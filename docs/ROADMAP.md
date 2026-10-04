@@ -7,7 +7,7 @@ The authority on what is built and what comes next. Update the status table when
 | Phase | Name | Status |
 | --- | --- | --- |
 | 0 | Direction | Done 2026-10-05. Docs written; concept, stack and principles accepted by Rahul. |
-| 1 | Foundations | In progress since 2026-10-05. Built on 2026-10-05: facts confirmed by Rahul, content modules, content layer, the Index at `/plain`, prerendering. Readable with scripts blocked; Lighthouse mobile performance 100 on both pages, measured on a local production build. Left: deploy to Vercel, CI bundle check, then re-measure on the deployed preview. |
+| 1 | Foundations | In progress since 2026-10-05. Built on 2026-10-05: facts confirmed by Rahul, content modules, content layer, the Index at `/plain`, prerendering. Readable with scripts blocked; Lighthouse mobile performance 100 on both pages, measured on a local production build. Left: deploy to Vercel (Rahul will say when), then re-measure on the deployed preview. |
 | 2 | Greybox | Not started |
 | 3 | Choreography | Not started |
 | 4 | Interactions | Not started |
@@ -26,7 +26,7 @@ A working site with no 3D.
 - Done: build the Index.
 - Done: prerender so the HTML contains all content.
 - Not started: deploy to Vercel with preview deployments. Ask Rahul first.
-- Not started: add a bundle-size check to CI. Ask Rahul first.
+- Moved to the start of Phase 2: the CI bundle-size check ([D18](DECISIONS.md)).
 
 **Done when:** the page is readable with JavaScript disabled; Lighthouse mobile performance is 95 or higher; Rahul has confirmed the facts in CONTENT.
 
@@ -34,6 +34,7 @@ A working site with no 3D.
 
 Find the Machine. This is the creative risk of the whole project, so it comes early and stays rough. It follows rounds 1 to 4 of [DESIGN-PROCESS](DESIGN-PROCESS.md).
 
+- First, before three.js is installed: add a bundle-size check to CI that fails a push when a budget in [PERFORMANCE](PERFORMANCE.md) is exceeded. Bring Rahul the options under [D13](DECISIONS.md) (a package such as `size-limit`, or a short script over the build output).
 - Build the workbench: a development-only page with free camera and a control panel.
 - Round 1, references: collect and narrow with Rahul.
 - Round 2, silhouette: three different whole Machines in flat grey; Rahul picks.

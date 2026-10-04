@@ -118,3 +118,11 @@ The first package brought to Rahul under D13. It fills the gap D9 left open: a V
 **No router package.** Two static pages need a path check, not a router. Reconsider if the site ever has client-side navigation between views that share state.
 
 **React hydrates in Phase 1 even though nothing is interactive yet.** This costs about 72 KB gzipped of the 100 KB critical-path budget (the whole critical path measures 77 KB). It was chosen so that Phase 2 can attach the scene without restructuring. **Passed over:** shipping no JavaScript until Phase 2.
+
+### D18. The CI bundle-size check moves to the start of Phase 2 — Accepted, 2026-10-05
+
+It was listed under Phase 1. Rahul agreed to add it just before three.js is installed instead.
+
+**Why:** the check exists to catch dependencies inflating the bundle, and Phase 1 adds none. The critical path measures 77 KB against a 100 KB budget, so nothing is about to break. Phase 2 is where three.js, React Three Fiber and drei arrive and where the scene chunk's 300 KB budget first applies.
+
+**Still to decide then, under D13:** a package such as `size-limit`, or a short script over the build output.

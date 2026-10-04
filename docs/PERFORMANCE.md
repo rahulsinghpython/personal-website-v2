@@ -99,4 +99,4 @@ Stepping down must never change the story, only the density. The point counts ar
 
 Test on real hardware, not only throttled desktop Chrome. The reference devices are not chosen yet; that is an open question in [ROADMAP](ROADMAP.md).
 
-Once the scaffold exists, the bundle budgets should be enforced automatically in CI so a regression fails the build.
+The bundle budgets are to be enforced automatically in CI so a regression fails the build. That check is added at the start of Phase 2, before three.js goes in ([DECISIONS D18](DECISIONS.md)). Until then the sizes are read off the `vite build` output by hand.
