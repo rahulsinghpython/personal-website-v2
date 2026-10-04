@@ -1,0 +1,7 @@
+@import 'tailwindcss';
+
+/* Placeholder values. The real palette is settled in the design rounds (D11). */
+body {
+  background-color: #0a0a0a;
+  color: #e5e5e5;
+}

@@ -1,0 +1,6 @@
+dist/
+pnpm-lock.yaml
+.vercel/
+
+# Docs are hand-formatted; Prettier would re-pad every table.
+*.md

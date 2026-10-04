@@ -1,22 +1,22 @@
 # Architecture
 
-How the site is built. Nothing here is implemented yet; this is the plan the first build phase follows. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
+How the site is built. Only the scaffold exists so far (see [ROADMAP](ROADMAP.md)); the rest is the plan the build phases follow. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
 
 ## Stack
 
-| Layer | Choice | Why |
-| --- | --- | --- |
-| Package manager | pnpm | Rahul's choice. |
-| Build | Vite | Rahul already ships with it. Fast, simple, good code splitting. |
-| UI | React + TypeScript (strict) | Same reason. One mental model for the DOM and the scene. |
-| 3D | three.js through React Three Fiber, with selected helpers from drei | Rahul has shipped three.js. R3F lets scene and DOM share state. |
-| Shared state | zustand | Tiny, and readable from inside the render loop without causing React re-renders. |
-| Choreography | GSAP, one paused master timeline | The whole story is one timeline whose position is set from scroll progress. |
-| Styling | Tailwind CSS | Matches Rahul's other current projects. |
-| Lint and format | oxlint, Prettier | Same. |
-| Hosting | Vercel | Same. |
+| Layer | Choice | Installed | Why |
+| --- | --- | --- | --- |
+| Package manager | pnpm | 12.9.1 (pinned in `packageManager`), on Node 24.19.0 (`.nvmrc`) | Rahul's choice. |
+| Build | Vite | vite 8.3.2, @vitejs/plugin-react 6.1.1 | Rahul already ships with it. Fast, simple, good code splitting. |
+| UI | React + TypeScript (strict) | react and react-dom 19.3.0, typescript 7.0.2, @types/react and @types/react-dom 19.3.0 | Same reason. One mental model for the DOM and the scene. |
+| 3D | three.js through React Three Fiber, with selected helpers from drei | Not yet; added in Phase 2 | Rahul has shipped three.js. R3F lets scene and DOM share state. |
+| Shared state | zustand | Not yet; added in the phase that first needs it | Tiny, and readable from inside the render loop without causing React re-renders. |
+| Choreography | GSAP, one paused master timeline | Not yet; added in Phase 3 | The whole story is one timeline whose position is set from scroll progress. |
+| Styling | Tailwind CSS | tailwindcss 4.3.3, @tailwindcss/vite 4.3.3 | Matches Rahul's other current projects. |
+| Lint and format | oxlint, Prettier | oxlint 1.86.0, prettier 3.9.9 | Same. |
+| Hosting | Vercel | Not set up yet | Same. |
 
-Use the latest stable version of each at scaffold time and record them here once installed. Do not copy versions from other repos.
+Versions were the latest stable on 2026-10-05, when the scaffold was made. When a later phase adds a "not yet" row, install the latest stable then and record it here. Do not copy versions from other repos.
 
 Deliberately not used: a smooth-scroll library (see [DECISIONS D8](DECISIONS.md)), a UI component kit, a post-processing stack, a physics engine, a CMS.
 

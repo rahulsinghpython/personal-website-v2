@@ -7,7 +7,7 @@ The authority on what is built and what comes next. Update the status table when
 | Phase | Name | Status |
 | --- | --- | --- |
 | 0 | Direction | Done 2026-10-05. Docs written; concept, stack and principles accepted by Rahul. |
-| 1 | Foundations | Not started |
+| 1 | Foundations | In progress since 2026-10-05. Stack scaffolded with a placeholder page; nothing else yet. |
 | 2 | Greybox | Not started |
 | 3 | Choreography | Not started |
 | 4 | Interactions | Not started |
