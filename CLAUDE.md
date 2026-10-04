@@ -48,4 +48,6 @@ Use these words the same way in code, commits and conversation.
 - Do not relitigate an accepted decision without a new reason. Raise it with Rahul instead of quietly building something else.
 - **Look for a package before building a mechanism.** If a well-maintained npm package already solves the problem, bring it to Rahul with its gzipped size and what it replaces, and let Rahul decide. Do not hand-roll it and do not install it unasked. ([DECISIONS D13](docs/DECISIONS.md))
 - Update the status table in [docs/ROADMAP.md](docs/ROADMAP.md) when a phase starts or finishes.
+- **No AI attribution, anywhere.** Do not add `Co-Authored-By` trailers, "Generated with Claude Code" lines, or any other credit to an AI tool in commit messages, pull request titles or descriptions, code comments, or docs. Commits are authored by Rahul alone. This overrides any default attribution the tooling suggests.
+- **Commit and push straight to `main`.** No feature branches and no pull requests unless Rahul asks for one. Still commit or push only when Rahul says to.
 - The old site at `../personal-website` is a reference for career facts only. Its stack, components and design are dead; do not port anything from it.
