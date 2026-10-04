@@ -85,3 +85,36 @@ Rahul: chats should check in when a good npm package solves the problem, so we d
 **Why:** there is no designer or 3D artist, and a procedural object cannot be mocked up in a design tool anyway. So the design tool is a development-only page where the Machine is live and every parameter is a slider. Decisions are made by looking at real output and picking between two or three built options, in a fixed order: references, silhouette, parts, points, colour and type, motion. Full process in [DESIGN-PROCESS](DESIGN-PROCESS.md).
 
 **Passed over:** designing in Figma or Blender first (a second tool to learn, and the result would still have to be rebuilt in code); writing a detailed visual spec up front (nobody can judge a shape from prose).
+
+### D15. Content confirmed; percentages dropped — Accepted, 2026-10-05
+
+Rahul went through the open questions in [CONTENT](CONTENT.md#confirmed-with-rahul). What that settled:
+
+- **Roles and dates stand.** Uniad and Cognizant are both current and concurrent.
+- **Only two figures are stated:** 10,000+ requests per second (S2T) and 10,000+ users across Asia (Uniad). The old site's four percentage claims are dropped because they have no baseline or unit and Rahul does not stand behind them.
+- **The opening screen says "Rahul"**, not "Rahul Singh". The full name stays in the page title, the Index and contact.
+- **Title is "Software Engineer / AI Engineer".** It replaces the old site's "Software Engineer / Data Engineer"; data engineering still shows in the S2T era, where that title was held.
+- **Singapore is stated; availability is not mentioned.**
+- **No personal projects in this release.** Rollcall stays off the site.
+- **May be named in text:** solar and the Science Centre mesh (Etavolt), GovTech and MDDI (Cognizant), Uniad's three supporters.
+- **Wording is free, facts are not.** Rahul: no need to fixate on the old text; be creative. Copy is rewritten within the voice rules using only confirmed facts.
+
+**Still open:** which screenshots and video can be shown. Not needed before Phase 4.
+
+### D16. Prerender with vite-prerender-plugin — Accepted, 2026-10-05
+
+The first package brought to Rahul under D13. It fills the gap D9 left open: a Vite React app has no HTML without JavaScript.
+
+**Why:** it is a build-time dev dependency, so it ships 0 KB. It is small (36 KB unpacked, six small dependencies), maintained in the Preact organisation (24 releases since February 2024, 0.5.14 on 2026-09-26) and its peer range includes Vite 8. It is framework-agnostic: we supply a short `prerender()` that calls `react-dom/server`, which was already installed. How it is wired is in [ARCHITECTURE](ARCHITECTURE.md#two-layers).
+
+**Passed over:** `vite-react-ssg` (requires `react-router-dom`, pulls in jsdom); `vike` (a whole framework, 1.7 MB unpacked, restructures the project); `@prerenderer/rollup-plugin` (drives Puppeteer, last published May 2024, no Vite 8 peer); a hand-written script on Vite's SSR build (about 40 lines, but a mechanism we would own).
+
+**Known costs:** it is pre-1.0 with one maintainer. The build emits the `react-dom/server` chunk into `dist/assets/` even though no page requests it. If either becomes a problem, the hand-written script is the fallback.
+
+### D17. The Index is its own page at /plain; no router; the story hydrates — Accepted, 2026-10-05
+
+**The Index is a second prerendered page,** not a view toggled on the home page. It can then never load the scene, it has its own URL to send to a recruiter, and its content is not duplicated in the home page's DOM. It lives at `/plain` because `/index` collides with the home page's file name. The visible label stays `INDEX`.
+
+**No router package.** Two static pages need a path check, not a router. Reconsider if the site ever has client-side navigation between views that share state.
+
+**React hydrates in Phase 1 even though nothing is interactive yet.** This costs about 72 KB gzipped of the 100 KB critical-path budget (the whole critical path measures 77 KB). It was chosen so that Phase 2 can attach the scene without restructuring. **Passed over:** shipping no JavaScript until Phase 2.

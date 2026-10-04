@@ -7,7 +7,7 @@ The authority on what is built and what comes next. Update the status table when
 | Phase | Name | Status |
 | --- | --- | --- |
 | 0 | Direction | Done 2026-10-05. Docs written; concept, stack and principles accepted by Rahul. |
-| 1 | Foundations | In progress since 2026-10-05. Stack scaffolded with a placeholder page; nothing else yet. |
+| 1 | Foundations | In progress since 2026-10-05. Built on 2026-10-05: facts confirmed by Rahul, content modules, content layer, the Index at `/plain`, prerendering. Readable with scripts blocked; Lighthouse mobile performance 100 on both pages, measured on a local production build. Left: deploy to Vercel, CI bundle check, then re-measure on the deployed preview. |
 | 2 | Greybox | Not started |
 | 3 | Choreography | Not started |
 | 4 | Interactions | Not started |
@@ -20,13 +20,13 @@ The order is chosen so that **the site is shippable at the end of every phase**.
 
 A working site with no 3D.
 
-- Scaffold the stack in [ARCHITECTURE](ARCHITECTURE.md); record the installed versions there.
-- Move the confirmed facts from [CONTENT](CONTENT.md) into typed modules in `src/content/`.
-- Build the content layer: one section per beat, real copy, near-black, final type direction.
-- Build the Index.
-- Prerender so the HTML contains all content.
-- Deploy to Vercel with preview deployments.
-- Add a bundle-size check to CI.
+- Done: scaffold the stack in [ARCHITECTURE](ARCHITECTURE.md); record the installed versions there.
+- Done: move the confirmed facts from [CONTENT](CONTENT.md) into typed modules in `src/content/`.
+- Done: build the content layer: one section per beat, real copy, near-black. Type is system font stacks for now; the typefaces are chosen in Phase 5.
+- Done: build the Index.
+- Done: prerender so the HTML contains all content.
+- Not started: deploy to Vercel with preview deployments. Ask Rahul first.
+- Not started: add a bundle-size check to CI. Ask Rahul first.
 
 **Done when:** the page is readable with JavaScript disabled; Lighthouse mobile performance is 95 or higher; Rahul has confirmed the facts in CONTENT.
 
@@ -96,14 +96,12 @@ Direction:
 1. **Design process:** is the workbench-and-rounds approach in [DESIGN-PROCESS](DESIGN-PROCESS.md) how you want to work ([D14](DECISIONS.md))?
 2. **Workbench control panel:** which package? First check under [D13](DECISIONS.md), due at the start of Phase 2.
 
-Content, in full in [CONTENT](CONTENT.md#needs-rahul):
+Content: roles and dates, the opening name, the numbers, what can be named, personal projects, location and title were answered on 2026-10-05 ([CONTENT](CONTENT.md#confirmed-with-rahul), [D15](DECISIONS.md)). Still open, in [CONTENT](CONTENT.md#still-needs-rahul):
 
-3. Are the roles and dates current?
-4. "Rahul Singh" or "Rahul" on the opening screen?
-5. Which numbers can be stated, and what can be shown from each employer?
-6. Which personal projects go in?
+3. Which screenshots and video can be shown from each employer? Needed by Phase 4.
+4. Is the LinkedIn URL carried over from the old site still right?
 
 Practical:
 
-7. **Reference devices:** which phone and which laptop should the budgets be tested on?
-8. **Domain:** what will the site live at?
+5. **Reference devices:** which phone and which laptop should the budgets be tested on?
+6. **Domain:** what will the site live at?

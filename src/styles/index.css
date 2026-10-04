@@ -1,7 +1,41 @@
 @import 'tailwindcss';
 
-/* Placeholder values. The real palette is settled in the design rounds (D11). */
+/* Placeholder values. The real palette and typefaces are settled in the design rounds (D11).
+   System font stacks until then, so there are no font files to load. */
+@theme {
+  --color-void: #0a0a0a;
+  --color-cold: #e5e5e5;
+  --color-dim: #a3a3a3;
+
+  --font-sans: ui-sans-serif, system-ui, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace;
+}
+
 body {
-  background-color: #0a0a0a;
-  color: #e5e5e5;
+  background-color: var(--color-void);
+  color: var(--color-cold);
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+@media print {
+  body {
+    background-color: #fff;
+    color: #000;
+  }
+}
+
+@layer components {
+  /* Statements: a tight grotesque, small, in capitals. */
+  .statement {
+    @apply font-sans text-base font-medium tracking-[0.08em] uppercase sm:text-lg;
+  }
+
+  /* Instrument readouts: years, numbers, labels. */
+  .readout {
+    @apply font-mono text-xs tracking-[0.08em] text-dim uppercase;
+  }
 }

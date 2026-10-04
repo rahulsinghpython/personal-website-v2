@@ -1,6 +1,6 @@
 # Architecture
 
-How the site is built. Only the scaffold exists so far (see [ROADMAP](ROADMAP.md)); the rest is the plan the build phases follow. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
+How the site is built. The content layer, the Index and prerendering exist; the scene layer does not (see [ROADMAP](ROADMAP.md)), and its sections below are the plan the build phases follow. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
 
 ## Stack
 
@@ -12,6 +12,7 @@ How the site is built. Only the scaffold exists so far (see [ROADMAP](ROADMAP.md
 | 3D | three.js through React Three Fiber, with selected helpers from drei | Not yet; added in Phase 2 | Rahul has shipped three.js. R3F lets scene and DOM share state. |
 | Shared state | zustand | Not yet; added in the phase that first needs it | Tiny, and readable from inside the render loop without causing React re-renders. |
 | Choreography | GSAP, one paused master timeline | Not yet; added in Phase 3 | The whole story is one timeline whose position is set from scroll progress. |
+| Prerendering | vite-prerender-plugin | vite-prerender-plugin 0.5.14 (dev only, nothing shipped) | Writes every page's HTML at build time, so content is readable with JavaScript off. See [DECISIONS D16](DECISIONS.md). |
 | Styling | Tailwind CSS | tailwindcss 4.3.3, @tailwindcss/vite 4.3.3 | Matches Rahul's other current projects. |
 | Lint and format | oxlint, Prettier | oxlint 1.86.0, prettier 3.9.9 | Same. |
 | Hosting | Vercel | Not set up yet | Same. |
@@ -40,7 +41,17 @@ The page is two layers that never depend on each other to render.
 └──────────────────────────────────────────────┘
 ```
 
-**Content layer.** One semantic section per beat, holding that beat's text. It must exist in the built HTML, not be created by JavaScript after load. The acceptance test: view-source shows every career fact, and the page is readable with JavaScript disabled. How the HTML is prerendered is chosen during scaffolding; the test is what matters.
+**Content layer.** One semantic section per beat, holding that beat's text. It must exist in the built HTML, not be created by JavaScript after load. The acceptance test: view-source shows every career fact, and the page is readable with JavaScript disabled.
+
+**How it is prerendered.** `src/main.tsx` is both the browser entry and the prerender entry. In the browser it hydrates the HTML that is already there. During `vite build`, vite-prerender-plugin loads the same module in Node and calls its exported `prerender()` once per page, which renders `<App>` to a string with `react-dom/server` and returns it with that page's title and description. The plugin writes the result into `#root` of `dist/index.html`, follows the link to the Index, and writes `dist/plain/index.html` the same way. Three things follow from this:
+
+- Anything that runs when a module is imported must be safe in Node. Browser-only code goes behind a `typeof window` check or inside an effect.
+- `App` takes the path as a prop and never reads `location` while rendering, so the build and the browser render the same tree.
+- `react-dom/server` is imported inside `prerender()` so it stays out of the client bundle. The build still emits it as a chunk in `dist/assets/` (about 63 KB gzipped) that no page ever requests. It is the edge build because the browser build opens a `MessageChannel` on import, which stops `vite build` from exiting.
+
+In `vite dev` there is no prerendering: `#root` starts empty and the app renders on the client.
+
+**Pages.** There are two, and no router: `/` is the story and `/plain` is the Index ([DECISIONS D17](DECISIONS.md)). `src/routes.ts` maps a path to a page. Links between them are ordinary links and load a new document.
 
 **Scene layer.** A fixed full-viewport canvas behind the content. It is loaded in a separate chunk after the first paint, so the opening screen (text on black) never waits for three.js. If the chunk fails or WebGL is missing, the content layer is already a complete page.
 
@@ -109,9 +120,9 @@ type Part = {
 
 ```
 src/
-  content/         typed facts: site, eras, projects. Mirrors docs/CONTENT.md.
-  sections/        the DOM beats, one component per beat
-  index-view/      the Index (plain version)
+  content/         typed facts: site, eras, projects, beats (copy). Mirrors docs/CONTENT.md.
+  sections/        the DOM beats. Story.tsx lays out all eight; the four era beats share EraBeat.tsx.
+  index-view/      the Index (plain version), served at /plain
   experience/      everything inside the canvas
     machine/       part definitions, point sampling, shaders
     camera/        camera pose as a function of progress
@@ -119,8 +130,9 @@ src/
     Experience.tsx the lazy-loaded entry to the scene
   state/           store, progress, tier detection
   styles/
-  App.tsx
-  main.tsx
+  routes.ts        which path is which page; page titles
+  App.tsx          picks the page for a path
+  main.tsx         browser entry (hydrates) and prerender entry (build time)
 docs/
 ```
 
@@ -134,7 +146,7 @@ docs/
 | WebGL unavailable or context lost | Content layer plus a static image of the finished Machine. |
 | `prefers-reduced-motion` | Machine shown assembled and awake; camera cuts between beats; no assembly animation. |
 | Low tier device | Fewer points, lower pixel ratio, optional interactions off. See tiers in [PERFORMANCE](PERFORMANCE.md). |
-| Visitor clicks `INDEX` | The Index: same content, no canvas. |
+| Visitor clicks `INDEX` | The Index at `/plain`: same content, no canvas. |
 
 ## Accessibility
 

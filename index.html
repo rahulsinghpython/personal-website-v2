@@ -3,12 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0a0a" />
+    <!-- No favicon until Phase 5. An empty one stops the browser asking for /favicon.ico. -->
+    <link rel="icon" href="data:," />
     <title>Rahul Singh</title>
   </head>
   <body>
-    <!-- Hand-written copy of what App renders, so the text is in the HTML with JavaScript off.
-         Stand-in until Phase 1 prerendering generates this from the components. -->
-    <div id="root"><h1>YOU'VE FOUND RAHUL SINGH.</h1></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <div id="root"></div>
+    <script prerender type="module" src="/src/main.tsx"></script>
   </body>
 </html>

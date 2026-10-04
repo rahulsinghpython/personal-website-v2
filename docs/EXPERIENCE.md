@@ -35,7 +35,7 @@ The page is one long scroll. The canvas is fixed behind it and the Machine respo
 
 | # | Beat | What the visitor sees | What they learn |
 | --- | --- | --- | --- |
-| 0 | **Found** | Black. Small type: `YOU'VE FOUND RAHUL SINGH.` Faint dust in the dark. Moving the pointer lights the dust near it. | Something is here. Nothing is explained. |
+| 0 | **Found** | Black. Small type: `YOU'VE FOUND RAHUL.` Faint dust in the dark. Moving the pointer lights the dust near it. | Something is here. Nothing is explained. |
 | 1 | **Signal** | First scroll. The dust pulls inward and a silhouette forms. Dormant, unlabelled. | The dust was an object all along. |
 | 2 | **Core** | Camera moves in. The Core locks together and wakes. First label appears: years, company, role. | The object has parts, and a part is a job. |
 | 3 | **Scanner** | The Scanner assembles as raw points. The visitor sweeps across it and surface appears where they sweep. | Rahul built this kind of software. They have been looking at it the whole time. |
@@ -89,7 +89,7 @@ Projects live **inside** parts, as components of them, never as a separate grid.
 
 A plain text version of everything: name, one line, the four eras with roles and facts, projects, contact. No canvas.
 
-- Reached from a small, always-visible link (working label: `INDEX`).
+- Reached from a small, always-visible link (working label: `INDEX`). It is its own page, at `/plain`.
 - Built from the same content data as the main experience, so the two can never disagree.
 - It is also what a visitor gets with no WebGL, and what search engines and screen readers read.
 - It should be good in its own right: fast, well set, printable.
