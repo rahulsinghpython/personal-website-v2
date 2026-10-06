@@ -22,7 +22,7 @@ Rahul Singh's personal site. It is not a portfolio template. It is one dark 3D w
 Each one is explained in the doc it links to. If a task seems to need breaking one, stop and raise it with Rahul.
 
 1. **One object.** Everything hangs off the Machine. No second hero, no card grids, no section that could be lifted from a template. ([VISION](docs/VISION.md))
-2. **The visitor causes the motion.** Nothing animates on its own. When input stops, the scene settles and the canvas stops rendering. ([EXPERIENCE](docs/EXPERIENCE.md#interaction-rules))
+2. **The visitor causes the change.** The story advances only when the visitor scrolls; nothing assembles, wakes or moves the camera on its own. Small ambient motion that adds to a part's meaning is allowed, within the limits in [DECISIONS D26](docs/DECISIONS.md). ([EXPERIENCE](docs/EXPERIENCE.md#interaction-rules))
 3. **Content is HTML first.** Every fact is real text in the DOM and readable with JavaScript off. The canvas is decoration on top. ([ARCHITECTURE](docs/ARCHITECTURE.md#two-layers))
 4. **The budget is a contract.** A feature that breaks [PERFORMANCE](docs/PERFORMANCE.md) is not done.
 5. **Procedural, not modelled.** The Machine is generated in code. No dependency on a 3D artist or a Blender file. ([DECISIONS D4](docs/DECISIONS.md))
@@ -34,7 +34,7 @@ Each one is explained in the doc it links to. If a task seems to need breaking o
 Use these words the same way in code, commits and conversation.
 
 - **The Machine**: the single 3D object at the centre of the site.
-- **Part**: one of the Machine's four subsystems. Each part is one era of Rahul's career: **Core**, **Scanner**, **Rings**, **Lens**.
+- **Part**: one of the Machine's four subsystems. Each part stands for one kind of work Rahul has done, in the order he came to it: **Core**, **Scanner**, **Rings**, **Lens**. The company is small print ([DECISIONS D24](docs/DECISIONS.md)).
 - **Dust**: the Machine's points while scattered and unreadable (the opening state).
 - **Dormant / awake**: a part that is assembled but unlit / a part that is powered on.
 - **Beat**: one step of the scroll story (Found, Signal, Core, Scanner, Rings, Lens, Whole, Contact).

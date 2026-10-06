@@ -29,7 +29,24 @@ It shows the Machine live with a free camera and a panel of controls:
 
 Rahul drags sliders until it looks right. The chosen values are then written into the code as the defaults. A design decision is a set of numbers found by eye, not a mock-up.
 
-The control panel should come from an existing package, not be hand-built ([DECISIONS D13](DECISIONS.md)). Because the workbench is excluded from the production build, it costs the shipped site nothing.
+The control panel is Tweakpane ([DECISIONS D20](DECISIONS.md)). Because the workbench is excluded from the production build, it costs the shipped site nothing.
+
+### Using it
+
+Run `pnpm dev` and open `/workbench/`. How it is built and why it cannot ship is in [ARCHITECTURE](ARCHITECTURE.md#the-workbench).
+
+- **Variants.** The tabs A, B and C switch between the options of the current round. Each tab holds that variant's sliders, grouped by part.
+- **Side by side.** Shows every variant at once with one shared camera. This is the view a round is decided in.
+- **Thumbnail.** Shrinks the viewports to 160 pixels, for the thumbnail test.
+- **Show part.** Draws one part at full brightness and dims the other three, so the four can be told apart while everything is grey. With side by side on, it compares the versions of that one part.
+- **Draw.** `solid` is the greybox; `points` is the cloud sampled from it. The Points folder sets how much of the tier's point budget is used, how big and bright a point is, how much fewer points are boosted to compensate, and each part's share of the points. These values travel in the URL as `pts=`.
+- **Shading.** `flat` is one grey with no shading, the pure silhouette. `shaded` lights the greybox from the camera so the form inside the outline can be read. The lighting is a greybox aid only; the real Machine is unlit.
+- **Tier.** Applies that tier's pixel-ratio cap. `tier dpr` renders at the cap even when this display's own ratio is lower, to see what a denser screen would be asked to draw.
+- **Copy values.** Puts the current variant's numbers on the clipboard as JSON, ready to paste into the code as defaults.
+- **Readout.** Frame rate, CPU and GPU time per frame, draw calls, and a count of frames drawn. The count must stop when input stops. `Run benchmark` draws 240 frames back to back and reports what they cost.
+- **The URL holds the state:** `?variant=B&tier=mid&view=front&compare=1&shading=flat&panel=0`, changed parameters as `p=A.core.radius:0.8`, and a free camera as `cam=`. Reload it, screenshot it, or send it.
+
+Not built yet, because their rounds have not come: the progress scrubber (round 6) and the colour controls (round 5).
 
 ## Rounds
 
@@ -37,7 +54,7 @@ Six rounds, in this order. Shape comes before look, and look before motion, beca
 
 | # | Round | What gets made | Rahul decides | Test |
 | --- | --- | --- | --- | --- |
-| 1 | **References** | 10 to 20 images of real objects with the right feeling | Which ones, and why | Can we name five words for the feeling? |
+| 1 | **References** | 10 to 20 images of real objects with the right feeling, shown as pictures on `/workbench/references.html` | Which ones, and why | Can we name five words for the feeling? |
 | 2 | **Silhouette** | Three deliberately different whole Machines, as plain grey solids | One, or a mix | Recognisable and strange at thumbnail size |
 | 3 | **Parts** | Two or three versions of each part inside the chosen silhouette | One per part | The four parts can be told apart; each hints at its job |
 | 4 | **Points** | The chosen shape as a point cloud | Density, size, brightness | Still reads at low-tier point counts on a phone |
@@ -56,7 +73,7 @@ How every round runs:
 
 ### Round 1, references
 
-Look at real instruments, not at other portfolio sites. Good places to look: gyroscopes and gimbals, astrolabes and orreries, LiDAR sensor heads, camera lens cross-sections, satellite instruments, engine and turbine cutaways, raw point-cloud scans of buildings.
+Look at real objects, not at other portfolio sites. Start with computing hardware, because the career is software ([DECISIONS D22](DECISIONS.md)): supercomputers, quantum computers and their wiring, core memory, disk drives, backplanes and patch panels, racks, front panels, chips. Scientific instruments are the second place to look: gyroscopes and gimbals, orreries, LiDAR sensor heads, lens cross-sections, spacecraft, turbine cutaways, raw point-cloud scans.
 
 Rahul marks what appeals and what does not, with a few words on why. The output is short: about five words for the feeling and a handful of "like this" images. Keep links and notes in the repo; do not commit other people's images.
 

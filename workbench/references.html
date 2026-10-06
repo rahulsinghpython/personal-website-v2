@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="data:," />
+    <title>References, round 1</title>
+    <!--
+      Round 1 of docs/DESIGN-PROCESS.md as a page of pictures. Development only, like the rest of
+      workbench/. The images are loaded from Wikimedia and are not in this repo; each one links to
+      its source page. The marks made here are copied out as text and recorded in
+      docs/REFERENCES.md.
+    -->
+    <style>
+      body {
+        margin: 0;
+        padding: 32px 32px 120px;
+        background: #0a0a0a;
+        color: #a3a3a3;
+        font:
+          13px/1.5 ui-monospace,
+          'SF Mono',
+          'Cascadia Mono',
+          Menlo,
+          Consolas,
+          monospace;
+      }
+      h1 {
+        margin: 0 0 8px;
+        color: #e5e5e5;
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      h2 {
+        margin: 40px 0 16px;
+        color: #e5e5e5;
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      p {
+        max-width: 68ch;
+        margin: 0 0 28px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid #1f1f1f;
+        background: #101010;
+      }
+      .card[data-mark='like'] {
+        border-color: #e5e5e5;
+      }
+      .card[data-mark='no'] {
+        opacity: 0.35;
+      }
+      .card img {
+        display: block;
+        width: 100%;
+        height: 220px;
+        object-fit: contain;
+        background: #050505;
+      }
+      .body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+      }
+      .name {
+        color: #e5e5e5;
+      }
+      .name a {
+        color: inherit;
+      }
+      .look {
+        flex: 1;
+      }
+      .marks {
+        display: flex;
+        gap: 8px;
+      }
+      button,
+      input {
+        border: 1px solid #333;
+        background: #0a0a0a;
+        color: #e5e5e5;
+        font: inherit;
+      }
+      button {
+        flex: 1;
+        padding: 6px 8px;
+        cursor: pointer;
+      }
+      button[aria-pressed='true'] {
+        border-color: #e5e5e5;
+        background: #e5e5e5;
+        color: #0a0a0a;
+      }
+      input {
+        padding: 6px 8px;
+      }
+      :focus-visible {
+        outline: 2px solid #e5e5e5;
+        outline-offset: 2px;
+      }
+      footer {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 32px;
+        border-top: 1px solid #1f1f1f;
+        background: #0a0a0a;
+      }
+      footer button {
+        flex: none;
+      }
+      #picks {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>References, round 1</h1>
+    <p>
+      Mark the ones you like the look of and the ones you do not; skip the rest. A few words on why
+      helps more than the mark does. Then copy your picks and paste them into the chat.
+    </p>
+    <h2>Computing hardware</h2>
+    <div class="grid" id="grid-2"></div>
+    <h2>Scientific instruments</h2>
+    <div class="grid" id="grid-1"></div>
+    <footer>
+      <span id="picks">Nothing marked yet.</span>
+      <button id="copy" type="button">Copy my picks</button>
+    </footer>
+
+    <script>
+      const REFERENCES = [
+        {
+          n: 1,
+          title: 'Armillary sphere',
+          page: 'https://en.wikipedia.org/wiki/Armillary_sphere',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/Armillary_sphere_with_astronomical_clock.jpg/500px-Armillary_sphere_with_astronomical_clock.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Armillary_sphere_with_astronomical_clock.jpg',
+          look: 'Rings that are the structure. Open enough to see through.',
+          batch: 1,
+        },
+        {
+          n: 2,
+          title: 'Torquetum',
+          page: 'https://en.wikipedia.org/wiki/Torquetum',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8b/GNM_-_Torquetum.jpg/500px-GNM_-_Torquetum.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:GNM_-_Torquetum.jpg',
+          look: 'Tilted plates stacked up. Asymmetric; purpose not obvious.',
+          batch: 1,
+        },
+        {
+          n: 3,
+          title: 'Planetarium projector',
+          page: 'https://en.wikipedia.org/wiki/Planetarium_projector',
+          img: 'https://upload.wikimedia.org/wikipedia/en/3/34/UniversalProjectionPlanetarium-Type23-6.jpg',
+          source: 'https://en.wikipedia.org/wiki/File:UniversalProjectionPlanetarium-Type23-6.jpg',
+          look: 'No face, bristling with small lenses.',
+          batch: 1,
+        },
+        {
+          n: 4,
+          title: 'Orrery',
+          page: 'https://en.wikipedia.org/wiki/Orrery',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Orrery_small.jpg/500px-Orrery_small.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Orrery_small.jpg',
+          look: 'Arms at different heights around one column.',
+          batch: 1,
+        },
+        {
+          n: 5,
+          title: 'Antikythera mechanism',
+          page: 'https://en.wikipedia.org/wiki/Antikythera_mechanism',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c8/Antikythera_Fragment_A_%28Front%29.webp/500px-Antikythera_Fragment_A_%28Front%29.webp',
+          source: 'https://commons.wikimedia.org/wiki/File:Antikythera_Fragment_A_(Front).webp',
+          look: 'Dense, layered, flat. A computer, not a robot.',
+          batch: 1,
+        },
+        {
+          n: 6,
+          title: 'Cassini–Huygens',
+          page: 'https://en.wikipedia.org/wiki/Cassini%E2%80%93Huygens',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Cassini_Saturn_Orbit_Insertion.jpg/500px-Cassini_Saturn_Orbit_Insertion.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Cassini_Saturn_Orbit_Insertion.jpg',
+          look: 'Several subsystems on one body. Long and directional.',
+          batch: 1,
+        },
+        {
+          n: 7,
+          title: 'JWST instrument module',
+          page: 'https://en.wikipedia.org/wiki/Integrated_Science_Instrument_Module',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/87/NASA%27s_Webb_Telescope_ISIM_Gets_Cubed_for_Gravity_Test_%2815930824442%29.jpg/500px-NASA%27s_Webb_Telescope_ISIM_Gets_Cubed_for_Gravity_Test_%2815930824442%29.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:NASA%27s_Webb_Telescope_ISIM_Gets_Cubed_for_Gravity_Test_(15930824442).jpg',
+          look: 'Instruments packed into one frame. Boxy, no symmetry.',
+          batch: 1,
+        },
+        {
+          n: 8,
+          title: 'Turbofan',
+          page: 'https://en.wikipedia.org/wiki/Turbofan',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e5/Turbofan3_Labelled.gif/500px-Turbofan3_Labelled.gif',
+          source: 'https://commons.wikimedia.org/wiki/File:Turbofan3_Labelled.gif',
+          look: 'Stages along one axis inside a housing. Flow has a direction.',
+          batch: 1,
+        },
+        {
+          n: 9,
+          title: 'Radial engine',
+          page: 'https://en.wikipedia.org/wiki/Radial_engine',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Radial_engine_WACO_QCF2.jpg/500px-Radial_engine_WACO_QCF2.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Radial_engine_WACO_QCF2.jpg',
+          look: 'One shape repeated around a centre, pipes between.',
+          batch: 1,
+        },
+        {
+          n: 10,
+          title: 'Cavity magnetron',
+          page: 'https://en.wikipedia.org/wiki/Cavity_magnetron',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/1/16/Magnetron2.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Magnetron2.jpg',
+          look: 'A compact block with fins around a hollow centre.',
+          batch: 1,
+        },
+        {
+          n: 11,
+          title: 'Wendelstein 7-X',
+          page: 'https://en.wikipedia.org/wiki/Wendelstein_7-X',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b3/W7X-Spulen_Plasma_blau_gelb.jpg/500px-W7X-Spulen_Plasma_blau_gelb.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:W7X-Spulen_Plasma_blau_gelb.jpg',
+          look: 'Twisted coils wrapped around a core.',
+          batch: 1,
+        },
+        {
+          n: 12,
+          title: 'Velodyne lidar heads',
+          page: 'https://en.wikipedia.org/wiki/Velodyne_Lidar',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3d/Velodyne_ProductFamily_BlueLens_32GreenLens.png/500px-Velodyne_ProductFamily_BlueLens_32GreenLens.png',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Velodyne_ProductFamily_BlueLens_32GreenLens.png',
+          look: 'Spinning sensor heads. The literal reference for the Scanner.',
+          batch: 1,
+        },
+        {
+          n: 13,
+          title: 'Theodolite',
+          page: 'https://en.wikipedia.org/wiki/Theodolite',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/30/SovietTheodolite.jpg/500px-SovietTheodolite.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:SovietTheodolite.jpg',
+          look: 'A sighting head in a yoke, turning on two axes.',
+          batch: 1,
+        },
+        {
+          n: 14,
+          title: 'Point cloud',
+          page: 'https://en.wikipedia.org/wiki/Point_cloud',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Point_cloud_torus.gif',
+          source: 'https://commons.wikimedia.org/wiki/File:Point_cloud_torus.gif',
+          look: 'A surface implied by nothing but points.',
+          batch: 1,
+        },
+        {
+          n: 15,
+          title: 'Gimbal',
+          page: 'https://en.wikipedia.org/wiki/Gimbal',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Gyroscope_operation.gif',
+          source: 'https://commons.wikimedia.org/wiki/File:Gyroscope_operation.gif',
+          look: 'Concentric rings on pivots at right angles.',
+          batch: 1,
+        },
+        {
+          n: 16,
+          title: 'Marine chronometer',
+          page: 'https://en.wikipedia.org/wiki/Marine_chronometer',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Frodsham_chronometer_mechanism.jpg/500px-Frodsham_chronometer_mechanism.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Frodsham_chronometer_mechanism.jpg',
+          look: "A timekeeper's mechanism. Precise, layered, circular.",
+          batch: 1,
+        },
+        {
+          n: 17,
+          title: 'Apollo guidance unit',
+          page: 'https://en.wikipedia.org/wiki/Apollo_PGNCS',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/35/Apollo_IMU_at_Draper_Hack_the_Moon_exhibit.agr.jpg/500px-Apollo_IMU_at_Draper_Hack_the_Moon_exhibit.agr.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Apollo_IMU_at_Draper_Hack_the_Moon_exhibit.agr.jpg',
+          look: 'Nested gimbals around a core, inside a sphere.',
+          batch: 1,
+        },
+        {
+          n: 18,
+          title: 'Compact Muon Solenoid',
+          page: 'https://en.wikipedia.org/wiki/Compact_Muon_Solenoid',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/CMS_Under_Construction_Apr_05.jpg/500px-CMS_Under_Construction_Apr_05.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:CMS_Under_Construction_Apr_05.jpg',
+          look: 'Concentric layers around one axis, seen end on.',
+          batch: 1,
+        },
+        {
+          n: 19,
+          title: 'Iris diaphragm',
+          page: 'https://en.wikipedia.org/wiki/Diaphragm_(optics)',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Prntacon-lens-diaphragm.jpg/500px-Prntacon-lens-diaphragm.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Prntacon-lens-diaphragm.jpg',
+          look: 'One small blade repeated around a hole.',
+          batch: 1,
+        },
+        {
+          n: 20,
+          title: 'Double-Gauss lens',
+          page: 'https://en.wikipedia.org/wiki/Double-Gauss_lens',
+          img: 'https://upload.wikimedia.org/wikipedia/en/8/8b/Double_gauss.png',
+          source: 'https://en.wikipedia.org/wiki/File:Double_gauss.png',
+          look: 'A row of glass elements along an axis.',
+          batch: 1,
+        },
+        {
+          n: 21,
+          title: 'Cray-1',
+          page: 'https://en.wikipedia.org/wiki/Cray-1',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/Cray-1-deutsches-museum.jpg/500px-Cray-1-deutsches-museum.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Cray-1-deutsches-museum.jpg',
+          look: 'A supercomputer as one object: a ring of columns with a bench around it.',
+          batch: 2,
+        },
+        {
+          n: 22,
+          title: 'IBM quantum computer',
+          page: 'https://en.wikipedia.org/wiki/IBM_Q_System_One',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/60/IBM_Q_system_%28Fraunhofer_2%29.jpg/500px-IBM_Q_system_%28Fraunhofer_2%29.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:IBM_Q_system_(Fraunhofer_2).jpg',
+          look: 'A machine hung inside a glass case. One strange object in a dark room.',
+          batch: 2,
+        },
+        {
+          n: 23,
+          title: 'Quantum computer, inside',
+          page: 'https://en.wikipedia.org/wiki/Quantum_computing',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/IBM_Quantum_Computer_Demo_at_ITUWTSA_2024%2C_Delhi_2.jpg/500px-IBM_Quantum_Computer_Demo_at_ITUWTSA_2024%2C_Delhi_2.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:IBM_Quantum_Computer_Demo_at_ITUWTSA_2024,_Delhi_2.jpg',
+          look: 'Tiered plates joined by coiled wiring, hanging from the top.',
+          batch: 2,
+        },
+        {
+          n: 24,
+          title: 'Core memory',
+          page: 'https://en.wikipedia.org/wiki/Magnetic-core_memory',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0e/Magnetic-core_memory_close-up.JPG/500px-Magnetic-core_memory_close-up.JPG',
+          source: 'https://commons.wikimedia.org/wiki/File:Magnetic-core_memory_close-up.JPG',
+          look: 'Tiny rings threaded on a grid of wires. Rings and wires as storage.',
+          batch: 2,
+        },
+        {
+          n: 25,
+          title: 'Hard disk',
+          page: 'https://en.wikipedia.org/wiki/Hard_disk_drive',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1e/Hard_disk_dismantled.jpg/500px-Hard_disk_dismantled.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Hard_disk_dismantled.jpg',
+          look: 'Stacked platters, and an arm that sweeps a head across them.',
+          batch: 2,
+        },
+        {
+          n: 26,
+          title: 'Wire-wrapped backplane',
+          page: 'https://en.wikipedia.org/wiki/Wire_wrap',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/66/IBM_1401_backplane.jpg/500px-IBM_1401_backplane.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:IBM_1401_backplane.jpg',
+          look: 'Thousands of point-to-point wires, dense and ordered.',
+          batch: 2,
+        },
+        {
+          n: 27,
+          title: 'Cable spaghetti',
+          page: 'https://en.wikipedia.org/wiki/Cable_management',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/7/72/Cablespaghetti2.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Cablespaghetti2.jpg',
+          look: 'Wiring with no order at all.',
+          batch: 2,
+        },
+        {
+          n: 28,
+          title: 'Patch panel',
+          page: 'https://en.wikipedia.org/wiki/Patch_panel',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/19-inch_rackmount_Ethernet_switches_and_patch_panels.jpg/500px-19-inch_rackmount_Ethernet_switches_and_patch_panels.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:19-inch_rackmount_Ethernet_switches_and_patch_panels.jpg',
+          look: 'Rows of ports and looping patch cables.',
+          batch: 2,
+        },
+        {
+          n: 29,
+          title: 'Supercomputer blades',
+          page: 'https://en.wikipedia.org/wiki/Blade_server',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bd/High_Performance_Computing_Center_Stuttgart_HLRS_2015_04_Cray_XC40_Hazel_Hen_blades.jpg/500px-High_Performance_Computing_Center_Stuttgart_HLRS_2015_04_Cray_XC40_Hazel_Hen_blades.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:High_Performance_Computing_Center_Stuttgart_HLRS_2015_04_Cray_XC40_Hazel_Hen_blades.jpg',
+          look: 'One module repeated in rows, with its plumbing.',
+          batch: 2,
+        },
+        {
+          n: 30,
+          title: 'Data centre',
+          page: 'https://en.wikipedia.org/wiki/Data_center',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/98/Cern_datacenter.jpg/500px-Cern_datacenter.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Cern_datacenter.jpg',
+          look: 'Aisles of identical racks. Scale by repetition.',
+          batch: 2,
+        },
+        {
+          n: 31,
+          title: 'Front panel',
+          page: 'https://en.wikipedia.org/wiki/Front_panel',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8c/Digital_pdp8-e2.jpg/500px-Digital_pdp8-e2.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Digital_pdp8-e2.jpg',
+          look: 'Rows of switches and lights. A computer you operate by hand.',
+          batch: 2,
+        },
+        {
+          n: 32,
+          title: 'Connection Machine',
+          page: 'https://en.wikipedia.org/wiki/Connection_Machine',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/01/Frostburg_%28CM-5%29_-_National_Cryptologic_Museum_-_DSC07914.JPG/500px-Frostburg_%28CM-5%29_-_National_Cryptologic_Museum_-_DSC07914.JPG',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Frostburg_(CM-5)_-_National_Cryptologic_Museum_-_DSC07914.JPG',
+          look: 'A black monolith with a wall of lights.',
+          batch: 2,
+        },
+        {
+          n: 33,
+          title: 'Enigma rotors',
+          page: 'https://en.wikipedia.org/wiki/Enigma_rotor_details',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Enigma_rotor_set.png/500px-Enigma_rotor_set.png',
+          source: 'https://commons.wikimedia.org/wiki/File:Enigma_rotor_set.png',
+          look: 'A stack of wired wheels that turn and line up.',
+          batch: 2,
+        },
+        {
+          n: 34,
+          title: 'Tape drives',
+          page: 'https://en.wikipedia.org/wiki/IBM_729',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3c/IBM_729_tape_drives.agr.jpg/500px-IBM_729_tape_drives.agr.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:IBM_729_tape_drives.agr.jpg',
+          look: 'Reels turning in a row of cabinets.',
+          batch: 2,
+        },
+        {
+          n: 35,
+          title: 'Fibre cable, cut open',
+          page: 'https://en.wikipedia.org/wiki/Optical_fiber',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/02/Optical_fiber_cable.jpg/500px-Optical_fiber_cable.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Optical_fiber_cable.jpg',
+          look: 'A core wrapped in layer after layer.',
+          batch: 2,
+        },
+        {
+          n: 36,
+          title: 'Optical fibres',
+          page: 'https://en.wikipedia.org/wiki/Optical_fiber',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/4/49/Fibreoptic.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Fibreoptic.jpg',
+          look: 'A bundle of strands carrying light.',
+          batch: 2,
+        },
+        {
+          n: 37,
+          title: 'Heat sink',
+          page: 'https://en.wikipedia.org/wiki/Heat_sink',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5f/Heatsink_with_heat_pipes.jpg/500px-Heatsink_with_heat_pipes.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Heatsink_with_heat_pipes.jpg',
+          look: 'Fins and bent pipes. One shape repeated for a job.',
+          batch: 2,
+        },
+        {
+          n: 38,
+          title: 'Chip die',
+          page: 'https://en.wikipedia.org/wiki/Die_(integrated_circuit)',
+          img: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Pentiumpro_moshen.jpg/500px-Pentiumpro_moshen.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Pentiumpro_moshen.jpg',
+          look: 'A processor from above: blocks and buses, like a city.',
+          batch: 2,
+        },
+      ]
+
+      const KEY = 'references-round-1'
+      let marks = {}
+      try {
+        marks = JSON.parse(localStorage.getItem(KEY)) ?? {}
+      } catch {
+        // Marks just do not survive a reload.
+      }
+
+      function summary() {
+        const line = (mark, label) => {
+          const picked = REFERENCES.filter((ref) => marks[ref.n]?.mark === mark).map((ref) => {
+            const why = marks[ref.n].why?.trim()
+            return `${ref.n} ${ref.title}${why ? ` (${why})` : ''}`
+          })
+          return picked.length > 0 ? `${label}: ${picked.join('; ')}` : null
+        }
+        return [line('like', 'Like'), line('no', 'Not this')].filter(Boolean).join('\n')
+      }
+
+      function update() {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(marks))
+        } catch {
+          // See above.
+        }
+        for (const card of document.querySelectorAll('.card')) {
+          const mark = marks[card.dataset.n]?.mark ?? ''
+          card.dataset.mark = mark
+          for (const button of card.querySelectorAll('button'))
+            button.setAttribute('aria-pressed', String(button.dataset.mark === mark))
+        }
+        document.getElementById('picks').textContent =
+          summary().replace('\n', '  |  ') || 'Nothing marked yet.'
+      }
+
+      for (const ref of REFERENCES) {
+        const grid = document.getElementById(`grid-${ref.batch}`)
+        const card = document.createElement('article')
+        card.className = 'card'
+        card.dataset.n = ref.n
+        card.innerHTML = `
+          <a href="${ref.source}" target="_blank" rel="noreferrer">
+            <img src="${ref.img}" alt="${ref.title}" loading="lazy" referrerpolicy="no-referrer" />
+          </a>
+          <div class="body">
+            <div class="name">${ref.n}. <a href="${ref.page}" target="_blank" rel="noreferrer">${ref.title}</a></div>
+            <div class="look">${ref.look}</div>
+            <div class="marks">
+              <button type="button" data-mark="like">Like</button>
+              <button type="button" data-mark="no">Not this</button>
+            </div>
+            <input type="text" placeholder="Why? (optional)" aria-label="Why, for ${ref.title}" />
+          </div>`
+        const input = card.querySelector('input')
+        input.value = marks[ref.n]?.why ?? ''
+        input.addEventListener('input', () => {
+          marks[ref.n] = { ...marks[ref.n], why: input.value }
+          update()
+        })
+        for (const button of card.querySelectorAll('button'))
+          button.addEventListener('click', () => {
+            const mark = marks[ref.n]?.mark === button.dataset.mark ? '' : button.dataset.mark
+            marks[ref.n] = { ...marks[ref.n], mark }
+            update()
+          })
+        grid.append(card)
+      }
+
+      document.getElementById('copy').addEventListener('click', async (event) => {
+        const text = summary() || 'Nothing marked.'
+        try {
+          await navigator.clipboard.writeText(text)
+          event.target.textContent = 'Copied'
+        } catch {
+          prompt('Copy this:', text)
+        }
+        setTimeout(() => (event.target.textContent = 'Copy my picks'), 1500)
+      })
+
+      update()
+    </script>
+  </body>
+</html>

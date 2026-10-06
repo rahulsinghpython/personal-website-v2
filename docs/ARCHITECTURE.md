@@ -9,15 +9,17 @@ How the site is built. The content layer, the Index and prerendering exist; the 
 | Package manager | pnpm | 12.9.1 (pinned in `packageManager`), on Node 24.19.0 (`.nvmrc`) | Rahul's choice. |
 | Build | Vite | vite 8.3.2, @vitejs/plugin-react 6.1.1 | Rahul already ships with it. Fast, simple, good code splitting. |
 | UI | React + TypeScript (strict) | react and react-dom 19.3.0, typescript 7.0.2, @types/react and @types/react-dom 19.3.0 | Same reason. One mental model for the DOM and the scene. |
-| 3D | three.js through React Three Fiber, with selected helpers from drei | Not yet; added in Phase 2 | Rahul has shipped three.js. R3F lets scene and DOM share state. |
-| Shared state | zustand | Not yet; added in the phase that first needs it | Tiny, and readable from inside the render loop without causing React re-renders. |
+| 3D | three.js through React Three Fiber, with selected helpers from drei | three 0.186.1, @types/three 0.186.0, @react-three/fiber 9.8.1, @react-three/drei 10.7.9 (installed 2026-10-05) | Rahul has shipped three.js. R3F lets scene and DOM share state. The only drei helper in use is `OrbitControls`, on the workbench. R3F's peer range is React `>=19 <19.4`, so React stays below 19.4 until R3F widens it. |
+| Shared state | zustand | zustand 5.0.15 (installed 2026-10-05) | Tiny, and readable from inside the render loop without causing React re-renders. So far it holds only the workbench's state. |
+| Workbench panel | Tweakpane | tweakpane 4.0.5, @tweakpane/core 2.0.5 for its types (dev only, nothing shipped) | The control panel of the design workbench. See [DECISIONS D20](DECISIONS.md). |
 | Choreography | GSAP, one paused master timeline | Not yet; added in Phase 3 | The whole story is one timeline whose position is set from scroll progress. |
 | Prerendering | vite-prerender-plugin | vite-prerender-plugin 0.5.14 (dev only, nothing shipped) | Writes every page's HTML at build time, so content is readable with JavaScript off. See [DECISIONS D16](DECISIONS.md). |
-| Styling | Tailwind CSS | tailwindcss 4.3.3, @tailwindcss/vite 4.3.3 | Matches Rahul's other current projects. |
+| Styling | Tailwind CSS | tailwindcss 4.3.3, @tailwindcss/vite 4.3.3 | Matches Rahul's other current projects. It looks for class names in `src/` only (set in `src/styles/index.css`); by default it scans the whole repo, and words in docs and scripts became shipped CSS. |
 | Lint and format | oxlint, Prettier | oxlint 1.86.0, prettier 3.9.9 | Same. |
+| Bundle check | `scripts/check-size.mjs`, run at the end of `pnpm build` and in CI | No package | Fails the build when a size budget is exceeded. Reads Vite's manifest (`build.manifest`). See [DECISIONS D19](DECISIONS.md). |
 | Hosting | Vercel | Not set up yet | Same. |
 
-Versions were the latest stable on 2026-10-05, when the scaffold was made. When a later phase adds a "not yet" row, install the latest stable then and record it here. Do not copy versions from other repos.
+Versions were the latest stable on 2026-10-05, when the scaffold was made and when Phase 2 added three.js. When a later phase adds a "not yet" row, install the latest stable then and record it here. Do not copy versions from other repos.
 
 Deliberately not used: a smooth-scroll library (see [DECISIONS D8](DECISIONS.md)), a UI component kit, a post-processing stack, a physics engine, a CMS.
 
@@ -85,7 +87,7 @@ scroll position ──▶ target progress ──▶ eased progress ──▶ mas
 
 ### Rendering on demand
 
-The canvas does not run a continuous loop. A frame is drawn only when something asked for one: scroll, pointer movement over an interactive area, a click, a resize. While eased progress is still catching up, frames keep being requested; once it has settled, rendering stops entirely. This is the technical side of "the visitor causes the motion" and it is the single largest performance win. See [PERFORMANCE](PERFORMANCE.md).
+The canvas does not run a continuous loop. A frame is drawn only when something asked for one: scroll, pointer movement over an interactive area, a click, a resize. While eased progress is still catching up, frames keep being requested; once it has settled, rendering stops entirely, unless a part has ambient motion ([DECISIONS D26](DECISIONS.md)), in which case frames continue at a capped rate while the canvas is visible. This is the technical side of "the visitor causes the motion" and it is the single largest performance win. See [PERFORMANCE](PERFORMANCE.md).
 
 ## How the Machine is drawn
 
@@ -125,18 +127,45 @@ src/
   index-view/      the Index (plain version), served at /plain
   experience/      everything inside the canvas
     machine/       part definitions, point sampling, shaders
+      part.ts      what a part is: parameters in, geometry out
+      shapes.ts    the few operations parts are made from: lathe, ring, rod, pipe, repeat
+      points.ts    the Machine as a point cloud: surface sampling, and the points material
+      machine.ts   the Machine: the signed-off silhouette, each part with its versions
+      variants.ts  the options (A, B, C) currently being decided on the workbench
+      silhouettes/ the three whole Machines of round 2, one file each
     camera/        camera pose as a function of progress
     timeline.ts    the master timeline
     Experience.tsx the lazy-loaded entry to the scene
-  state/           store, progress, tier detection
+  state/           store, progress, tier detection. tiers.ts holds the tier numbers.
   styles/
   routes.ts        which path is which page; page titles
   App.tsx          picks the page for a path
   main.tsx         browser entry (hydrates) and prerender entry (build time)
+workbench/         the design tool. Development only; never built. See "The workbench".
+scripts/
+  check-size.mjs   the bundle check
 docs/
 ```
 
-`src/experience/` is the only place allowed to import three.js. Everything outside it must work if that folder never loads.
+`src/experience/` and `workbench/` are the only places allowed to import three.js. Everything else in `src/` must work if the scene never loads, and reaches it through one lazy import. oxlint enforces this (`no-restricted-imports` in `.oxlintrc.json`): three.js, React Three Fiber and anything under `src/experience/` cannot be imported from the rest of `src/`, and nothing in `src/` can import the workbench or Tweakpane.
+
+## The workbench
+
+The design tool described in [DESIGN-PROCESS](DESIGN-PROCESS.md#the-workbench). It lives in `workbench/`, outside `src/`, with its own `workbench/index.html`, and is served by `pnpm dev` at `/workbench/`.
+
+**It cannot ship.** `vite build` builds only the root `index.html`, and nothing in `src/` imports `workbench/`, so it is never part of the production module graph. It has no `prerender` script and no page links to it, so it is never rendered at build time either. Two checks back this up: the lint rule above, and `scripts/check-size.mjs`, which fails the build on any HTML page other than `/` and `/plain` and on any file no budget covers.
+
+**The split.** The Machine's own code (each part as a function of its parameters) is in `src/experience/machine/` and will ship with the scene. The workbench only imports it and adds the tools around it:
+
+| File | What it is |
+| --- | --- |
+| `store.ts` | The workbench's state in zustand: variant, tier, view, every parameter value. Mirrored to the URL. |
+| `camera.ts` | One camera pose shared by every viewport. A mutable value, because it changes every frame while orbiting. |
+| `Viewport.tsx` | One canvas showing one variant, rendering on demand. |
+| `Panel.tsx` | The Tweakpane panel: a tab per variant, a folder per part, a slider per parameter, and the readout. |
+| `stats.ts` | Cost per frame (CPU and GPU), draw calls, frames drawn, and the benchmark. |
+
+`window.__workbench` exposes `get`, `set`, `benchmark` and `stats`, so the workbench can be driven from the console or the Chrome DevTools MCP.
 
 ## Fallbacks
 

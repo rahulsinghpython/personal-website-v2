@@ -11,4 +11,8 @@ export default defineConfig({
     // The Index is found by following the link to it from the home page.
     vitePrerenderPlugin({ renderTarget: '#root' }),
   ],
+  build: {
+    // Read by scripts/check-size.mjs to follow what each chunk imports.
+    manifest: true,
+  },
 })

@@ -4,7 +4,7 @@ What has been decided, why, and what was passed over. Read this before proposing
 
 **Accepted** means Rahul set or confirmed it. **Proposed** means a chat put it forward and it is the working assumption until Rahul says otherwise.
 
-D3 to D5 and D7 to D11 were proposed in the documentation pass on 2026-10-05 and accepted by Rahul the same day.
+D3 to D5 and D7 to D11 were proposed in the documentation pass on 2026-10-05 and accepted by Rahul the same day. D14 was proposed in that pass and accepted at the start of Phase 2, also on 2026-10-05.
 
 ---
 
@@ -80,7 +80,7 @@ Rahul: chats should check in when a good npm package solves the problem, so we d
 
 **Earlier entries that ruled a package out** (D8 on smooth-scroll, D10 on post-processing) are about the behaviour, not about avoiding dependencies. They stand unless Rahul reopens them.
 
-### D14. Design happens in the browser, on a workbench — Proposed, 2026-10-05
+### D14. Design happens in the browser, on a workbench — Accepted, 2026-10-05
 
 **Why:** there is no designer or 3D artist, and a procedural object cannot be mocked up in a design tool anyway. So the design tool is a development-only page where the Machine is live and every parameter is a slider. Decisions are made by looking at real output and picking between two or three built options, in a fixed order: references, silhouette, parts, points, colour and type, motion. Full process in [DESIGN-PROCESS](DESIGN-PROCESS.md).
 
@@ -126,3 +126,110 @@ It was listed under Phase 1. Rahul agreed to add it just before three.js is inst
 **Why:** the check exists to catch dependencies inflating the bundle, and Phase 1 adds none. The critical path measures 77 KB against a 100 KB budget, so nothing is about to break. Phase 2 is where three.js, React Three Fiber and drei arrive and where the scene chunk's 300 KB budget first applies.
 
 **Still to decide then, under D13:** a package such as `size-limit`, or a short script over the build output.
+
+### D19. The bundle check is a script, and it is a tripwire, not the performance gate — Accepted, 2026-10-05
+
+Settles what D18 left open.
+
+**The check is `scripts/check-size.mjs`,** with no dependencies. It runs at the end of `pnpm build`, so a build over budget fails locally, in CI and on the host alike. `.github/workflows/ci.yml` runs typecheck, lint and the build on every push to `main`. Because pushes go straight to `main`, CI marks the commit red after it lands; it does not reject the push.
+
+**Why a script and not `size-limit`:** the budgets are sums over what a page loads, not limits on named files. `size-limit` picks files by filename glob, so three.js arriving in a new shared chunk that `index.html` preloads would match no glob and pass. The script reads each built HTML page for the files it references and Vite's manifest for what those import, so it measures what the browser is told to load. It also fails on any file in `dist/` that no budget covers, which is how a development-only page leaking into the production build would be caught. The measuring itself is a few lines of zlib; the package would not have saved the part that matters.
+
+**What it is for:** one mistake, three.js or the scene landing in the critical path so the opening text waits for it. Whether the scene chunk is 260 or 320 KB is not something a visitor feels.
+
+**What it is not:** a measure of how the site runs. Rahul: performance does not just mean network. This site's performance is decided at runtime: fill rate from overlapping additive point sprites (which grows with point size and pixel ratio, not point count), main-thread work when the scene attaches (evaluating three.js, sampling points, compiling shaders), frames rendered at rest, draw calls. Those are measured on the workbench, in a real Chrome driven through the Chrome DevTools MCP. See [PERFORMANCE](PERFORMANCE.md#measuring).
+
+**Passed over:** `size-limit` with `@size-limit/file` (above); a Lighthouse gate in CI (Rahul: not needed; Lighthouse stays a manual end-of-phase measurement); gating frame rate in CI (runners have no GPU).
+
+**Known cost:** `build.manifest` is on, so `dist/.vite/manifest.json` is deployed with the site. No page requests it.
+
+### D20. The workbench control panel is Tweakpane — Accepted, 2026-10-05
+
+Brought to Rahul under D13. It replaces a hand-built panel of sliders, folders and readouts. It is used only on the workbench, so it ships 0 KB; the bundle check fails if it ever reaches the production build.
+
+**Why:** it edits a plain object that we own, so the panel is only a view of the Machine's parameters. The same object can be set from the Chrome DevTools MCP for screenshots and benchmarks, and the chosen values can be copied into the code as they are. Tabs (for the A, B, C variant switch) and graphed readouts (for frame cost and draw calls) are built in. It has no dependencies.
+
+**Passed over:** Leva (keeps the values in its own store behind a React hook, so the scene would depend on a dev tool's state; 11 dependencies, one of them the archived Stitches); lil-gui (the same plain-object model and a more recent release, but no tabs and no graphed readouts, which would have to be hand-built).
+
+**Known cost:** the last release, 4.0.5, was in November 2024. It has no dependencies and touches only the DOM, so the risk is judged low for a tool that never ships. lil-gui is the fallback.
+
+### D21. The workbench lives outside `src/`, and three.js is fenced in by lint — Accepted, 2026-10-05
+
+Rahul approved the plan before the workbench was written. What it settled:
+
+- **The workbench is `workbench/` at the repo root, with its own HTML entry.** It is kept out of the production build by not being an input to it, not by a development-only branch that tree-shaking has to remove. `src/` is what ships; `workbench/` is the tool. **Passed over:** a `/workbench` route inside the app behind `import.meta.env.DEV`, which would put dev-only code one mistake away from the entry chunk and from prerendering.
+- **The rule in ARCHITECTURE changes** from "`src/experience/` is the only place allowed to import three.js" to "`src/experience/` and `workbench/`". oxlint now enforces it.
+- **zustand is installed now, not in Phase 3.** The workbench needs state that the panel, the viewports and the Chrome DevTools MCP all set. It was already the accepted choice (D9).
+- **The frame-cost readout and the benchmark are our own code** (`workbench/stats.ts`), over three.js's render info and the GPU timer-query extension. **Passed over:** drei's `StatsGl` overlay, which draws its own panel and does not hand its numbers to a benchmark.
+- **Tailwind looks for class names in `src/` only, and not in `src/experience/`.** By default it scans the whole repo, and words in docs, scripts and the Machine's code (`ring`, `grid`, `relative`) became rules in the shipped CSS.
+- **The scene does not attach to the page in Phase 2.** The production build contains no three.js until Phase 3, so the Phase 1 pages are unchanged. The scene chunk's size is measured once at the end of Phase 2 with a throwaway build.
+
+### D22. The Machine's look comes from computing hardware first — Accepted, 2026-10-06
+
+Rahul's direction, given in round 1. The first batch of references followed the list in DESIGN-PROCESS and was all scientific instruments: armillary spheres, orreries, lenses, spacecraft. Rahul: he is a software person, the list was too "sciency", and the references should be tech: computers, wires, quantum machines.
+
+**What changes:** the visual vocabulary. The Machine should look like it belongs to computing (racks, wiring, storage, a quantum rig) more than to an observatory. DESIGN-PROCESS now says to look at computing hardware first. A second batch of references was collected in [REFERENCES](REFERENCES.md).
+
+**What does not change:** one object, four parts, the era each part stands for, drawn as points (D2, D3, D5). The four likes from the first batch (orrery, Cassini, turbofan, gimbal) still stand as taste: things that could move, subsystems on one body, a machine recognised at a glance, rings inside rings.
+
+**A limit that comes with it:** borrowing the look of a quantum computer or a supercomputer must not imply Rahul worked on one. The parts stand for the eras in CONTENT and nothing else (rule 6).
+
+**Also in this round:** references are shown as pictures on a development-only page, `workbench/references.html`, because a list of links asked Rahul to imagine the images. The pictures load from Wikimedia and are not stored in the repo.
+
+### D23. The silhouette: a hanging tiered rig with a small cube in gimbals on top — Accepted, 2026-10-06
+
+Rahul's sign-off for round 2. The shape is described in [EXPERIENCE](EXPERIENCE.md#the-shape).
+
+**How it was reached.** Round 1 ended with nine references liked and five words: futuristic, nested, wired, kinetic, dense ([REFERENCES](REFERENCES.md)). Three silhouettes were built from them: A, a cube of cubes in gimbal rings; B, a tiered rig that hangs, after the inside of a quantum computer; C, a cable cut open. Rahul liked A and B together. A first mix hung a large cube in gimbals under B's tiers; he preferred B kept whole with A as a much smaller piece on top. That is the shape signed off. His words: "Nice nice looks quite good."
+
+**A rule that came out of it: nothing is bolted onto a ring that turns.** On A, the Scanner rode the outer gimbal ring and the Lens stuck out from it. Rahul: the gimbal rings are good, but putting things on them breaks physics. So the gimbal is built the way a real one is: the outer ring on one pin, each ring pivoted inside the next, the cube on an axle through the innermost. This holds for any later version of the Rings.
+
+**Passed over:** A on its own; the cable, cut open (the only one where fibres visibly ran from the Core into the Lens, which is worth remembering for round 3); the first mix, with the cube in gimbals as the large lower half.
+
+**Still open:** which of the four parts the crown belongs to, and each part's detail. Round 3.
+
+### D24. A part stands for a kind of work; the company is small print — Accepted, 2026-10-06
+
+Rahul's direction at the start of round 3. It changes the emphasis of D5, which tied each part to a career era named by its employer.
+
+**Why:** asked which employer the crown should stand for, Rahul questioned why the company was getting so much weight. His answer: the company can be small print, and the focus should be on the work.
+
+**What changes:**
+
+- Each part is defined by the work: data pipelines (Core), turning LiDAR point clouds into 3D models (Scanner), scheduling (Rings), LLM analytics (Lens). A label on the Machine leads with the work; the company and years sit beside it in small print.
+- A piece of the shape is given to a part by what it looks like it does, not by argument about an employer. The tiers with lines running through them and the tip are the Core; the arm is the Scanner; the orbit rings are the Rings; the cube in gimbals on top is the Lens.
+- Every part is one connected piece. Before this, the cube counted as Core and its gimbals as Rings, which split two parts across the Machine.
+
+**What does not change:** four parts, in the order Rahul came to the work, which is still the order of the career (D5). The part names stay as handles in code and docs even though the Lens is no longer lens-shaped; no visitor sees them. No fact changes: employers, years and roles are as in CONTENT.
+
+**Not done here:** the content layer and the Index still lead with company and role. Rewriting that copy to lead with the work is its own piece of work, listed in [ROADMAP](ROADMAP.md).
+
+### D25. Round 3: version 2 of every part; the beads are the things being scheduled — Accepted, 2026-10-06
+
+Three versions of each part were built inside the signed-off silhouette. Rahul picked version 2 of all four:
+
+- **Core:** plates open in the middle, with the lines dropping straight through them as one bundle into a nozzle.
+- **Scanner:** a drum held in a fork at the end of the arm, drawn with the fan of beams it sweeps.
+- **Rings:** each orbit ring on three spokes, carrying a row of beads, more of them the wider the ring.
+- **Lens:** the crown with two gimbal rings and a bigger cube, so it still reads at its small size.
+
+**The beads.** Rahul asked whether the beads could be skills, rotating around. Decided against, on the chat's advice and with his agreement: tech names on floating balls is the best-known feature of 3D portfolio templates; VISION lists a skills section as an anti-goal and CONTENT says a technology is mentioned only beside the work that used it; and the rings already stand for scheduling. The beads are the things being scheduled. They slide round their rings and settle into even spacing. Technologies stay in the text beside the work that used them.
+
+**Passed over:** version 1 (as signed off in round 2) and version 3 of each part; skills on the beads, with names at the edge of the screen and the matching bead lighting on hover.
+
+### D26. Small ambient motion is allowed — Accepted, 2026-10-06
+
+Rahul's direction. It relaxes D6, which allowed no motion at all without input.
+
+**Why:** Rahul: "nothing moves unless the visitor moves it" is too strict; small animations can enhance the product. The beads drifting round their rings is the first case.
+
+**The rule now:**
+
+- Small, slow motion with no input is allowed where it adds to a part's meaning.
+- The story still advances only when the visitor scrolls. Ambient motion never assembles a part, wakes one, or moves the camera.
+- It is done in the shader, with no per-point work in JavaScript.
+- It pauses when the tab is hidden, when the canvas is off screen, and when the system asks for reduced motion. It is off on the low tier.
+
+**What it costs.** D6 called drawing nothing at rest the largest performance win available, and that is given up on the high and mid tiers while the Machine is on screen. The guardrails above keep the rest. The "frames at rest: 0" budget in PERFORMANCE changes with this; the idle frame rate gets a cap when it is first measured, in Phase 3.
+
+**Still ruled out:** motion as decoration. Floating blobs, an auto-rotating Machine, parallax on everything.

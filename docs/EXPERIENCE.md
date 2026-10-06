@@ -2,22 +2,37 @@
 
 What the visitor sees and does. Read [VISION](VISION.md) first.
 
-**Status of this doc:** the structure (one object, four parts, eight beats, the interaction rules) is the agreed direction. The Machine's exact shape and the wording of the copy are deliberately open and get settled by prototyping. The last section says which is which.
+**Status of this doc:** the structure (one object, four parts, eight beats, the interaction rules) is the agreed direction. The Machine's silhouette was settled on 2026-10-06; the detail of each part and the wording of the copy are still open and get settled by prototyping. The last section says which is which.
 
 ## The Machine
 
 A strange instrument floating in darkness. It is not a robot, has no face, and its purpose is not obvious. It is drawn mostly as **points**, like a LiDAR scan, with thin lines and a few solid surfaces appearing as parts wake up.
 
-It has four parts. Each part is one era of Rahul's career, and each part's job inside the Machine matches the work of that era.
+### The shape
 
-| Part | Era | What it is in the Machine | Why this shape |
+Signed off by Rahul on 2026-10-06, as a grey solid on the workbench ([DECISIONS D23](DECISIONS.md)). It looks like computing hardware, not like an observatory instrument ([D22](DECISIONS.md)). Five words for the feeling: futuristic, nested, wired, kinetic, dense.
+
+It is a tall rig that hangs, with a small crown on top.
+
+- **The rig (Core).** A stack of round plates that narrow as they descend, joined by posts. The top plate is solid; the others are open in the middle, and a bundle of straight lines drops through all of them into a nozzle at the bottom. It hangs from a short mount at the top. The look is borrowed from the inside of a quantum computer; the Machine does not claim Rahul worked on one.
+- **The orbits (Rings).** The three lowest plates each carry a thin ring on three spokes, with a row of beads on it, more beads the wider the ring. The rings get wider as the plates get narrower, so the outline is a diamond. The beads are the things being scheduled: they drift round their rings and settle into even spacing ([DECISIONS D25](DECISIONS.md), [D26](DECISIONS.md)).
+- **The arm (Scanner).** A straight arm off the top plate, ending in a fork that holds a drum, drawn with the fan of thin beams it sweeps.
+- **The crown (Lens).** Standing on the mount, much smaller than the rig: a cube of eight cubes with a small city on its roof, held in two gimbal rings. The outer ring stands on one pin, like a toy gyroscope on its pedestal. The inner ring pivots inside it, and the cube sits on an axle through the inner ring. Nothing else is attached to the rings, because a ring that turns freely cannot carry anything.
+
+The outline was signed off in round 2 and the detail of each part picked in round 3 ([D25](DECISIONS.md)). As points (round 4) it is one cloud sampled from these surfaces, with the thin parts given a larger share of the points than their size alone would earn, so the rings and beams do not vanish.
+
+The code is `src/experience/machine/machine.ts`, and every number in it is a slider on the workbench.
+
+It has four parts. Each part stands for **a kind of work** Rahul has done, and is one connected piece of the shape. The company and the years are small print beside it, not the point ([DECISIONS D24](DECISIONS.md)).
+
+| Part | The work | Which piece of the Machine | Small print |
 | --- | --- | --- | --- |
-| **Core** | S2T, 2021 to 2023 | The central housing, wrapped in conduits that carry pulses of data | Data engineering: pipelines, microservices, throughput |
-| **Scanner** | Etavolt, 2023 to 2024 | A sensing head that sweeps a beam and turns points into surface | Rahul built point-cloud-to-mesh software from LiDAR data |
-| **Rings** | Uniad, 2024 onward | Concentric rings around the Core that turn and lock into alignment | Scheduling, bookings, calendars: many moving things kept in order |
-| **Lens** | Cognizant, 2024 onward | A stack of apertures at the front that pulls scattered points into focus | LLM analytics: turning raw data into something a person can read |
+| **Core** | Data engineering: pipelines, microservices, throughput | The rig: the tiers, the lines running down through them, and the tip | S2T, 2021 to 2023 |
+| **Scanner** | Turning LiDAR point clouds into 3D models | The arm and its head | Etavolt, 2023 to 2024 |
+| **Rings** | Scheduling, bookings, calendars: many moving things kept in order | The orbit rings | Uniad, 2024 onward |
+| **Lens** | LLM analytics: turning raw data into something a person can read | The crown: the cube in gimbals | Cognizant, 2024 onward |
 
-Together they read as one device: data flows through the Core, the Scanner perceives, the Rings keep time, the Lens makes sense of it. Parts assemble **in chronological order**, so the Machine is literally built the way the career was.
+The names are handles for us and never shown to a visitor; the Lens is no longer shaped like a lens. Parts still assemble **in the order Rahul came to the work**, so the Machine is built the way the career was.
 
 ### Three states
 
@@ -37,7 +52,7 @@ The page is one long scroll. The canvas is fixed behind it and the Machine respo
 | --- | --- | --- | --- |
 | 0 | **Found** | Black. Small type: `YOU'VE FOUND RAHUL.` Faint dust in the dark. Moving the pointer lights the dust near it. | Something is here. Nothing is explained. |
 | 1 | **Signal** | First scroll. The dust pulls inward and a silhouette forms. Dormant, unlabelled. | The dust was an object all along. |
-| 2 | **Core** | Camera moves in. The Core locks together and wakes. First label appears: years, company, role. | The object has parts, and a part is a job. |
+| 2 | **Core** | Camera moves in. The Core locks together and wakes. First label appears: the work, with the years and the company in small print. | The object has parts, and a part is a kind of work. |
 | 3 | **Scanner** | The Scanner assembles as raw points. The visitor sweeps across it and surface appears where they sweep. | Rahul built this kind of software. They have been looking at it the whole time. |
 | 4 | **Rings** | Rings form around the Core, turn, and lock. | Scale and orchestration: 10,000+ users. |
 | 5 | **Lens** | A scatter of points is pulled through the Lens and resolves into something legible. | LLM products for Singapore's government. |
@@ -51,7 +66,7 @@ The "oh, it's a whole career" moment must land by beat 2 or 3, about twenty seco
 There are three small discoveries, each one a reward for scrolling:
 
 1. Beat 1: the dust is an object.
-2. Beat 2: the object's parts are jobs.
+2. Beat 2: the object's parts are kinds of work.
 3. Beat 3: the way it is drawn is itself Rahul's work.
 
 Beat 6 is the payoff, not a new reveal.
@@ -60,8 +75,8 @@ Beat 6 is the payoff, not a new reveal.
 
 These are the rules that make principle 3 in [VISION](VISION.md) real.
 
-1. **Nothing moves unless the visitor moves it.** Inputs are scroll, pointer move, click or tap, and drag.
-2. **Settling is allowed, looping is not.** After input stops, motion may ease to rest for up to about 1.5 seconds. Then the scene is completely still and the canvas stops rendering. No idle spin, no breathing, no drifting particles.
+1. **The visitor causes the change.** The story advances only on input: scroll, pointer move, click or tap, and drag. Nothing assembles, wakes or moves the camera on its own.
+2. **Small ambient motion is allowed; decoration is not.** After input stops, the big motion eases to rest within about 1.5 seconds. What may keep moving is small, slow, and part of a part's meaning: the beads drifting round the Rings. It pauses when the tab is hidden, the canvas is off screen or the system asks for reduced motion, and it is off on the low tier ([DECISIONS D26](DECISIONS.md)). No idle spin of the whole Machine, no breathing, no floating particles.
 3. **Scroll is never hijacked.** The page scrolls natively. The Machine eases toward the scroll position, which gives smoothness without taking control from the visitor.
 4. **Scrolling back undoes it.** The scene is a pure function of progress. Scroll up and the Machine disassembles exactly as it assembled.
 5. **Every interaction means something.** If an interaction does not teach the visitor about that part's work, cut it.
@@ -119,7 +134,7 @@ Direction only. Exact tokens are chosen during the build.
 
 **Fixed.** Change only with a new entry in [DECISIONS](DECISIONS.md).
 
-- One object; four parts; the era each part stands for; chronological assembly.
+- One object; four parts; the kind of work each part stands for; chronological assembly.
 - Drawn primarily as points.
 - The eight beats and their order.
 - The interaction rules.
@@ -127,7 +142,7 @@ Direction only. Exact tokens are chosen during the build.
 
 **Open.** Settle by prototyping, then write the answer back here.
 
-- The Machine's silhouette and each part's exact geometry. This is the main job of the greybox phase.
+- The exact numbers of each part (radii, counts, spacing), and how dense, large and bright the points are. Round 4 of the greybox phase. The silhouette itself is settled; see "The shape" above.
 - The name "the Machine" as visitor-facing language. It is a working name for us; the site may never say it.
 - The accent colour and the typefaces.
 - All copy. Drafts are in [CONTENT](CONTENT.md).

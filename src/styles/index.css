@@ -1,4 +1,8 @@
-@import 'tailwindcss';
+/* Class names are looked for in src/ only, and not in the scene's code. Left to itself Tailwind
+   scans the whole repo, and words in scripts, docs and the Machine ("ring", "grid") that happen
+   to be class names end up in the shipped CSS. */
+@import 'tailwindcss' source('..');
+@source not '../experience';
 
 /* Placeholder values. The real palette and typefaces are settled in the design rounds (D11).
    System font stacks until then, so there are no font files to load. */

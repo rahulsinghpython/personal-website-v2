@@ -18,7 +18,7 @@ What we do not take:
 
 - Its look. No neon lime, no helmet, no racing language.
 - Its production model. That site was made by a studio (OFF+BRAND) with 3D artists and motion designers. This one is made by one engineer, so the idea must be buildable in code. See [DECISIONS D4](DECISIONS.md).
-- Constant motion. Our scene stays still until the visitor does something.
+- Constant motion. Our scene changes when the visitor does something; what moves by itself is small.
 
 ## Who it is for
 
@@ -39,7 +39,7 @@ The Machine is the navigation, the timeline and the portfolio. Projects are not 
 The opening explains nothing. The visitor should wonder what they are looking at. But the mystery is short: within about twenty seconds of scrolling they must understand that the object is a career. Mystery that lasts longer than that is just confusion.
 
 **3. The visitor causes the change.**
-Nothing moves by itself. Scrolling assembles the Machine. Moving the pointer lights the dust. Sweeping across a part reconstructs it. When the visitor stops, the world stops. This makes every change feel earned, and it means an idle page costs the GPU nothing.
+Scrolling assembles the Machine. Moving the pointer lights the dust. Sweeping across a part reconstructs it. When the visitor stops, the story stops. This makes every change feel earned. A little ambient motion is allowed where it means something ([DECISIONS D26](DECISIONS.md)); nothing in the story happens by itself.
 
 **4. The medium is the proof.**
 Rahul built software that turns LiDAR point clouds into 3D models. So the Machine is a point cloud that reconstructs itself in front of you. The site does not claim the skill; it demonstrates it. Wherever possible, a part shows its era's work by doing a small version of it.

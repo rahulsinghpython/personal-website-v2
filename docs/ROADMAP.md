@@ -8,7 +8,7 @@ The authority on what is built and what comes next. Update the status table when
 | --- | --- | --- |
 | 0 | Direction | Done 2026-10-05. Docs written; concept, stack and principles accepted by Rahul. |
 | 1 | Foundations | In progress since 2026-10-05. Built on 2026-10-05: facts confirmed by Rahul, content modules, content layer, the Index at `/plain`, prerendering. Readable with scripts blocked; Lighthouse mobile performance 100 on both pages, measured on a local production build. Left: deploy to Vercel (Rahul will say when), then re-measure on the deployed preview. |
-| 2 | Greybox | Not started |
+| 2 | Greybox | In progress since 2026-10-05. Built: the bundle-size check and CI ([D19](DECISIONS.md)); the workbench, showing placeholder shapes ([D20](DECISIONS.md), [D21](DECISIONS.md)). Round 1 finished on 2026-10-06: nine references liked, outcome in [REFERENCES](REFERENCES.md), look drawn from computing hardware ([D22](DECISIONS.md)). Round 2 finished on 2026-10-06: Rahul signed off the silhouette, a hanging tiered rig with a small cube in gimbals on top ([D23](DECISIONS.md), [EXPERIENCE](EXPERIENCE.md#the-shape)). Round 3: each part now stands for a kind of work, with the company as small print ([D24](DECISIONS.md)); Round 3 finished on 2026-10-06: version 2 of all four parts ([D25](DECISIONS.md)). Small ambient motion is now allowed ([D26](DECISIONS.md)). Round 4: the Machine is drawn as points on the workbench, waiting for Rahul to tune density, size and brightness. |
 | 3 | Choreography | Not started |
 | 4 | Interactions | Not started |
 | 5 | Finish | Not started |
@@ -34,12 +34,12 @@ A working site with no 3D.
 
 Find the Machine. This is the creative risk of the whole project, so it comes early and stays rough. It follows rounds 1 to 4 of [DESIGN-PROCESS](DESIGN-PROCESS.md).
 
-- First, before three.js is installed: add a bundle-size check to CI that fails a push when a budget in [PERFORMANCE](PERFORMANCE.md) is exceeded. Bring Rahul the options under [D13](DECISIONS.md) (a package such as `size-limit`, or a short script over the build output).
-- Build the workbench: a development-only page with free camera and a control panel.
-- Round 1, references: collect and narrow with Rahul.
-- Round 2, silhouette: three different whole Machines in flat grey; Rahul picks.
-- Round 3, parts: refine each of the four parts inside the chosen silhouette.
-- Round 4, points: sample to a point cloud; tune density, size and brightness.
+- Done, before three.js is installed: a bundle-size check that fails the build, and so CI, when a size budget in [PERFORMANCE](PERFORMANCE.md) is exceeded. A script over the build output ([D19](DECISIONS.md)).
+- Done: the workbench, a development-only page at `/workbench/` with free camera and a control panel. It includes a benchmark mode that reports cost per frame, draw calls, points and sampling time, which is how runtime performance is measured ([PERFORMANCE](PERFORMANCE.md#measuring)).
+- Done: round 1, references. Two batches, nine likes; outcome in [REFERENCES](REFERENCES.md).
+- Done: round 2, silhouette. Signed off on 2026-10-06 ([D23](DECISIONS.md)); the shape is `src/experience/machine/silhouettes/crowned.ts`.
+- Round 3, parts: refine each of the four parts inside the chosen silhouette. Rahul picked version 2 of every part: open plates with a bundle of lines (Core), a drum in a fork with its fan of beams (Scanner), beaded rings (Rings), two gimbals and a bigger cube (Lens).
+- Round 4, points: sample to a point cloud; tune density, size and brightness. Sampling and the points material are built (`src/experience/machine/points.ts`); not yet tuned.
 - Measure points and frame rate on real devices; set the tier point counts.
 
 Rounds 5 (colour and type) and 6 (motion) happen in Phases 5 and 3, on the same workbench.
@@ -94,8 +94,10 @@ Answered on 2026-10-05: the Machine concept, the stack and the principles are ac
 
 Direction:
 
-1. **Design process:** is the workbench-and-rounds approach in [DESIGN-PROCESS](DESIGN-PROCESS.md) how you want to work ([D14](DECISIONS.md))?
-2. **Workbench control panel:** which package? First check under [D13](DECISIONS.md), due at the start of Phase 2.
+1. **Design process:** answered on 2026-10-05. The workbench-and-rounds approach in [DESIGN-PROCESS](DESIGN-PROCESS.md) is accepted ([D14](DECISIONS.md)).
+2. **Workbench control panel:** answered on 2026-10-05. Tweakpane ([D20](DECISIONS.md)).
+
+Copy: since [D24](DECISIONS.md) a part stands for a kind of work and the company is small print, but the content layer and the Index still lead with company and role. Rewriting them to lead with the work is not scheduled; it is outside the greybox phase.
 
 Content: roles and dates, the opening name, the numbers, what can be named, personal projects, location and title were answered on 2026-10-05 ([CONTENT](CONTENT.md#confirmed-with-rahul), [D15](DECISIONS.md)). Still open, in [CONTENT](CONTENT.md#still-needs-rahul):
 

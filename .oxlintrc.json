@@ -3,7 +3,44 @@
   "plugins": ["react", "typescript", "oxc", "jsx-a11y"],
   "rules": {
     "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+    "react/only-export-components": ["warn", { "allowConstantExport": true }],
+    "no-restricted-imports": [
+      "error",
+      {
+        "patterns": [
+          {
+            "group": ["three", "three/*", "@react-three/*", "**/experience/**"],
+            "message": "Only src/experience/ and workbench/ may import three.js or the scene (docs/ARCHITECTURE.md). The page reaches the scene through one lazy import."
+          },
+          {
+            "group": ["tweakpane", "@tweakpane/*", "**/workbench/**"],
+            "message": "The workbench is development only. Nothing that ships may import it."
+          }
+        ]
+      }
+    ]
   },
+  "overrides": [
+    {
+      "files": ["src/experience/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": ["tweakpane", "@tweakpane/*", "**/workbench/**"],
+                "message": "The workbench is development only. Nothing that ships may import it."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["workbench/**"],
+      "rules": { "no-restricted-imports": "off" }
+    }
+  ],
   "ignorePatterns": ["dist"]
 }
