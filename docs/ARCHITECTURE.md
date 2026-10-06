@@ -1,6 +1,6 @@
 # Architecture
 
-How the site is built. The content layer, the Index and prerendering exist; the scene layer does not (see [ROADMAP](ROADMAP.md)), and its sections below are the plan the build phases follow. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
+How the site is built. The content layer, the Index and prerendering exist. Of the scene layer, the Machine's shape and its point cloud exist and are shown on the workbench only; nothing is mounted on the site (see [ROADMAP](ROADMAP.md)). The rest of the scene sections below are the plan the build phases follow. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
 
 ## Stack
 
@@ -100,6 +100,8 @@ The canvas does not run a continuous loop. A frame is drawn only when something 
 - which part it belongs to,
 - a small random offset so points do not all move in step.
 
+Two things about the sampling are deliberate ([DECISIONS D27](DECISIONS.md)). Points are not shared out by surface area alone: the thinner a piece is, the more closely its points are packed, or the plates would take nearly every point and the lines would vanish. And a point's size is in the Machine's own units, not in pixels, so the Machine is the same picture on a phone and on a monitor.
+
 **All point animation happens in the vertex shader.** The CPU sets a handful of uniforms per frame (overall progress, how assembled and how awake each part is, pointer position for the torch and the scan beam). The GPU interpolates every point between dust and assembled and picks its colour and size. No per-point work happens in JavaScript after setup.
 
 **The whole cloud is one draw call**, or one per part if that makes per-part control simpler. Lines and the few solid surfaces are a small number of additional draw calls.
@@ -129,10 +131,10 @@ src/
     machine/       part definitions, point sampling, shaders
       part.ts      what a part is: parameters in, geometry out
       shapes.ts    the few operations parts are made from: lathe, ring, rod, pipe, repeat
-      points.ts    the Machine as a point cloud: surface sampling, and the points material
-      machine.ts   the Machine: the signed-off silhouette, each part with its versions
-      variants.ts  the options (A, B, C) currently being decided on the workbench
-      silhouettes/ the three whole Machines of round 2, one file each
+      points.ts    the Machine as a point cloud: surface sampling, the points material, the chosen look
+      machine.ts   the Machine: the signed-off silhouette and the picked detail of each part
+      cube.ts      the cube of cubes with a city on its roof, which the Lens carries
+      variants.ts  the shapes the workbench switches between; one, now the shape is settled
     camera/        camera pose as a function of progress
     timeline.ts    the master timeline
     Experience.tsx the lazy-loaded entry to the scene
@@ -160,12 +162,13 @@ The design tool described in [DESIGN-PROCESS](DESIGN-PROCESS.md#the-workbench). 
 | File | What it is |
 | --- | --- |
 | `store.ts` | The workbench's state in zustand: variant, tier, view, every parameter value. Mirrored to the URL. |
+| `cloud.ts` | How the points are drawn: the sliders' values, starting from the chosen look. Mirrored to the URL. |
 | `camera.ts` | One camera pose shared by every viewport. A mutable value, because it changes every frame while orbiting. |
 | `Viewport.tsx` | One canvas showing one variant, rendering on demand. |
 | `Panel.tsx` | The Tweakpane panel: a tab per variant, a folder per part, a slider per parameter, and the readout. |
 | `stats.ts` | Cost per frame (CPU and GPU), draw calls, frames drawn, and the benchmark. |
 
-`window.__workbench` exposes `get`, `set`, `benchmark` and `stats`, so the workbench can be driven from the console or the Chrome DevTools MCP.
+`window.__workbench` exposes `get`, `set`, `benchmark`, `stats` and `cloud`, so the workbench can be driven from the console or the Chrome DevTools MCP.
 
 ## Fallbacks
 

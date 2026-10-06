@@ -8,7 +8,7 @@ The authority on what is built and what comes next. Update the status table when
 | --- | --- | --- |
 | 0 | Direction | Done 2026-10-05. Docs written; concept, stack and principles accepted by Rahul. |
 | 1 | Foundations | In progress since 2026-10-05. Built on 2026-10-05: facts confirmed by Rahul, content modules, content layer, the Index at `/plain`, prerendering. Readable with scripts blocked; Lighthouse mobile performance 100 on both pages, measured on a local production build. Left: deploy to Vercel (Rahul will say when), then re-measure on the deployed preview. |
-| 2 | Greybox | In progress since 2026-10-05. Built: the bundle-size check and CI ([D19](DECISIONS.md)); the workbench, showing placeholder shapes ([D20](DECISIONS.md), [D21](DECISIONS.md)). Round 1 finished on 2026-10-06: nine references liked, outcome in [REFERENCES](REFERENCES.md), look drawn from computing hardware ([D22](DECISIONS.md)). Round 2 finished on 2026-10-06: Rahul signed off the silhouette, a hanging tiered rig with a small cube in gimbals on top ([D23](DECISIONS.md), [EXPERIENCE](EXPERIENCE.md#the-shape)). Round 3: each part now stands for a kind of work, with the company as small print ([D24](DECISIONS.md)); Round 3 finished on 2026-10-06: version 2 of all four parts ([D25](DECISIONS.md)). Small ambient motion is now allowed ([D26](DECISIONS.md)). Round 4: the Machine is drawn as points on the workbench, waiting for Rahul to tune density, size and brightness. |
+| 2 | Greybox | Done 2026-10-07, begun 2026-10-05. Built: the bundle-size check and CI ([D19](DECISIONS.md)); the workbench, showing placeholder shapes ([D20](DECISIONS.md), [D21](DECISIONS.md)). Round 1 finished on 2026-10-06: nine references liked, outcome in [REFERENCES](REFERENCES.md), look drawn from computing hardware ([D22](DECISIONS.md)). Round 2 finished on 2026-10-06: Rahul signed off the silhouette, a hanging tiered rig with a small cube in gimbals on top ([D23](DECISIONS.md), [EXPERIENCE](EXPERIENCE.md#the-shape)). Round 3: each part now stands for a kind of work, with the company as small print ([D24](DECISIONS.md)); Round 3 finished on 2026-10-06: version 2 of all four parts ([D25](DECISIONS.md)). Small ambient motion is now allowed ([D26](DECISIONS.md)). Round 4 finished on 2026-10-07: the Machine as points, in a look between two of the three shown ([D27](DECISIONS.md), [D28](DECISIONS.md)). The scene chunk was measured with a throwaway build: 243.8 kB of 300 ([PERFORMANCE](PERFORMANCE.md#the-bundle-check)). **Finished on 2026-10-07, with one criterion put off by Rahul:** frame rate was measured on the development machine only; the mid and low tiers move to Phase 5 ([D28](DECISIONS.md)). |
 | 3 | Choreography | Not started |
 | 4 | Interactions | Not started |
 | 5 | Finish | Not started |
@@ -37,14 +37,17 @@ Find the Machine. This is the creative risk of the whole project, so it comes ea
 - Done, before three.js is installed: a bundle-size check that fails the build, and so CI, when a size budget in [PERFORMANCE](PERFORMANCE.md) is exceeded. A script over the build output ([D19](DECISIONS.md)).
 - Done: the workbench, a development-only page at `/workbench/` with free camera and a control panel. It includes a benchmark mode that reports cost per frame, draw calls, points and sampling time, which is how runtime performance is measured ([PERFORMANCE](PERFORMANCE.md#measuring)).
 - Done: round 1, references. Two batches, nine likes; outcome in [REFERENCES](REFERENCES.md).
-- Done: round 2, silhouette. Signed off on 2026-10-06 ([D23](DECISIONS.md)); the shape is `src/experience/machine/silhouettes/crowned.ts`.
-- Round 3, parts: refine each of the four parts inside the chosen silhouette. Rahul picked version 2 of every part: open plates with a bundle of lines (Core), a drum in a fork with its fan of beams (Scanner), beaded rings (Rings), two gimbals and a bigger cube (Lens).
-- Round 4, points: sample to a point cloud; tune density, size and brightness. Sampling and the points material are built (`src/experience/machine/points.ts`); not yet tuned.
-- Measure points and frame rate on real devices; set the tier point counts.
+- Done: round 2, silhouette. Signed off on 2026-10-06 ([D23](DECISIONS.md)); the shape is `src/experience/machine/machine.ts`.
+- Done: round 3, parts. Rahul picked version 2 of every part ([D25](DECISIONS.md)): open plates with a bundle of lines (Core), a drum in a fork with its fan of beams (Scanner), beaded rings (Rings), two gimbals and a bigger cube (Lens). The versions and silhouettes he passed over were removed from the code on 2026-10-06; they are in git history at `4393c8e`.
+- Done: round 4, points. Sampling and the points material are `src/experience/machine/points.ts` ([D27](DECISIONS.md)). Three looks were shown side by side at desktop size and at phone size; Rahul picked a mix of two, which is `POINT_LOOK` in that file ([D28](DECISIONS.md)).
+- Done on the development machine only: measure points and frame cost ([PERFORMANCE](PERFORMANCE.md#measured-on-the-development-machine)). Moved to Phase 5 by Rahul: measuring on a mid and a low device, and setting the tier point counts ([D28](DECISIONS.md)).
+- Done: a throwaway build with the scene mounted lazily, to read the scene chunk's size ([D21](DECISIONS.md)). 243.8 kB of 300, without GSAP; reverted.
 
 Rounds 5 (colour and type) and 6 (motion) happen in Phases 5 and 3, on the same workbench.
 
 **Done when:** Rahul signs off the silhouette; the mid tier holds 60 fps and the low tier 30 fps with the Machine on screen; the shape is written back into [EXPERIENCE](EXPERIENCE.md).
+
+**How it ended:** the silhouette was signed off ([D23](DECISIONS.md)) and the shape is in EXPERIENCE. The frame-rate criterion was not met and not failed: no mid or low device was measured, by Rahul's choice, and it is now a Phase 5 item ([D28](DECISIONS.md)).
 
 ## Phase 3. Choreography
 
@@ -74,6 +77,7 @@ The first-release interactions from [EXPERIENCE](EXPERIENCE.md#interactions-by-p
 - Final typefaces, accent colour, spacing, copy.
 - Social preview image, favicon, metadata.
 - Real-device testing. Accessibility pass.
+- Carried over from Phase 2 ([D28](DECISIONS.md)): name the reference devices; measure the mid tier at 60 fps and the low tier at 30 fps on them; set the tier point counts in [PERFORMANCE](PERFORMANCE.md); time point sampling on the low device and move it to build time or a worker if it passes 50 ms.
 - Custom domain.
 
 **Done when:** every budget is met on the reference devices and Rahul is happy to send the link to someone.
@@ -106,5 +110,5 @@ Content: roles and dates, the opening name, the numbers, what can be named, pers
 
 Practical:
 
-5. **Reference devices:** which phone and which laptop should the budgets be tested on?
+5. **Reference devices:** which phone and which laptop should the budgets be tested on? Put off by Rahul on 2026-10-07 ([D28](DECISIONS.md)); needed by Phase 5.
 6. **Domain:** what will the site live at?

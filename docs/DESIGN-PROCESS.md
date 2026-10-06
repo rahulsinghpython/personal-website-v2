@@ -38,13 +38,15 @@ Run `pnpm dev` and open `/workbench/`. How it is built and why it cannot ship is
 - **Variants.** The tabs A, B and C switch between the options of the current round. Each tab holds that variant's sliders, grouped by part.
 - **Side by side.** Shows every variant at once with one shared camera. This is the view a round is decided in.
 - **Thumbnail.** Shrinks the viewports to 160 pixels, for the thumbnail test.
-- **Show part.** Draws one part at full brightness and dims the other three, so the four can be told apart while everything is grey. With side by side on, it compares the versions of that one part.
-- **Draw.** `solid` is the greybox; `points` is the cloud sampled from it. The Points folder sets how much of the tier's point budget is used, how big and bright a point is, how much fewer points are boosted to compensate, and each part's share of the points. These values travel in the URL as `pts=`.
+- **Show part.** Draws one part at full brightness and dims the other three, so the four can be told apart while everything is grey.
+- **Draw.** `solid` is the greybox; `points` is the cloud sampled from it. The Points folder sets how much of the tier's point budget is used, how big and bright a point is, how much fewer points are boosted to compensate, how much closer points are packed on thin pieces than on broad ones, and each part's share of the points. Size is in the Machine's own units, not pixels, so the picture is the same at any window size ([DECISIONS D27](DECISIONS.md)). These values travel in the URL as `pts=`.
+  The sliders start from the look chosen in round 4 ([DECISIONS D28](DECISIONS.md)), and `Reset to the chosen look` puts them back. D28 lists the looks that were passed over as rows of numbers; put a row after `pts=` to see it again.
+- **Phone size.** Makes each viewport 390 pixels wide, the size of a phone screen held upright. With the tier set to low it shows what a low-tier phone would be given: `/workbench/?draw=points&phone=1&tier=low`.
 - **Shading.** `flat` is one grey with no shading, the pure silhouette. `shaded` lights the greybox from the camera so the form inside the outline can be read. The lighting is a greybox aid only; the real Machine is unlit.
 - **Tier.** Applies that tier's pixel-ratio cap. `tier dpr` renders at the cap even when this display's own ratio is lower, to see what a denser screen would be asked to draw.
 - **Copy values.** Puts the current variant's numbers on the clipboard as JSON, ready to paste into the code as defaults.
 - **Readout.** Frame rate, CPU and GPU time per frame, draw calls, and a count of frames drawn. The count must stop when input stops. `Run benchmark` draws 240 frames back to back and reports what they cost.
-- **The URL holds the state:** `?variant=B&tier=mid&view=front&compare=1&shading=flat&panel=0`, changed parameters as `p=A.core.radius:0.8`, and a free camera as `cam=`. Reload it, screenshot it, or send it.
+- **The URL holds the state:** `?tier=mid&view=front&compare=1&phone=1&shading=flat&panel=0`, changed parameters as `p=A.core.radius:0.8`, and a free camera as `cam=`. Reload it, screenshot it, or send it.
 
 Not built yet, because their rounds have not come: the progress scrubber (round 6) and the colour controls (round 5).
 

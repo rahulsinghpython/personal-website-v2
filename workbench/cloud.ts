@@ -1,36 +1,19 @@
 import { create } from 'zustand'
-import type { PartWeights } from '../src/experience/machine/points'
+import { POINT_LOOK, type PointLook } from '../src/experience/machine/points'
 
-/** Round 4: how the Machine is drawn as points. Kept apart from the shape's own parameters. */
-export type CloudState = {
+/** How the Machine is drawn as points. Kept apart from the shape's own parameters. */
+export type CloudState = PointLook & {
   /** `solid` is the greybox; `points` is the cloud sampled from it. */
   draw: 'solid' | 'points'
-  /** Share of the tier's point budget in use, from 0 to 1. */
-  density: number
-  /** A point's width in CSS pixels at ten units from the camera. */
-  size: number
-  brightness: number
-  /**
-   * How much bigger and brighter each point gets as the count drops, so a low tier still reads.
-   * 0 is no help; at 0.5 a quarter of the points are each twice as big and twice as bright.
-   */
-  boost: number
-  weights: PartWeights
 }
 
-const DEFAULTS: CloudState = {
-  draw: 'solid',
-  density: 1,
-  size: 1.8,
-  brightness: 0.5,
-  boost: 0.35,
-  weights: { core: 1, scanner: 2.5, rings: 2.5, lens: 2 },
-}
+/** The sliders start from the look chosen in round 4. */
+const DEFAULTS: CloudState = { draw: 'solid', ...structuredClone(POINT_LOOK) }
 
-const KEYS = ['density', 'size', 'brightness', 'boost'] as const
+const KEYS = ['density', 'size', 'brightness', 'boost', 'thin'] as const
 const PARTS = ['core', 'scanner', 'rings', 'lens'] as const
 
-/** `draw=points&pts=density,size,brightness,boost,core,scanner,rings,lens` in the URL. */
+/** `draw=points&pts=density,size,brightness,boost,thin,core,scanner,rings,lens` in the URL. */
 function fromUrl(): CloudState {
   const query = new URLSearchParams(location.search)
   const numbers = query.get('pts')?.split(',').map(Number) ?? []
@@ -54,7 +37,9 @@ useCloud.subscribe((state) => {
   ]
   if (state.draw === 'points') query.set('draw', 'points')
   else query.delete('draw')
-  if (numbers.some((n, i) => n !== defaults[i])) query.set('pts', numbers.join(','))
+  // Rounded, because a slider snapping to its step leaves values like 0.013000000000000001.
+  const rounded = numbers.map((n) => +n.toFixed(4))
+  if (rounded.some((n, i) => n !== defaults[i])) query.set('pts', rounded.join(','))
   else query.delete('pts')
   const search = query.toString().replaceAll('%3A', ':').replaceAll('%2C', ',')
   history.replaceState(null, '', search ? `?${search}` : location.pathname)

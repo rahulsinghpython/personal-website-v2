@@ -2,7 +2,7 @@
 
 What the visitor sees and does. Read [VISION](VISION.md) first.
 
-**Status of this doc:** the structure (one object, four parts, eight beats, the interaction rules) is the agreed direction. The Machine's silhouette was settled on 2026-10-06; the detail of each part and the wording of the copy are still open and get settled by prototyping. The last section says which is which.
+**Status of this doc:** the structure (one object, four parts, eight beats, the interaction rules) is the agreed direction. The Machine's silhouette and the detail of each part were settled on 2026-10-06, and how its points are drawn on 2026-10-07. Colour, type, motion and the wording of the copy are still open and get settled by prototyping. The last section says which is which.
 
 ## The Machine
 
@@ -19,7 +19,7 @@ It is a tall rig that hangs, with a small crown on top.
 - **The arm (Scanner).** A straight arm off the top plate, ending in a fork that holds a drum, drawn with the fan of thin beams it sweeps.
 - **The crown (Lens).** Standing on the mount, much smaller than the rig: a cube of eight cubes with a small city on its roof, held in two gimbal rings. The outer ring stands on one pin, like a toy gyroscope on its pedestal. The inner ring pivots inside it, and the cube sits on an axle through the inner ring. Nothing else is attached to the rings, because a ring that turns freely cannot carry anything.
 
-The outline was signed off in round 2 and the detail of each part picked in round 3 ([D25](DECISIONS.md)). As points (round 4) it is one cloud sampled from these surfaces, with the thin parts given a larger share of the points than their size alone would earn, so the rings and beams do not vanish.
+The outline was signed off in round 2 and the detail of each part picked in round 3 ([D25](DECISIONS.md)). As points (round 4) it is one cloud sampled from these surfaces. The thinner a piece is, the more closely its points are packed, so the lines, rings and beams do not vanish behind the plates; and a point is sized as part of the object, so the Machine is the same picture on a phone as on a monitor ([D27](DECISIONS.md)). The look Rahul chose on 2026-10-07 sits between an even scan and a drawing led by its lines: the plates are a thin scatter and the lines, rings and beams are the brightest things in it ([D28](DECISIONS.md)).
 
 The code is `src/experience/machine/machine.ts`, and every number in it is a slider on the workbench.
 
@@ -142,7 +142,7 @@ Direction only. Exact tokens are chosen during the build.
 
 **Open.** Settle by prototyping, then write the answer back here.
 
-- The exact numbers of each part (radii, counts, spacing), and how dense, large and bright the points are. Round 4 of the greybox phase. The silhouette itself is settled; see "The shape" above.
+- How many points each tier draws. The silhouette, each part's detail and the look of the points are settled; see "The shape" above. The point counts wait for real devices ([DECISIONS D28](DECISIONS.md)).
 - The name "the Machine" as visitor-facing language. It is a working name for us; the site may never say it.
 - The accent colour and the typefaces.
 - All copy. Drafts are in [CONTENT](CONTENT.md).

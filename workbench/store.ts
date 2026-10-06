@@ -22,6 +22,8 @@ export type WorkbenchState = {
   compare: boolean
   /** Shrink the viewports, for the thumbnail test. */
   thumb: boolean
+  /** Make each viewport the size of a phone screen, to see what a phone would be given. */
+  phone: boolean
   panel: boolean
   /** Render at the tier's pixel-ratio cap even when this display's own ratio is lower. */
   capDpr: boolean
@@ -47,6 +49,7 @@ const DEFAULTS = {
   focus: 'all' as Focus,
   compare: false,
   thumb: false,
+  phone: false,
   panel: true,
   capDpr: false,
 }
@@ -83,6 +86,7 @@ function fromUrl() {
       DEFAULTS.focus,
     compare: flag('compare', DEFAULTS.compare),
     thumb: flag('thumb', DEFAULTS.thumb),
+    phone: flag('phone', DEFAULTS.phone),
     panel: flag('panel', DEFAULTS.panel),
     capDpr: flag('capdpr', DEFAULTS.capDpr),
     params,
@@ -119,6 +123,7 @@ function toUrl(state: WorkbenchState) {
   const flags = {
     compare: state.compare,
     thumb: state.thumb,
+    phone: state.phone,
     panel: state.panel,
     capdpr: state.capDpr,
   }

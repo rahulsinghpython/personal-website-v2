@@ -1,13 +1,23 @@
 import { useEffect, useRef } from 'react'
 import { Pane } from 'tweakpane'
 import type { PartId } from '../src/experience/machine/part'
+import { POINT_LOOK } from '../src/experience/machine/points'
 import { variants } from '../src/experience/machine/variants'
 import { applyView } from './camera'
 import { useCloud } from './cloud'
 import { benchmark, stats } from './stats'
 import { useWorkbench, type WorkbenchState } from './store'
 
-const SETTINGS = ['tier', 'view', 'shading', 'focus', 'compare', 'thumb', 'capDpr'] as const
+const SETTINGS = [
+  'tier',
+  'view',
+  'shading',
+  'focus',
+  'compare',
+  'thumb',
+  'phone',
+  'capDpr',
+] as const
 type Settings = Pick<WorkbenchState, (typeof SETTINGS)[number]>
 
 const pick = (state: WorkbenchState): Settings =>
@@ -39,16 +49,23 @@ export function Panel() {
     })
     pane.addBinding(settings, 'compare', { label: 'side by side' })
     pane.addBinding(settings, 'thumb', { label: 'thumbnail' })
+    pane.addBinding(settings, 'phone', { label: 'phone size' })
     pane.addBinding(settings, 'capDpr', { label: 'tier dpr' })
 
-    // Round 4: the cloud. `share` is how much of the point budget a part gets for its size.
+    // The cloud. `share` is how much of the point budget a part gets for its size.
     const cloud = structuredClone(useCloud.getState())
     pane.addBinding(cloud, 'draw', { options: { solid: 'solid', points: 'points' } })
     const points = pane.addFolder({ title: 'Points' })
     points.addBinding(cloud, 'density', { min: 0.02, max: 1, step: 0.01 })
-    points.addBinding(cloud, 'size', { min: 0.5, max: 8, step: 0.1 })
+    points.addBinding(cloud, 'size', {
+      min: 0.004,
+      max: 0.05,
+      step: 0.001,
+      format: (value: number) => value.toFixed(3),
+    })
     points.addBinding(cloud, 'brightness', { min: 0.05, max: 2, step: 0.01 })
     points.addBinding(cloud, 'boost', { label: 'low-count boost', min: 0, max: 0.8, step: 0.01 })
+    points.addBinding(cloud, 'thin', { label: 'thin-piece lift', min: 0, max: 1, step: 0.01 })
     for (const part of ['core', 'scanner', 'rings', 'lens'] as const)
       points.addBinding(cloud.weights, part, {
         label: `${part} share`,
@@ -56,6 +73,17 @@ export function Panel() {
         max: 20,
         step: 0.1,
       })
+    points.addButton({ title: 'Reset to the chosen look' }).on('click', () => {
+      useCloud.setState(structuredClone(POINT_LOOK))
+    })
+    const unsubscribeCloud = useCloud.subscribe((state) => {
+      if (JSON.stringify(cloud) === JSON.stringify(state)) return
+      // In place: the share sliders are bound to this `weights` object, not to a replacement.
+      const { weights, ...rest } = state
+      Object.assign(cloud, rest)
+      Object.assign(cloud.weights, weights)
+      pane.refresh()
+    })
 
     // One tab per variant, one folder per part, one slider per parameter.
     const tabs = pane.addTab({ pages: variants.map((machine) => ({ title: machine.id })) })
@@ -144,6 +172,7 @@ export function Panel() {
 
     return () => {
       unsubscribe()
+      unsubscribeCloud()
       pane.dispose()
     }
   }, [])

@@ -1,5 +1,5 @@
 import type { BufferGeometry } from 'three'
-import { box, noise } from '../shapes'
+import { box, noise } from './shapes'
 
 const SIDES = [-1, 1]
 const LOTS = 3

@@ -8,7 +8,7 @@ import {
   type MachineValues,
   type PartDef,
 } from '../src/experience/machine/part'
-import { pointsMaterial, samplePoints } from '../src/experience/machine/points'
+import { lift, pointsMaterial, samplePoints } from '../src/experience/machine/points'
 import { TIERS } from '../src/state/tiers'
 import { useCloud } from './cloud'
 import { announcePose, onPose, pose, poseToUrl } from './camera'
@@ -44,19 +44,14 @@ function Part({ machine, part }: { machine: string; part: PartDef }) {
 function Cloud({ machine }: { machine: MachineDef }) {
   const values = useWorkbench((state) => state.params[machine.id]!) as MachineValues
   const tier = useWorkbench((state) => state.tier)
-  const density = useCloud((state) => state.density)
-  const weights = useCloud((state) => state.weights)
-  const size = useCloud((state) => state.size)
-  const brightness = useCloud((state) => state.brightness)
-  const pixelRatio = useThree((state) => state.viewport.dpr)
-  const boost = useCloud((state) => state.boost)
+  const { density, weights, size, brightness, boost, thin } = useCloud()
+  const bufferHeight = useThree((state) => state.size.height * state.viewport.dpr)
   const count = Math.round(TIERS[tier].points * density)
-  // Fewer points are each drawn bigger and brighter, so the low tier is thinner, not dimmer.
-  const lift = (TIERS.high.points / Math.max(1, count)) ** boost
+  const scale = lift(count, boost)
 
   const geometry = useMemo(
-    () => timeBuild(() => samplePoints(machine, values, count, weights)),
-    [machine, values, count, weights],
+    () => timeBuild(() => samplePoints(machine, values, count, weights, thin)),
+    [machine, values, count, weights, thin],
   )
   const material = useMemo(() => pointsMaterial(), [])
   useEffect(() => () => geometry.dispose(), [geometry])
@@ -67,9 +62,9 @@ function Cloud({ machine }: { machine: MachineDef }) {
       <primitive
         object={material}
         attach="material"
-        uniforms-uSize-value={size * lift}
-        uniforms-uBrightness-value={brightness * lift}
-        uniforms-uPixelRatio-value={pixelRatio}
+        uniforms-uSize-value={size * scale}
+        uniforms-uBrightness-value={brightness * scale}
+        uniforms-uHeight-value={bufferHeight}
       />
     </points>
   )

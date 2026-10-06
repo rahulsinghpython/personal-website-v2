@@ -233,3 +233,42 @@ Rahul's direction. It relaxes D6, which allowed no motion at all without input.
 **What it costs.** D6 called drawing nothing at rest the largest performance win available, and that is given up on the high and mid tiers while the Machine is on screen. The guardrails above keep the rest. The "frames at rest: 0" budget in PERFORMANCE changes with this; the idle frame rate gets a cap when it is first measured, in Phase 3.
 
 **Still ruled out:** motion as decoration. Floating blobs, an auto-rotating Machine, parallax on everything.
+
+### D27. Points are sized as part of the Machine, and packed closer on thin pieces — Proposed, 2026-10-06
+
+Two changes a chat made to round 4 before showing it to Rahul, after screenshotting the first version and finding it failed the round's own test.
+
+**A point's size is in the Machine's units, not in pixels.** The first version drew every point a fixed number of CSS pixels wide. On a phone the Machine is drawn about half as wide as on a monitor, so the same points sat twice as close together, and with the low tier's boost on top the cube and the plates were solid white. The test for the round is "still reads at low-tier point counts on a phone", and it did not. Now a point is a fixed fraction of the Machine, so every screen shows the same picture at a different scale. A point that would be narrower than a pixel is drawn one pixel wide and dimmer by the area it gained.
+
+**Points are packed closer the thinner a piece is.** By area alone the five plates take most of the points and read as flat static, and the bundle of lines through them, which is what makes the Core look like a pipeline, could not be seen. Each piece's thickness is taken as its surface area over its longest side, which for a rod or a ring comes out in proportion to its radius whatever its length. One number, `thin`, sets how strongly thin pieces are favoured. The share per part from the first version stays, as a second, coarser control.
+
+**Passed over:** lifting each piece by its total area (tried first: a short spoke came out brighter than a long one of the same radius); a size that follows the window only part of the way (the picture would still differ between screens); leaving both alone and tuning brightness down (the phone and the monitor cannot both be right with one value).
+
+**What it costs:** on a large monitor each point covers more pixels than before, so the picture is softer there than fixed-size points would be. Sampling makes one sampler per piece instead of one per part; on the development machine it measured about 40 ms for 150,000 points, against 61 ms recorded for the first version in an earlier session, so it is no slower (see [PERFORMANCE](PERFORMANCE.md#measured-on-the-development-machine)).
+
+**Still Rahul's:** which look, or which numbers. Three are on the workbench: fine and even, balanced, and line-led. Settled in D28.
+
+### D28. Round 4: a mix of looks 2 and 3; device measurement is put off — Accepted, 2026-10-07
+
+Rahul's pick, and his direction on measuring: "a mix of 2 and 3, for now just benchmark on mine, we'll worry about lower devices later."
+
+**The look.** Three were shown side by side, at desktop size and at phone size:
+
+| | Density | Size | Brightness | Boost | Thin | Shares: core, scanner, rings, lens |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1, Haze: small dim points, the plates a soft fog | 1 | 0.009 | 0.45 | 0.35 | 0.25 | 1, 1.5, 2.2, 1 |
+| 2, Scan: the plates and the lines in balance | 1 | 0.012 | 0.42 | 0.35 | 0.5 | 1, 1, 2, 0.8 |
+| 3, Wire: fewer points, the lines and rings lead | 0.5 | 0.013 | 0.42 | 0.35 | 0.7 | 1, 1, 2, 0.7 |
+| **Chosen: between 2 and 3** | 0.75 | 0.013 | 0.42 | 0.35 | 0.6 | 1, 1, 2, 0.75 |
+
+The chosen row is halfway between 2 and 3, worked out by the chat; Rahul asked for a mix and did not give numbers. It is `POINT_LOOK` in `src/experience/machine/points.ts` and what the workbench sliders start from. The pick was made on top of D27's two changes, which Rahul was told about and did not question. The three looks are no longer in the code; any of them can be seen again by putting its row in the workbench URL as `pts=`.
+
+**Measuring.** The phase was meant to end with the mid tier holding 60 fps and the low tier 30 fps on real devices. Rahul put that off: the greybox phase is measured on the development machine only, and lower devices are dealt with later. So:
+
+- The tier point counts in PERFORMANCE stay starting guesses. They are set in Phase 5, with real-device testing.
+- Whether sampling has to move to build time or a worker is decided then too. It cannot be judged on a fast CPU.
+- The reference devices are still not named.
+
+**What was measured** is in [PERFORMANCE](PERFORMANCE.md#measured-on-the-development-machine): on Rahul's machine every tier's settings cost under 1 ms of GPU time a frame at the median, in one draw call, with nothing drawn at rest.
+
+**The risk taken on:** Phase 3 builds the choreography without knowing what a phone can hold. If the low tier turns out to need far fewer points, the look at that count has not been seen on a real phone, only at phone size on a monitor.

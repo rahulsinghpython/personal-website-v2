@@ -79,6 +79,21 @@ body {
   display: none;
 }
 
+/* What a phone would be given: each viewport the size of a phone screen held upright. */
+.workbench[data-phone='true'] .viewports {
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  background: none;
+}
+
+.workbench[data-phone='true'] .viewport {
+  flex: none;
+  width: 390px;
+  height: min(844px, 100%);
+  outline: 1px solid #1f1f1f;
+}
+
 .panel {
   flex: none;
   width: 300px;

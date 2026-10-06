@@ -64,7 +64,7 @@ The site picks a tier at startup from device signals, and steps down a tier if m
 | Optional per-part interactions | Yes | Yes | Off |
 | Post-processing | Only if a decision allows it | No | No |
 
-Stepping down must never change the story, only the density. The point counts are starting guesses to tune in the greybox phase.
+Stepping down must never change the story, only the density. The point counts are starting guesses. The greybox phase measured only the development machine, so they are set when the site is tested on real devices, in Phase 5 ([DECISIONS D28](DECISIONS.md)). The look chosen in round 4 draws three quarters of each count.
 
 ## Rules
 
@@ -100,7 +100,7 @@ Stepping down must never change the story, only the density. The point counts ar
 
 **Read cost per frame, not frames per second, from the automated browser.** The Chrome that the DevTools MCP drives does not run at the display's refresh rate: measured on 2026-10-05 it drew about 41 frames a second on an empty page, with gaps between 15 and 33 ms, on a machine whose display is 165 Hz. A frame rate read through it is wrong. What it measures correctly is how long a frame takes (the GPU timer extension is available) and every count. The targets are 16.7 ms a frame for 60 fps and 33.3 ms for 30 fps.
 
-The development machine has a discrete GPU (RTX 4070 Ti), so it is a high-tier device. It cannot stand in for the mid or low tier. Test on real hardware, not only throttled desktop Chrome. The reference devices are not chosen yet; that is an open question in [ROADMAP](ROADMAP.md).
+The development machine has a discrete GPU (RTX 4070 Ti), so it is a high-tier device. It cannot stand in for the mid or low tier. Test on real hardware, not only throttled desktop Chrome. The reference devices are not chosen yet; Rahul has put that off until later ([DECISIONS D28](DECISIONS.md)), and it stays an open question in [ROADMAP](ROADMAP.md).
 
 ### The bundle check
 
@@ -111,4 +111,29 @@ The development machine has a discrete GPU (RTX 4070 Ti), so it is a high-tier d
 - **Whole experience:** the home page's critical path plus the scene chunk.
 - Any other file in `dist/` fails the check, apart from the `react-dom/server` chunk that no page requests.
 
-Sizes are gzipped by Node's zlib, in units of 1,000 bytes. `vite build` prints figures about 1% higher for the same files. Measured on 2026-10-05, before three.js: critical path 76.2 kB for `/` and 75.9 kB for `/plain`.
+Sizes are gzipped by Node's zlib, in units of 1,000 bytes. `vite build` prints figures about 1% higher for the same files. Measured on 2026-10-05, before three.js: critical path 76.2 kB for `/` and 75.9 kB for `/plain`. Measured again on 2026-10-06, with three.js installed and nothing mounted: the same two figures.
+
+**The scene chunk, measured once.** On 2026-10-06 a throwaway build mounted the Machine as points on the home page through one lazy import, and was then reverted ([DECISIONS D21](DECISIONS.md)). The scene chunk was 243.8 kB against its 300 kB budget: three.js, React Three Fiber, the Machine's shapes and the points material. It did not include GSAP, which Phase 3 adds, or any drei helper. That leaves about 56 kB for both and for the choreography code, so check GSAP's size against it before installing. The same build put the critical path at 77.1 kB for `/` and 76.8 kB for `/plain`, 0.9 kB more than with no scene, which is the cost of the lazy mount.
+
+### Measured on the development machine
+
+A high-tier device (RTX 4070 Ti, i5-13600KF), so these say the scene is cheap there and nothing about the mid or low tier. It is the only device measured in the greybox phase; Rahul put the others off ([DECISIONS D28](DECISIONS.md)).
+
+Workbench benchmark, 2026-10-07, with the look chosen in round 4, which draws three quarters of each tier's points. Each tier's settings were run on this machine in a 2560 by 1440 viewport at that tier's pixel-ratio cap, so the high column is a 5120 by 2880 drawing buffer, more than any screen this machine drives.
+
+| | High settings | Mid settings | Low settings |
+| --- | --- | --- | --- |
+| Points | 112,500 | 45,000 | 15,000 |
+| Draw calls | 1 | 1 | 1 |
+| GPU time per frame, median / 95th percentile | 0.44 / 2.36 ms | 0.20 / 0.21 ms | 0.08 / 0.08 ms |
+| CPU time in render, median | 0.1 ms | 0.1 ms | 0.1 ms |
+| Sampling the points | about 47 ms | about 21 ms | about 15 ms |
+| Frames drawn in 2 s at rest | 0 | 0 | 0 |
+
+With the camera about three times closer than the whole-Machine view, where each point covers about nine times as many pixels, the high settings cost 0.92 ms a frame at the median and 3.6 ms at the 95th percentile. A frame at 165 Hz is 6.1 ms and at 60 Hz 16.7 ms, so on this machine the cloud fits inside a frame with room to spare at every setting.
+
+What this does not show:
+
+- **Frame rate on a mid or low device.** Not measured. The tier point counts above are still the starting guesses.
+- **Sampling on a slow CPU.** It is the number to watch. It has a fixed part of about 10 ms that does not shrink with the point count, and a low-tier phone's CPU is several times slower than this one, so 15 ms here is likely to pass the 50 ms limit above there. Measure it on a phone before deciding whether sampling moves to build time or a worker.
+- **Start-up in a production build.** The workbench is the development server: loading it showed three long tasks, of 219, 101 and 56 ms, which include unminified modules and React's development build. Measure long tasks again on the built site once the scene is mounted, in Phase 3.
