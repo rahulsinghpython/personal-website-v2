@@ -83,16 +83,25 @@ There is no skills section on this site and no logo tiles. A technology is menti
 
 ## Projects
 
-Projects appear inside the part for their era. The work itself may be described in text now; what can be **shown** is still open.
+Projects appear inside the part for their era. The work is described in text, and since 2026-10-08 it may also be **shown**: Rahul cleared everything the old site showed.
 
 | Project | Era / part | Status |
 | --- | --- | --- |
-| LiDAR point-cloud-to-mesh software, for solar | Etavolt / Scanner | Described in text. Screenshots and video: not yet cleared. |
-| Tuition centre management platform | Uniad / Rings | Described in text. Screenshots: not yet cleared. |
+| LiDAR point-cloud-to-mesh software, for solar | Etavolt / Scanner | Described in text. Screenshots and video: cleared. |
+| Tuition centre management platform | Uniad / Rings | Described in text. Screenshots: cleared. |
 
 **No personal projects in this release.** Rollcall (LLM résumé tailoring, in a sibling repo) stays off the site for now; Rahul may add personal projects later.
 
-Screenshots and a LiDAR mesh video exist in the old repo under `src/assets/carousel/`. None is cleared for reuse. Check each with Rahul before using it; the Cognizant work is for government and the old site showed only team photos for it.
+Screenshots and a LiDAR mesh video are in the old repo under `src/assets/carousel/`. **All of it is cleared for reuse.** Rahul, on 2026-10-08: "All from my previous personal website can be used". What is there, read the same day:
+
+| Era | Files | What they are |
+| --- | --- | --- |
+| S2T | 3 images | Two road-show photos and a team photo. No product screens. |
+| Etavolt | 5 images, 1 video | Roof reconstruction in 3D, panel placement and optimising, solar roof analysis, the Science Centre mesh; the video is mesh construction from LiDAR (4 MB). |
+| Uniad | 8 images | Dashboard and overview, students, calendar synced across users, invoicing, PDF generation, onboarding, sign-up. |
+| Cognizant | 3 images | Team and event photos only. **Nothing of this work may be shown.** Rahul, on 2026-10-08: it comes under the secrets act. It is described in text only, within what is cleared to be named ([Confirmed with Rahul](#confirmed-with-rahul), row 4). Do not make or look for screenshots of it. |
+
+Cleared means allowed, not required: which of these go in a project panel is chosen when the panels are built. They are copied in and resized then, under the budgets in [PERFORMANCE](PERFORMANCE.md); one photo is 9.6 MB as it stands. Nothing else from the old site is ported.
 
 ## Voice
 
@@ -138,8 +147,8 @@ Answered on 2026-10-05.
 | 5 | Personal projects? | None for now. |
 | 6 | Location and availability? | Based in Singapore, stated. Availability is not mentioned. |
 | 7 | Title? | Software Engineer / AI Engineer. |
+| 8 | What can be shown? | Answered on 2026-10-08: everything the old site showed, the screenshots, photos and the LiDAR mesh video. See [Projects](#projects). |
 
 ## Still needs Rahul
 
-1. **What can be shown** (not just named): the screenshots and the LiDAR mesh video from the old repo. Needed when project panels are built in Phase 4, not before.
-2. **The LinkedIn URL** above was carried over from the old site and has not been checked.
+1. **The LinkedIn URL** above was carried over from the old site and has not been checked.
