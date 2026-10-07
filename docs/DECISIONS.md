@@ -359,9 +359,9 @@ Rahul's direction; the number is the chat's. On his tablet, a Samsung Galaxy Tab
 
 **The dust is thinner than the Machine, from the same day.** At the new count the opening dropped frames on Rahul's tablet while the dust dispersed and formed, and nowhere else. Dust fills the window, which costs far more than the same points packed into the Machine. So only about 110,000 points are drawn as dust, roughly what the high tier drew before, each bolder so the dust is as bright; the rest are not drawn until they are most of the way in, and so appear as the cloud closes (`dustLook` in `points.ts`). Not yet confirmed on the tablet. Two smaller things went in with it: the canvas no longer changes size as a touch browser's toolbar hides, and is no longer re-measured on every scroll event.
 
-### D34. An awake part is drawn with lines, and the far side is dimmer — Proposed, 2026-10-08
+### D34. An awake part is drawn with lines, and the far side is dimmer — Lines accepted, depth proposed, 2026-10-08
 
-Built for Rahul to compare on his tablet; not yet seen by him. After D33 he said the Machine was still missing something and asked whether more points was the only way to make it crisp. The chat's answer: points are soft at any count, and two things were missing.
+Built for Rahul to compare on his tablet. He has scrolled it there and accepted the lines: "I think the lines are good". He has not said anything about the depth. After D33 he said the Machine was still missing something and asked whether more points was the only way to make it crisp. The chat's answer: points are soft at any count, and two things were missing.
 
 **Lines.** EXPERIENCE has always said an awake part has "lines drawn"; waking only changed the colour. Now the centre line of every rod and ring and the rim of every plate and can is a true one-pixel line (`src/experience/machine/lines.ts`), a few thousand segments in one more draw call. They are read back from each shape's vertices, so they follow every move a shape is given. A part's lines are drawn in during the last third of its waking, each from one end and in its own time: the haze closes into a scan, then the scan resolves into a drawing. **Passed over for now:** lines wider than a pixel, which three.js does with an add-on that would add to the scene chunk; filled surfaces, the other half of that sentence in EXPERIENCE.
 
@@ -369,4 +369,4 @@ Built for Rahul to compare on his tablet; not yet seen by him. After D33 he said
 
 **Comparing.** `?lines=0` and `?depth=0` in the address turn each off.
 
-**Still Rahul's:** whether either stays, and how strong. Both numbers are first values.
+**Still Rahul's:** whether the depth stays, and how strong it is. The lines stay as built, one pixel wide at their first brightness.
