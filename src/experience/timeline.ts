@@ -44,7 +44,8 @@ const LAST = beats.length - 1
 const at = (beat: BeatId) => beats.indexOf(beat)
 
 /**
- * First values, to be settled in round 6 of docs/DESIGN-PROCESS.md by Rahul scrolling them.
+ * Settled in round 6 of docs/DESIGN-PROCESS.md: Rahul scrolled these on his tablet and asked for
+ * no change (docs/DECISIONS.md, D35).
  * A beat's picture is finished a little before its text has fully arrived and holds a little
  * after, so the visitor reads beside something that is standing still.
  */

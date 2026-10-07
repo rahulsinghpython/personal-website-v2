@@ -18,8 +18,7 @@ export type Pose = {
 }
 
 /**
- * First values, found by eye on the workbench. The camera path is settled in round 6 of
- * docs/DESIGN-PROCESS.md, by Rahul scrolling it.
+ * The path Rahul picked by scrolling it, in round 6 of docs/DESIGN-PROCESS.md (D35).
  *
  * The parts wake from the top of the Machine to the bottom (D32): the Scanner is on the top
  * plate, the Rings are round the lower plates and the Lens hangs under the last one. So after
@@ -31,10 +30,11 @@ export const POSES: Record<BeatId, Pose> = {
   core: { x: 0, y: 0.1, z: 0, azimuth: 22, elevation: 6, distance: 7.6 },
   scanner: { x: 0, y: 1.25, z: 0, azimuth: 28, elevation: 24, distance: 4.8 },
   rings: { x: 0, y: -0.55, z: 0, azimuth: 14, elevation: 28, distance: 7.8 },
-  // From a little below, so the lowest ring opens into an ellipse and does not bar the frame.
-  lens: { x: 0, y: -1.75, z: 0, azimuth: 30, elevation: -14, distance: 4.6 },
-  whole: { x: 0, y: -0.3, z: 0, azimuth: 36, elevation: 14, distance: 11.5 },
-  contact: { x: 0, y: -0.3, z: 0, azimuth: 30, elevation: 10, distance: 13 },
+  // From above, like every other pose: the camera never passes level, where each ring would be
+  // a flat bar across the frame. The front of the lowest ring crosses the top of the cube (D35).
+  lens: { x: 0, y: -1.9, z: 0, azimuth: 30, elevation: 20, distance: 5.2 },
+  whole: { x: 0, y: -0.3, z: 0, azimuth: 36, elevation: 14, distance: 9.6 },
+  contact: { x: 0, y: -0.3, z: 0, azimuth: 30, elevation: 10, distance: 10.6 },
 }
 
 /** Degrees, across the window's shorter side. */

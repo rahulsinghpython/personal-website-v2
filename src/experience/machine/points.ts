@@ -127,8 +127,8 @@ const DUST_HEIGHT = 0.4
  * and the beams, would vanish, so `thin` packs points more closely the thinner a piece is: at 0
  * every surface is equally dense, at 1 a rod of half the radius is twice as dense.
  *
- * Each point also gets what the story needs: where it is while it is dust, how late in its part
- * it wakes (top first), and how its piece turns about the Machine's axis.
+ * Each point also gets what the story needs: where it is while it is dust, and how its piece
+ * turns about the Machine's axis.
  */
 export function samplePoints(
   machine: MachineDef,
@@ -152,7 +152,6 @@ export function samplePoints(
   const partIndex = new Float32Array(count)
   const jitter = new Float32Array(count)
   const dust = new Float32Array(count * 3)
-  const order = new Float32Array(count)
   const spin = new Float32Array(count * 2)
   const random = seeded(1)
   const point = new Vector3()
@@ -192,26 +191,11 @@ export function samplePoints(
     dust[i * 3 + 2] = Math.sin(angle) * flat
   }
 
-  // Waking runs down each part: 0 at its highest point, 1 at its lowest.
-  const top = machine.parts.map(() => -Infinity)
-  const bottom = machine.parts.map(() => Infinity)
-  for (let i = 0; i < count; i++) {
-    const part = partIndex[i]!
-    const y = positions[i * 3 + 1]!
-    top[part] = Math.max(top[part]!, y)
-    bottom[part] = Math.min(bottom[part]!, y)
-  }
-  for (let i = 0; i < count; i++) {
-    const part = partIndex[i]!
-    order[i] = (top[part]! - positions[i * 3 + 1]!) / Math.max(top[part]! - bottom[part]!, 1e-6)
-  }
-
   const cloud = new BufferGeometry()
   cloud.setAttribute('position', new BufferAttribute(positions, 3))
   cloud.setAttribute('aPart', new BufferAttribute(partIndex, 1))
   cloud.setAttribute('aJitter', new BufferAttribute(jitter, 1))
   cloud.setAttribute('aDust', new BufferAttribute(dust, 3))
-  cloud.setAttribute('aOrder', new BufferAttribute(order, 1))
   cloud.setAttribute('aSpin', new BufferAttribute(spin, 2))
   return cloud
 }
@@ -289,7 +273,6 @@ export function pointsMaterial() {
       attribute float aPart;
       attribute float aJitter;
       attribute vec3 aDust;
-      attribute float aOrder;
       attribute vec2 aSpin;
       varying float vBrightness;
       varying float vWake;

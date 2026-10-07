@@ -299,13 +299,13 @@ Brought to Rahul under D13 with the sizes in D29; he said yes to installing the 
 
 **One thing to know.** Moving the timeline wakes gsap's own ticker, which then runs for about two seconds before sleeping again. So the timeline is not touched on a frame where progress has not changed, or the ticker would never sleep while the beads drift.
 
-### D31. The first choreography — Proposed, 2026-10-07
+### D31. The first choreography — Accepted as built on 2026-10-08, the camera path apart (D35)
 
-What a chat built so that there is something to scroll. None of it has been seen by Rahul in motion; round 6 of [DESIGN-PROCESS](DESIGN-PROCESS.md) settles it. Recorded here so the next chat knows which choices were made and that they are open.
+What a chat built on 2026-10-07 so that there was something to scroll, written down then as open choices. Rahul has since scrolled it on his tablet and asked for no change to the assembly (D35).
 
 **Gather, then lock.** EXPERIENCE says a silhouette forms at Signal and also that each part assembles in its own beat. Both are kept by giving assembly two stages. At Signal every part's dust gathers to a loose silhouette, each point still a little way back toward where it was as dust. In its own beat a part locks, closing the rest of the way, and then wakes from the top down. A part that has not had its beat reads as haze beside the sharp ones. **Passed over:** assembling everything exactly at Signal (the later beats would have nothing to do but change colour); leaving the later parts as dust until their beat (no silhouette at Signal).
 
-**Changed the same day, at Rahul's asking:** a part no longer locks and then wakes in a sweep from its top down. He asked for the colour to arrive the way the cloud turns into the shape, so each point turns to the accent as it lands, in its own time. The top-down order is still worked out for every point (`aOrder`) but not used; it goes if this stays.
+**Changed the same day, at Rahul's asking:** a part no longer locks and then wakes in a sweep from its top down. He asked for the colour to arrive the way the cloud turns into the shape, so each point turns to the accent as it lands, in its own time. The top-down order is still worked out for every point (`aOrder`) but not used; it goes if this stays. It stayed, and `aOrder` was removed on 2026-10-08.
 
 **Dust is a ball of random points** about nine units across, and which dust point becomes which point of the Machine is random too. **Not tried yet:** dust that keeps some of the Machine's structure, like an exploded view.
 
@@ -370,3 +370,18 @@ Built for Rahul to compare on his tablet. He has scrolled it there and accepted 
 **Comparing.** `?lines=0` and `?depth=0` in the address turn each off.
 
 **Still Rahul's:** whether the depth stays, and how strong it is. The lines stay as built, one pixel wide at their first brightness.
+
+### D35. Round 6: the camera stays above the Machine, and ends closer — Accepted, 2026-10-08
+
+Two camera paths were on the home page for Rahul to scroll on his tablet, the second at `?path=b`. He picked the second. His words: "Your version is good". It is now the one path, and the switch is gone.
+
+**What the chat saw in stills of the first path,** one every half beat, in a wide window and a tall one. Found to Rings held up. Two things did not. The camera looked down on the Rings (28 degrees above level) and up at the Lens (14 below), then down again on the whole Machine, so it passed level twice, and at level every ring is a flat bar across the frame. And the Machine was small at the end: about two thirds of the window's height at Whole and less at Contact, which is the payoff.
+
+**What changed.** Three poses; the other five are as D32 left them.
+
+- **Lens:** from 20 degrees above, not from below. The camera never passes level, so the rings stay open the whole way down and back. The price is the reason D32 went below: the front of the lowest ring crosses the top of the cube. This replaces that part of D32.
+- **Whole and Contact:** closer, 9.6 and 10.6 units against 11.5 and 13.
+
+**Passed over:** the first path, in git history at `cdb79af`.
+
+**The assembly stays as built.** Asked about the opening, each part's arrival against its text, and how closely the scene follows the scroll, Rahul answered "all fine". So the dust layout, the order and overlap of assembly, the easing and the poses from Found to Rings are the values of D31 and D32, now chosen and no longer first guesses. No second option was built for any of them: he did not find anything wrong to answer with one. That ends round 6. The top-down wake order that D31 kept in case (`aOrder`) is removed.
