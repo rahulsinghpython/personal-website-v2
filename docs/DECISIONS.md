@@ -272,3 +272,73 @@ The chosen row is halfway between 2 and 3, worked out by the chat; Rahul asked f
 **What was measured** is in [PERFORMANCE](PERFORMANCE.md#measured-on-the-development-machine): on Rahul's machine every tier's settings cost under 1 ms of GPU time a frame at the median, in one draw call, with nothing drawn at rest.
 
 **The risk taken on:** Phase 3 builds the choreography without knowing what a phone can hold. If the low tier turns out to need far fewer points, the look at that count has not been seen on a real phone, only at phone size on a monitor.
+
+### D29. The scene chunk's budget is 400 kB, not 300 — Accepted, 2026-10-07
+
+Rahul, before Phase 3 started: "300 kb is way too small of a budget." A chat measured what Phase 3 would add and offered 350, 400, 500 or leaving it; Rahul picked 400. This supersedes the 300 kB figure that D18 mentions.
+
+**Why 300 was wrong.** It was set before any code existed. The throwaway build at the end of Phase 2 measured the scene chunk at 243.8 kB, most of it three.js and React Three Fiber, which our code cannot shrink. GSAP 3.15.0, gzipped from the minified files in its npm package without installing it, is 28.4 kB for the core and 18.0 kB for ScrollTrigger. With both, the chunk is about 290 kB before any choreography code, any Phase 4 interaction, any drei helper or tier detection. The budget was governing about 10 kB.
+
+**Why 400.** It leaves about 110 kB after GSAP and ScrollTrigger, and about 128 kB if ScrollTrigger turns out not to be needed. That is room for Phases 3 to 5 without the number being argued over at every step, and the check still trips if something large arrives by accident, such as all of drei or a post-processing library.
+
+**What it costs.** The scene chunk loads after first paint, so a larger one delays the Machine appearing, not the opening text. On Lighthouse's mobile preset (1.6 Mbps) each 100 kB is about half a second. Evaluating more script when the scene attaches is main-thread work, which is measured as long tasks on the built site in Phase 3 ([PERFORMANCE](PERFORMANCE.md#measured-on-the-development-machine)).
+
+**What does not change.** The critical path stays at 100 kB and the whole experience at 1 MB. LCP, CLS and the Lighthouse score keep their budgets, and those are what a visitor feels. D19 still holds: the check is a tripwire, not the performance gate. D13 still holds: GSAP, and ScrollTrigger if it is wanted, are brought to Rahul with these sizes before they are installed. This entry raises a limit; it approves no package.
+
+**Passed over:** 350 kB (enough for Phase 3, likely to need raising again in Phase 4); 500 kB (a tripwire that loose would not catch a leaked library, and the Machine could arrive about a second later on a slow connection); keeping 300 kB and reading scroll progress without ScrollTrigger (still leaves under 30 kB for everything after GSAP's core).
+
+### D30. GSAP's core only: no ScrollTrigger, no CSS plugin — Accepted, 2026-10-07
+
+Brought to Rahul under D13 with the sizes in D29; he said yes to installing the core alone.
+
+**What is used.** gsap 3.15.0, imported as `gsap/gsap-core`. The story is one paused timeline, and the frame loop sets its position from eased progress. Importing `gsap` itself would also register its plugin for animating CSS, which nothing here needs: everything on the timeline is a number on a plain object that the frame loop copies into shader uniforms and the camera.
+
+**Why not ScrollTrigger.** It is 18 kB gzipped for pinning, scrubbing and scroll-linked triggers. The page scrolls natively (D8), nothing is pinned, and progress is read from the scroll position in a few lines (`src/state/progress.ts`). Add it only if a later beat needs something those lines cannot do.
+
+**What it cost.** The scene chunk went from 243.8 kB to 265.0 kB with the core and all of the first choreography.
+
+**One thing to know.** Moving the timeline wakes gsap's own ticker, which then runs for about two seconds before sleeping again. So the timeline is not touched on a frame where progress has not changed, or the ticker would never sleep while the beads drift.
+
+### D31. The first choreography — Proposed, 2026-10-07
+
+What a chat built so that there is something to scroll. None of it has been seen by Rahul in motion; round 6 of [DESIGN-PROCESS](DESIGN-PROCESS.md) settles it. Recorded here so the next chat knows which choices were made and that they are open.
+
+**Gather, then lock.** EXPERIENCE says a silhouette forms at Signal and also that each part assembles in its own beat. Both are kept by giving assembly two stages. At Signal every part's dust gathers to a loose silhouette, each point still a little way back toward where it was as dust. In its own beat a part locks, closing the rest of the way, and then wakes from the top down. A part that has not had its beat reads as haze beside the sharp ones. **Passed over:** assembling everything exactly at Signal (the later beats would have nothing to do but change colour); leaving the later parts as dust until their beat (no silhouette at Signal).
+
+**Changed the same day, at Rahul's asking:** a part no longer locks and then wakes in a sweep from its top down. He asked for the colour to arrive the way the cloud turns into the shape, so each point turns to the accent as it lands, in its own time. The top-down order is still worked out for every point (`aOrder`) but not used; it goes if this stays.
+
+**Dust is a ball of random points** about nine units across, and which dust point becomes which point of the Machine is random too. **Not tried yet:** dust that keeps some of the Machine's structure, like an exploded view.
+
+**Progress is measured against the sections,** not taken as scroll position over page height. See ARCHITECTURE. It makes no difference on a desktop, where every section is one window tall.
+
+**The Machine is drawn off centre,** to the right in a wide window and upward in a tall one, by sliding the camera's view and not by turning it. The field of view is 30 degrees across the shorter side, as on the workbench.
+
+**The beads drift only once the Rings are awake,** at up to 0.06 radians a second, neighbouring rings in opposite directions. The rate is capped at 30 frames a second. This sets the cap that D26 left to Phase 3. Nothing is drawn at rest before the Rings beat.
+
+**The scene catches up with the scroll position** by closing about two thirds of the gap every 0.22 seconds, and stops drawing when the gap can no longer be seen.
+
+**The awake colour is a placeholder amber,** `#ffa726`, and an awake point is a quarter brighter than a dormant one. Round 5 picks the accent.
+
+**The tier is guessed:** a touch device is mid, anything else is high, nothing is low, and `?tier=` in the address sets it by hand. Detection is Phase 5.
+
+**Reduced motion is honoured now,** in the plain form ARCHITECTURE describes, because shipping the animation without it would be worse than shipping it early.
+
+### D32. The shape is redrawn: every part on the rig's axis, solar panels on the roof — Accepted, 2026-10-07
+
+Reopens the shape signed off in D23 and D25. Rahul picked C, the third of three, on the workbench, from a tablet. The home page draws it. His words: "yes C is nice". The motion is still unsettled (D31), and he has not yet scrolled it.
+
+**Why it was reopened.** Two new reasons, both after the Machine was first seen assembled on the page. Rahul: the rig in the middle is good, but the parts around it are confusing and do not sit with a portfolio this technical. Someone he showed it to: the top part and the left part look off. Those are the crown and the arm, the two pieces that break the rig's symmetry. The rig is drawn like computing hardware (D22); the crown is a gyroscope, the arm is a lamp on a bracket and the orbits are an orrery, which is the instrument look D22 moved away from.
+
+**What B changes.** The rig is kept. The other three parts are redrawn in its vocabulary (plates, posts, lines, cans) and moved onto its axis.
+
+- **Scanner:** a scanning puck on the mount, over a roof of solar panels standing on the top plate, with beams from the puck down onto each panel. The panels are Rahul's addition: the 3D work was for solar, rebuilding roofs and placing panels on them ([CONTENT](CONTENT.md)).
+- **Rings:** a beaded track close around each of the three lowest plates, on short spokes. They follow the rig's taper, so the outline stays the rig's.
+- **Lens:** the cube of cubes on a stage hung under the last plate, where the chip sits in a real rig. The lines of the bundle run into its roof and one tip leaves below. This is the idea D23 said was worth remembering from the cable silhouette: lines that visibly run from the Core into the Lens.
+
+**What does not change:** one object, four parts, the work each stands for, the order they assemble in. D23's rule that nothing is bolted onto a ring that turns still holds: the spokes turn with their ring.
+
+**Three fixes after the pick,** proposed by the chat from close-ups of C as points and agreed by Rahul. The cube was a haze behind its cage, so it is drawn by its edges, its faces faintly, and the cage is three thin posts. The ring spokes were the brightest lines on the Machine, so they get under a third of the points their size earns. The puck was a blur and a beam to every panel looked like tent ropes, so the puck is taller with three rims and there is one fan of beams, on one panel. The second and third needed a piece to be able to take more or less than its share of points: `weighted` in `part.ts`.
+
+**The camera.** A new pose for every beat, first values from the chat like the rest of D31. The parts now wake from the top of the Machine to the bottom, so after the Core the camera only travels down. The Lens is seen from a little below, so the lowest ring does not cut across the frame.
+
+**Not done.** A and B are still in the code, as workbench variants. A was never committed in its final form, so it stays until C has been scrolled and signed off; then it and B go, and the shape moves into `machine.ts`. The city on the cube's roof does not read as points. The Scanner beat's sweep (EXPERIENCE) is not built; the fan of beams is where it would start.

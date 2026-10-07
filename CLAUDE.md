@@ -2,7 +2,7 @@
 
 Rahul Singh's personal site. It is not a portfolio template. It is one dark 3D world built around one object, **the Machine**, which the visitor slowly realises is Rahul's whole career.
 
-**Status: the plain site exists (content layer, the Index, prerendered HTML). The Machine exists on the development workbench only; nothing 3D is mounted on the site.** [docs/ROADMAP.md](docs/ROADMAP.md) is the authority on what is built and what is next.
+**Status: the plain site exists (content layer, the Index, prerendered HTML). The Machine is mounted on the home page in a first version, assembled by scrolling; its motion is not settled yet.** [docs/ROADMAP.md](docs/ROADMAP.md) is the authority on what is built and what is next.
 
 ## Read before you build
 

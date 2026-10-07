@@ -1,6 +1,6 @@
 # Architecture
 
-How the site is built. The content layer, the Index and prerendering exist. Of the scene layer, the Machine's shape and its point cloud exist and are shown on the workbench only; nothing is mounted on the site (see [ROADMAP](ROADMAP.md)). The rest of the scene sections below are the plan the build phases follow. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
+How the site is built. The content layer, the Index and prerendering exist. The scene layer is mounted on the home page in a first version: the Machine as points, driven by scroll (see [ROADMAP](ROADMAP.md) for what Phase 3 still owes). Where a section below describes something not built yet, it says so. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
 
 ## Stack
 
@@ -12,7 +12,7 @@ How the site is built. The content layer, the Index and prerendering exist. Of t
 | 3D | three.js through React Three Fiber, with selected helpers from drei | three 0.186.1, @types/three 0.186.0, @react-three/fiber 9.8.1, @react-three/drei 10.7.9 (installed 2026-10-05) | Rahul has shipped three.js. R3F lets scene and DOM share state. The only drei helper in use is `OrbitControls`, on the workbench. R3F's peer range is React `>=19 <19.4`, so React stays below 19.4 until R3F widens it. |
 | Shared state | zustand | zustand 5.0.15 (installed 2026-10-05) | Tiny, and readable from inside the render loop without causing React re-renders. So far it holds only the workbench's state. |
 | Workbench panel | Tweakpane | tweakpane 4.0.5, @tweakpane/core 2.0.5 for its types (dev only, nothing shipped) | The control panel of the design workbench. See [DECISIONS D20](DECISIONS.md). |
-| Choreography | GSAP, one paused master timeline | Not yet; added in Phase 3 | The whole story is one timeline whose position is set from scroll progress. |
+| Choreography | GSAP, one paused master timeline | gsap 3.15.0 (installed 2026-10-07). Only `gsap/gsap-core` is imported | The whole story is one timeline whose position is set from scroll progress. The core alone is enough because everything animated is a number on a plain object; no ScrollTrigger and no CSS plugin ([DECISIONS D30](DECISIONS.md)). |
 | Prerendering | vite-prerender-plugin | vite-prerender-plugin 0.5.14 (dev only, nothing shipped) | Writes every page's HTML at build time, so content is readable with JavaScript off. See [DECISIONS D16](DECISIONS.md). |
 | Styling | Tailwind CSS | tailwindcss 4.3.3, @tailwindcss/vite 4.3.3 | Matches Rahul's other current projects. It looks for class names in `src/` only (set in `src/styles/index.css`); by default it scans the whole repo, and words in docs and scripts became shipped CSS. |
 | Lint and format | oxlint, Prettier | oxlint 1.86.0, prettier 3.9.9 | Same. |
@@ -66,7 +66,7 @@ Three kinds of state, kept apart on purpose.
 | State | Lives in | Changes | Read by |
 | --- | --- | --- | --- |
 | **Progress** (0 to 1) | A plain mutable value outside React | Every frame while scrolling | The render loop only |
-| **Scene state**: current beat, opened part, tier, reduced motion | zustand store | A few times per visit | DOM and scene |
+| **Scene state**: current beat, opened part, tier, reduced motion | zustand store. Not built yet: nothing in the DOM reads it until Phase 4, and the scene picks its tier and reads reduced motion once, when it mounts | A few times per visit | DOM and scene |
 | **Content** | Typed modules in `src/content/` | Never at runtime | Sections, the Index, part labels |
 
 The rule that protects frame rate: **nothing that changes every frame goes through React state.** Progress is read directly inside the frame loop. React re-renders only when the beat or the opened part changes.
@@ -81,13 +81,13 @@ scroll position ──▶ target progress ──▶ eased progress ──▶ mas
                                               └──▶ current beat (written to the store when it changes)
 ```
 
-- Target progress is the scroll position divided by the scrollable height.
+- Target progress comes from the scroll position, measured against the sections: a beat has arrived when the bottom of its section meets the bottom of the window, which is where its text sits. Between two arrivals progress moves evenly. When every section is one window tall this is the scroll position divided by the scrollable height; when one is taller, as on a phone, the scene still stays in step with the text ([DECISIONS D31](DECISIONS.md)). `src/state/progress.ts`.
 - Eased progress chases the target a little each frame. This is what makes the Machine feel smooth while the page itself scrolls natively.
 - The scene is a **pure function of eased progress**. Same progress, same picture. That makes it reversible (scroll up to undo), testable (set progress to any value and look), and easy to debug.
 
 ### Rendering on demand
 
-The canvas does not run a continuous loop. A frame is drawn only when something asked for one: scroll, pointer movement over an interactive area, a click, a resize. While eased progress is still catching up, frames keep being requested; once it has settled, rendering stops entirely, unless a part has ambient motion ([DECISIONS D26](DECISIONS.md)), in which case frames continue at a capped rate while the canvas is visible. This is the technical side of "the visitor causes the motion" and it is the single largest performance win. See [PERFORMANCE](PERFORMANCE.md).
+The canvas does not run a continuous loop. A frame is drawn only when something asked for one: scroll, pointer movement over an interactive area, a click, a resize. While eased progress is still catching up, frames keep being requested; once it has settled, rendering stops entirely, unless a part has ambient motion ([DECISIONS D26](DECISIONS.md)), in which case frames continue at a capped rate, 30 a second, while the canvas is visible. The only ambient motion is the beads, and they move only once the Rings are awake, so nothing is drawn at rest before the Rings beat on any tier. This is the technical side of "the visitor causes the motion" and it is the single largest performance win. See [PERFORMANCE](PERFORMANCE.md).
 
 ## How the Machine is drawn
 
@@ -126,6 +126,7 @@ type Part = {
 src/
   content/         typed facts: site, eras, projects, beats (copy). Mirrors docs/CONTENT.md.
   sections/        the DOM beats. Story.tsx lays out all eight; the four era beats share EraBeat.tsx.
+                   Scene.tsx is the one place the page reaches the scene, by a dynamic import.
   index-view/      the Index (plain version), served at /plain
   experience/      everything inside the canvas
     machine/       part definitions, point sampling, shaders
@@ -135,10 +136,11 @@ src/
       machine.ts   the Machine: the signed-off silhouette and the picked detail of each part
       cube.ts      the cube of cubes with a city on its roof, which the Lens carries
       variants.ts  the shapes the workbench switches between; one, now the shape is settled
-    camera/        camera pose as a function of progress
-    timeline.ts    the master timeline
-    Experience.tsx the lazy-loaded entry to the scene
-  state/           store, progress, tier detection. tiers.ts holds the tier numbers.
+    camera/        camera.ts: the camera's pose at each beat, and how a pose is applied
+    timeline.ts    the master timeline, and the plain object it writes the story into
+    Experience.tsx the lazy-loaded entry to the scene: the canvas and the frame loop
+  state/           progress.ts: progress, read from scroll. tiers.ts: the tier numbers, and a
+                   stand-in for tier detection until Phase 5. The store is not built yet.
   styles/
   routes.ts        which path is which page; page titles
   App.tsx          picks the page for a path
@@ -149,7 +151,7 @@ scripts/
 docs/
 ```
 
-`src/experience/` and `workbench/` are the only places allowed to import three.js. Everything else in `src/` must work if the scene never loads, and reaches it through one lazy import. oxlint enforces this (`no-restricted-imports` in `.oxlintrc.json`): three.js, React Three Fiber and anything under `src/experience/` cannot be imported from the rest of `src/`, and nothing in `src/` can import the workbench or Tweakpane.
+`src/experience/` and `workbench/` are the only places allowed to import three.js. Everything else in `src/` must work if the scene never loads, and reaches it through one lazy import. oxlint enforces this (`no-restricted-imports` in `.oxlintrc.json`): three.js, React Three Fiber and anything under `src/experience/` cannot be imported from the rest of `src/`, and nothing in `src/` can import the workbench or Tweakpane. The rule also catches the dynamic import, so `src/sections/Scene.tsx` switches it off for that one line. A static import slipping in there would not be caught by lint; the bundle check would catch it, because the critical path would pass its budget.
 
 ## The workbench
 
@@ -164,7 +166,7 @@ The design tool described in [DESIGN-PROCESS](DESIGN-PROCESS.md#the-workbench). 
 | `store.ts` | The workbench's state in zustand: variant, tier, view, every parameter value. Mirrored to the URL. |
 | `cloud.ts` | How the points are drawn: the sliders' values, starting from the chosen look. Mirrored to the URL. |
 | `camera.ts` | One camera pose shared by every viewport. A mutable value, because it changes every frame while orbiting. |
-| `Viewport.tsx` | One canvas showing one variant, rendering on demand. |
+| `Viewport.tsx` | One canvas showing one variant, rendering on demand. With the story on, it puts the timeline at the scrubber's beat; in the `story` view the camera is the visitor's. |
 | `Panel.tsx` | The Tweakpane panel: a tab per variant, a folder per part, a slider per parameter, and the readout. |
 | `stats.ts` | Cost per frame (CPU and GPU), draw calls, frames drawn, and the benchmark. |
 
@@ -176,7 +178,7 @@ The design tool described in [DESIGN-PROCESS](DESIGN-PROCESS.md#the-workbench). 
 | --- | --- |
 | JavaScript off | Content layer only. Fully readable. |
 | WebGL unavailable or context lost | Content layer plus a static image of the finished Machine. |
-| `prefers-reduced-motion` | Machine shown assembled and awake; camera cuts between beats; no assembly animation. |
+| `prefers-reduced-motion` | Machine shown assembled and awake; camera cuts between beats; no assembly animation; the beads do not drift. Built in Phase 3 in this plain form; Phase 5 reviews it. |
 | Low tier device | Fewer points, lower pixel ratio, optional interactions off. See tiers in [PERFORMANCE](PERFORMANCE.md). |
 | Visitor clicks `INDEX` | The Index at `/plain`: same content, no canvas. |
 

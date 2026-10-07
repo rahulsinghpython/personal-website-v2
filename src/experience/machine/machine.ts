@@ -1,6 +1,6 @@
 import type { BufferGeometry } from 'three'
 import { cubeCity } from './cube'
-import { defineMachine, param, type MachineDef, type MachineValues } from './part'
+import { defineMachine, param, spinning, type MachineDef, type MachineValues } from './part'
 import { around, ball, band, box, drum, GIMBAL_THICK, lathe, rad, ring, rod } from './shapes'
 
 // The Machine, in the silhouette Rahul signed off in round 2 (docs/DECISIONS.md, D23): a tiered
@@ -16,9 +16,9 @@ import { around, ball, band, box, drum, GIMBAL_THICK, lathe, rad, ring, rod } fr
 // over are in git history, at 4393c8e.
 
 /** Height of the top plate. */
-const TOP = 1.1
+export const TOP = 1.1
 /** The top face of the mount, where the crown stands. */
-const MOUNT_TOP = TOP + 0.405
+export const MOUNT_TOP = TOP + 0.405
 
 const schema = {
   core: {
@@ -47,12 +47,12 @@ const schema = {
   },
 }
 type Values = MachineValues<typeof schema>
-type Core = Values['core']
+export type Core = Values['core']
 
-const tierCount = (c: Core) => Math.round(c.tiers)
-const tierY = (c: Core, tier: number) => TOP - tier * c.drop
-const tierRadius = (c: Core, tier: number) => Math.max(0.12, c.radius * (1 - c.taper * tier))
-const lastTier = (c: Core) => tierCount(c) - 1
+export const tierCount = (c: Core) => Math.round(c.tiers)
+export const tierY = (c: Core, tier: number) => TOP - tier * c.drop
+export const tierRadius = (c: Core, tier: number) => Math.max(0.12, c.radius * (1 - c.taper * tier))
+export const lastTier = (c: Core) => tierCount(c) - 1
 
 // ---------------------------------------------------------------------------------------------
 // Core: data pipelines. Stage after stage, with the lines that run through them. The plates are
@@ -122,6 +122,9 @@ function scanner({ core, scanner }: Values): BufferGeometry[] {
 // Rings: scheduling. Many moving things kept in order. Each ring sits on three spokes and carries
 // a row of beads, more of them the wider the ring. The beads are the things being scheduled.
 
+/** How fast the beads of the innermost ring drift once the Rings are awake, in radians a second. */
+const BEAD_DRIFT = 0.06
+
 function rings({ core, rings }: Values): BufferGeometry[] {
   const count = Math.min(Math.round(rings.count), tierCount(core))
   return Array.from({ length: count }, (_, orbit) => {
@@ -130,10 +133,14 @@ function rings({ core, rings }: Values): BufferGeometry[] {
     const plate = tierRadius(core, tier)
     const radius = rings.radius + orbit * rings.grow
     const turn = rad(rings.phase) * orbit
+    // Neighbouring rings turn opposite ways as they lock, and their beads then drift opposite
+    // ways (D26), slower the wider the ring.
+    const way = orbit % 2 === 0 ? 1 : -1
+    const drift = (way * BEAD_DRIFT) / (1 + orbit * 0.4)
     return [
-      ring(radius, 0.02).translate(0, y, 0),
-      ...around(3, () => rod([plate, y, 0], [radius, y, 0], 0.018)),
-      ...around(4 + orbit * 2, () => ball(0.065).translate(radius, y, 0)),
+      spinning(ring(radius, 0.02).translate(0, y, 0), way),
+      ...around(3, () => spinning(rod([plate, y, 0], [radius, y, 0], 0.018), way)),
+      ...around(4 + orbit * 2, () => spinning(ball(0.065).translate(radius, y, 0), way, drift)),
     ].map((piece) => piece.rotateY(turn))
   }).flat()
 }

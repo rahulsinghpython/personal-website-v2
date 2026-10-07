@@ -115,13 +115,13 @@ Each era beat has a readout line built from the era's data (years, company, full
 | Found | | `YOU'VE FOUND RAHUL.` |
 | Signal | | `SOMETHING WAS BUILT HERE.` |
 | Core | `2021 — 2023 / S2T / DATA ENGINEER, JR. TEAM LEAD` | `IT STARTED WITH PIPES. 10,000 REQUESTS A SECOND.` |
-| Scanner | `2023 — 2024 / ETAVOLT / SOFTWARE ENGINEER` | `I WROTE SOFTWARE THAT TURNS LASER SCANS INTO 3D MODELS.` |
+| Scanner | `2023 — 2024 / ETAVOLT / SOFTWARE ENGINEER` | `I WROTE SOFTWARE THAT TURNS LASER SCANS INTO 3D MODELS. YOU'VE BEEN LOOKING AT ONE.` |
 | Rings | `2024 — NOW / UNIAD / LEAD SOFTWARE ENGINEER` | `10,000 PEOPLE. ONE SCHEDULE THAT HOLDS.` |
 | Lens | `2024 — NOW / COGNIZANT / SOFTWARE ENGINEER` | `LANGUAGE MODELS FOR SINGAPORE'S GOVERNMENT. DATA IN, DECISIONS OUT.` |
 | Whole | | `FIVE YEARS. ONE MACHINE.` |
 | Contact | | `YOU FOUND ME. SAY SOMETHING.` |
 
-**Held back until the Machine exists:** the Scanner statement's second sentence, `YOU'VE BEEN LOOKING AT ONE.` It is the third reveal in [EXPERIENCE](EXPERIENCE.md#the-reveal-budget), and it is only true once the visitor is looking at a point cloud. Add it back in Phase 3.
+**Added back on 2026-10-07, with the scene:** the Scanner statement's second sentence, `YOU'VE BEEN LOOKING AT ONE.` It is the third reveal in [EXPERIENCE](EXPERIENCE.md#the-reveal-budget). It is only true while the visitor is looking at a point cloud. The Index does not carry the statements, but the story page still shows the line when the scene cannot start (no JavaScript, no WebGL). Revisit it with the no-WebGL fallback in Phase 5.
 
 **Leans on the Machine:** `FIVE YEARS. ONE MACHINE.` reads as a figure of speech on the plain site. Revisit if it confuses anyone before the scene ships.
 

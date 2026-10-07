@@ -4,7 +4,7 @@ import { variants } from '../src/experience/machine/variants'
 import { TIERS, type Tier } from '../src/state/tiers'
 
 export type Shading = 'flat' | 'shaded'
-export type ViewId = 'iso' | 'front' | 'side' | 'top' | 'free'
+export type ViewId = 'iso' | 'front' | 'side' | 'top' | 'free' | 'story'
 export type Focus = PartId | 'all'
 
 /** Every parameter value, as variant, then part, then parameter name. */
@@ -25,6 +25,11 @@ export type WorkbenchState = {
   /** Make each viewport the size of a phone screen, to see what a phone would be given. */
   phone: boolean
   panel: boolean
+  /**
+   * Where the story is, in beats: 0 is Found and 7 is Contact. Null draws the Machine whole and
+   * dormant, outside the story, as rounds 2 to 4 saw it.
+   */
+  beat: number | null
   /** Render at the tier's pixel-ratio cap even when this display's own ratio is lower. */
   capDpr: boolean
   params: Params
@@ -51,6 +56,7 @@ const DEFAULTS = {
   thumb: false,
   phone: false,
   panel: true,
+  beat: null as number | null,
   capDpr: false,
 }
 
@@ -78,7 +84,7 @@ function fromUrl() {
       ) ?? DEFAULTS.variant,
     tier: oneOf(query.get('tier'), Object.keys(TIERS) as Tier[]) ?? DEFAULTS.tier,
     view:
-      oneOf(query.get('view'), ['iso', 'front', 'side', 'top', 'free'] as const) ??
+      oneOf(query.get('view'), ['iso', 'front', 'side', 'top', 'free', 'story'] as const) ??
       (query.has('cam') ? 'free' : DEFAULTS.view),
     shading: oneOf(query.get('shading'), ['flat', 'shaded'] as const) ?? DEFAULTS.shading,
     focus:
@@ -88,6 +94,10 @@ function fromUrl() {
     thumb: flag('thumb', DEFAULTS.thumb),
     phone: flag('phone', DEFAULTS.phone),
     panel: flag('panel', DEFAULTS.panel),
+    beat:
+      query.has('beat') && Number.isFinite(Number(query.get('beat')))
+        ? Number(query.get('beat'))
+        : null,
     capDpr: flag('capdpr', DEFAULTS.capDpr),
     params,
   }
@@ -130,6 +140,8 @@ function toUrl(state: WorkbenchState) {
   const flagDefaults = { ...DEFAULTS, capdpr: DEFAULTS.capDpr }
   for (const [key, value] of Object.entries(flags))
     if (value !== flagDefaults[key as keyof typeof flags]) query.set(key, value ? '1' : '0')
+
+  if (state.beat !== null) query.set('beat', String(+state.beat.toFixed(3)))
 
   const base = defaultParams()
   const changed: string[] = []

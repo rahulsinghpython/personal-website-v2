@@ -40,7 +40,14 @@ export function Panel() {
 
     pane.addBinding(settings, 'tier', { options: { high: 'high', mid: 'mid', low: 'low' } })
     pane.addBinding(settings, 'view', {
-      options: { 'three-quarter': 'iso', front: 'front', side: 'side', top: 'top', free: 'free' },
+      options: {
+        'three-quarter': 'iso',
+        front: 'front',
+        side: 'side',
+        top: 'top',
+        free: 'free',
+        story: 'story',
+      },
     })
     pane.addBinding(settings, 'shading', { options: { shaded: 'shaded', flat: 'flat' } })
     pane.addBinding(settings, 'focus', {
@@ -51,6 +58,12 @@ export function Panel() {
     pane.addBinding(settings, 'thumb', { label: 'thumbnail' })
     pane.addBinding(settings, 'phone', { label: 'phone size' })
     pane.addBinding(settings, 'capDpr', { label: 'tier dpr' })
+
+    // Round 6. With the story off the Machine is whole and dormant, as the earlier rounds saw it.
+    const scrub = { on: store.getState().beat !== null, beat: store.getState().beat ?? 0 }
+    const storyFolder = pane.addFolder({ title: 'Story' })
+    storyFolder.addBinding(scrub, 'on', { label: 'in the story' })
+    storyFolder.addBinding(scrub, 'beat', { min: 0, max: 7, step: 0.01 })
 
     // The cloud. `share` is how much of the point budget a part gets for its size.
     const cloud = structuredClone(useCloud.getState())
@@ -152,6 +165,8 @@ export function Panel() {
       if (JSON.stringify(cloud) !== JSON.stringify(useCloud.getState()))
         useCloud.setState(structuredClone(cloud))
       const state = store.getState()
+      const beat = scrub.on ? scrub.beat : null
+      if (beat !== state.beat) store.setState({ beat })
       const changed = SETTINGS.filter((key) => settings[key] !== state[key])
       if (changed.length === 0) return
       store.setState(pick({ ...state, ...settings }))
@@ -160,6 +175,8 @@ export function Panel() {
 
     const unsubscribe = store.subscribe((state) => {
       Object.assign(settings, pick(state))
+      scrub.on = state.beat !== null
+      if (state.beat !== null) scrub.beat = state.beat
       for (const [variant, parts] of Object.entries(state.params))
         for (const [part, partValues] of Object.entries(parts))
           Object.assign(values[variant]![part]!, partValues)

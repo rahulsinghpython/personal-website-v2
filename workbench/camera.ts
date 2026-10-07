@@ -6,7 +6,7 @@ import type { ViewId } from './store'
 
 export const pose = { position: new Vector3(), target: new Vector3() }
 
-const PRESETS: Record<Exclude<ViewId, 'free'>, [number, number, number]> = {
+const PRESETS: Record<Exclude<ViewId, 'free' | 'story'>, [number, number, number]> = {
   iso: [6, 4, 7.5],
   front: [0, 0, 10.5],
   side: [10.5, 0, 0],
@@ -28,7 +28,7 @@ export function announcePose(from: object | null) {
 }
 
 export function applyView(view: ViewId) {
-  if (view === 'free') return
+  if (view === 'free' || view === 'story') return
   pose.position.set(...PRESETS[view])
   pose.target.set(0, 0, 0)
   announcePose(null)

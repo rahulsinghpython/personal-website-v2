@@ -32,7 +32,7 @@ These are targets set before any code exists. Measure a baseline at the end of t
 | Cumulative Layout Shift | ≤ 0.02 |
 | Lighthouse performance score, mobile | ≥ 90 |
 | Critical path (HTML, CSS, fonts, entry JS), gzipped | ≤ 100 KB |
-| Scene chunk (three.js, R3F, scene code), gzipped | ≤ 300 KB, loaded after first paint |
+| Scene chunk (three.js, R3F, GSAP, scene code), gzipped | ≤ 400 KB, loaded after first paint. Raised from 300 KB on 2026-10-07 ([DECISIONS D29](DECISIONS.md)) |
 | Whole experience, transferred | ≤ 1 MB |
 | Font files | ≤ 2 families, subset, WOFF2 |
 | Image textures in the scene | 0 |
@@ -43,7 +43,7 @@ These are targets set before any code exists. Measure a baseline at the end of t
 | --- | --- |
 | Frame rate while scrolling, laptop with integrated graphics | 60 fps |
 | Frame rate while scrolling, low tier | ≥ 30 fps, steady |
-| Frames rendered at rest | 0 on the low tier, with reduced motion, with the tab hidden or the canvas off screen. Elsewhere only ambient motion, at a capped rate to be set in Phase 3 ([DECISIONS D26](DECISIONS.md)) |
+| Frames rendered at rest | 0 on the low tier, with reduced motion, with the tab hidden or the canvas off screen. Elsewhere only ambient motion, capped at 30 frames a second ([DECISIONS D26](DECISIONS.md), [D31](DECISIONS.md)), and only from the Rings beat on, when there are beads to move |
 | Draw calls | ≤ 30 |
 | Long tasks (> 50 ms) after load | None during scroll |
 | Allocations inside the frame loop | None |
@@ -113,7 +113,24 @@ The development machine has a discrete GPU (RTX 4070 Ti), so it is a high-tier d
 
 Sizes are gzipped by Node's zlib, in units of 1,000 bytes. `vite build` prints figures about 1% higher for the same files. Measured on 2026-10-05, before three.js: critical path 76.2 kB for `/` and 75.9 kB for `/plain`. Measured again on 2026-10-06, with three.js installed and nothing mounted: the same two figures.
 
-**The scene chunk, measured once.** On 2026-10-06 a throwaway build mounted the Machine as points on the home page through one lazy import, and was then reverted ([DECISIONS D21](DECISIONS.md)). The scene chunk was 243.8 kB against its 300 kB budget: three.js, React Three Fiber, the Machine's shapes and the points material. It did not include GSAP, which Phase 3 adds, or any drei helper. That leaves about 56 kB for both and for the choreography code, so check GSAP's size against it before installing. The same build put the critical path at 77.1 kB for `/` and 76.8 kB for `/plain`, 0.9 kB more than with no scene, which is the cost of the lazy mount.
+**The scene chunk, measured once.** On 2026-10-06 a throwaway build mounted the Machine as points on the home page through one lazy import, and was then reverted ([DECISIONS D21](DECISIONS.md)). The scene chunk was 243.8 kB: three.js, React Three Fiber, the Machine's shapes and the points material. It did not include GSAP, which Phase 3 adds, or any drei helper. The budget was 300 kB then, which left about 56 kB for both and for the choreography code. On 2026-10-07 the minified files in the gsap 3.15.0 npm package were gzipped without installing it: the core is 28.4 kB and ScrollTrigger 18.0 kB, so the two would have taken the chunk to about 290 kB before any Phase 3 code. Rahul raised the budget to 400 kB ([DECISIONS D29](DECISIONS.md)), which leaves about 156 kB over the measured chunk, or about 110 kB once GSAP and ScrollTrigger are in. GSAP is still brought to Rahul before it is installed ([DECISIONS D13](DECISIONS.md)). The same build put the critical path at 77.1 kB for `/` and 76.8 kB for `/plain`, 0.9 kB more than with no scene, which is the cost of the lazy mount.
+
+**The scene chunk, shipped.** On 2026-10-07, with the first choreography mounted and GSAP's core in it, the scene chunk is 265.0 kB of 400: about 21 kB more than the throwaway build, for the core, the timeline, the camera and the larger shader. The critical path is 77.3 kB for `/` and 77.0 kB for `/plain`.
+
+### Measured on the site, on the development machine
+
+2026-10-07, in the automated Chrome, 1440 by 900. Draw calls were counted by wrapping the WebGL draw function, so these are frames really drawn.
+
+| | Frames drawn in 2 s at rest |
+| --- | --- |
+| Found, Core (before the Rings wake), high tier | 0 |
+| Whole, high tier, beads drifting | 50, against a cap of 30 a second. The automated browser paces frames unevenly, so read this as "capped", not as a rate |
+| Whole, low tier (`?tier=low`) | 0 |
+| Found, reduced motion | 0 |
+
+Scrolling away and back to the same position gave the same camera position and pose, to four decimal places.
+
+Start-up on the production build (`pnpm preview`): one long task of 72 ms as the scene attaches, which is three.js being evaluated, the points being sampled and the shader compiled. That is on a fast desktop CPU, so it will be several times longer on a phone. It happens after the text is on screen and not during scroll, so it breaks no row above, but it is the number to bring down if Lighthouse's blocking-time score suffers once deployed.
 
 ### Measured on the development machine
 

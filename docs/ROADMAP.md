@@ -8,8 +8,8 @@ The authority on what is built and what comes next. Update the status table when
 | --- | --- | --- |
 | 0 | Direction | Done 2026-10-05. Docs written; concept, stack and principles accepted by Rahul. |
 | 1 | Foundations | In progress since 2026-10-05. Built on 2026-10-05: facts confirmed by Rahul, content modules, content layer, the Index at `/plain`, prerendering. Readable with scripts blocked; Lighthouse mobile performance 100 on both pages, measured on a local production build. Left: deploy to Vercel (Rahul will say when), then re-measure on the deployed preview. |
-| 2 | Greybox | Done 2026-10-07, begun 2026-10-05. Built: the bundle-size check and CI ([D19](DECISIONS.md)); the workbench, showing placeholder shapes ([D20](DECISIONS.md), [D21](DECISIONS.md)). Round 1 finished on 2026-10-06: nine references liked, outcome in [REFERENCES](REFERENCES.md), look drawn from computing hardware ([D22](DECISIONS.md)). Round 2 finished on 2026-10-06: Rahul signed off the silhouette, a hanging tiered rig with a small cube in gimbals on top ([D23](DECISIONS.md), [EXPERIENCE](EXPERIENCE.md#the-shape)). Round 3: each part now stands for a kind of work, with the company as small print ([D24](DECISIONS.md)); Round 3 finished on 2026-10-06: version 2 of all four parts ([D25](DECISIONS.md)). Small ambient motion is now allowed ([D26](DECISIONS.md)). Round 4 finished on 2026-10-07: the Machine as points, in a look between two of the three shown ([D27](DECISIONS.md), [D28](DECISIONS.md)). The scene chunk was measured with a throwaway build: 243.8 kB of 300 ([PERFORMANCE](PERFORMANCE.md#the-bundle-check)). **Finished on 2026-10-07, with one criterion put off by Rahul:** frame rate was measured on the development machine only; the mid and low tiers move to Phase 5 ([D28](DECISIONS.md)). |
-| 3 | Choreography | Not started |
+| 2 | Greybox | Done 2026-10-07, begun 2026-10-05. Built: the bundle-size check and CI ([D19](DECISIONS.md)); the workbench, showing placeholder shapes ([D20](DECISIONS.md), [D21](DECISIONS.md)). Round 1 finished on 2026-10-06: nine references liked, outcome in [REFERENCES](REFERENCES.md), look drawn from computing hardware ([D22](DECISIONS.md)). Round 2 finished on 2026-10-06: Rahul signed off the silhouette, a hanging tiered rig with a small cube in gimbals on top ([D23](DECISIONS.md), [EXPERIENCE](EXPERIENCE.md#the-shape)). Round 3: each part now stands for a kind of work, with the company as small print ([D24](DECISIONS.md)); Round 3 finished on 2026-10-06: version 2 of all four parts ([D25](DECISIONS.md)). Small ambient motion is now allowed ([D26](DECISIONS.md)). Round 4 finished on 2026-10-07: the Machine as points, in a look between two of the three shown ([D27](DECISIONS.md), [D28](DECISIONS.md)). The scene chunk was measured with a throwaway build: 243.8 kB against a budget of 300 kB, raised to 400 kB the same day ([D29](DECISIONS.md), [PERFORMANCE](PERFORMANCE.md#the-bundle-check)). **Finished on 2026-10-07, with one criterion put off by Rahul:** frame rate was measured on the development machine only; the mid and low tiers move to Phase 5 ([D28](DECISIONS.md)). |
+| 3 | Choreography | In progress since 2026-10-07. Built: the scene mounted on the home page through one lazy import; progress read from scroll and eased; rendering on demand; dust to dormant to awake in the vertex shader, per part; a camera pose per beat; the beads drifting once the Rings are awake; the workbench's story scrubber. GSAP's core only ([D30](DECISIONS.md)). Every number in it is a first value from a chat ([D31](DECISIONS.md)). Left: round 6, where Rahul scrolls it and the motion is settled; the first-time-viewer test. |
 | 4 | Interactions | Not started |
 | 5 | Finish | Not started |
 | 6 | Later | Not scheduled |
@@ -41,7 +41,7 @@ Find the Machine. This is the creative risk of the whole project, so it comes ea
 - Done: round 3, parts. Rahul picked version 2 of every part ([D25](DECISIONS.md)): open plates with a bundle of lines (Core), a drum in a fork with its fan of beams (Scanner), beaded rings (Rings), two gimbals and a bigger cube (Lens). The versions and silhouettes he passed over were removed from the code on 2026-10-06; they are in git history at `4393c8e`.
 - Done: round 4, points. Sampling and the points material are `src/experience/machine/points.ts` ([D27](DECISIONS.md)). Three looks were shown side by side at desktop size and at phone size; Rahul picked a mix of two, which is `POINT_LOOK` in that file ([D28](DECISIONS.md)).
 - Done on the development machine only: measure points and frame cost ([PERFORMANCE](PERFORMANCE.md#measured-on-the-development-machine)). Moved to Phase 5 by Rahul: measuring on a mid and a low device, and setting the tier point counts ([D28](DECISIONS.md)).
-- Done: a throwaway build with the scene mounted lazily, to read the scene chunk's size ([D21](DECISIONS.md)). 243.8 kB of 300, without GSAP; reverted.
+- Done: a throwaway build with the scene mounted lazily, to read the scene chunk's size ([D21](DECISIONS.md)). 243.8 kB without GSAP, against a budget that was 300 kB and is now 400 kB ([D29](DECISIONS.md)); reverted.
 
 Rounds 5 (colour and type) and 6 (motion) happen in Phases 5 and 3, on the same workbench.
 
@@ -53,10 +53,14 @@ Rounds 5 (colour and type) and 6 (motion) happen in Phases 5 and 3, on the same 
 
 Make scrolling build it.
 
-- Progress from scroll, eased; on-demand rendering.
-- Dust to dormant to awake in the vertex shader, per part.
-- Camera path through the eight beats, in step with the DOM sections.
-- Scrolling back reverses everything exactly.
+- Done, first version: progress from scroll, eased; on-demand rendering.
+- Done, first version: dust to dormant to awake in the vertex shader, per part.
+- Done, first version: camera path through the eight beats, in step with the DOM sections.
+- Done: scrolling back reverses everything exactly. Checked by scrolling away and back and comparing the camera.
+- Not started: round 6 of [DESIGN-PROCESS](DESIGN-PROCESS.md). Rahul scrolls it on a real device; dust layout, assembly order and overlap, easing and the camera path are settled, as options where there is a real choice.
+- Done: the shape was redrawn after outside feedback. Rahul picked the third of three on the workbench: every part on the rig's axis, solar panels on the top plate, the wide rings kept ([D32](DECISIONS.md)). The home page draws it, with a new camera pose for every beat. Left: remove the two shapes passed over once this one has been scrolled.
+- Not started: show it to someone who has not seen it, for the reveal test.
+- Known and left for later: on a phone the text of the era beats covers the lower part of the Machine (spacing is Phase 5); the Lens beat's text touches the top of the rig on a wide window; React Three Fiber logs a three.js deprecation warning (`THREE.Clock`) to the console; nothing labels a part on the Machine itself yet.
 
 **Done when:** a first-time viewer, unprompted, says what the object is by beat 3; zero frames render at rest; all runtime budgets in [PERFORMANCE](PERFORMANCE.md) hold.
 

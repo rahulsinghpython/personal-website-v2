@@ -1,7 +1,16 @@
 import { OrbitControls } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react'
-import { DoubleSide, MathUtils, PerspectiveCamera, type DirectionalLight } from 'three'
+import {
+  DoubleSide,
+  MathUtils,
+  PerspectiveCamera,
+  type DirectionalLight,
+  type ShaderMaterial,
+  type Vector4,
+} from 'three'
+import { beats } from '../src/content/beats'
+import { applyCamera } from '../src/experience/camera/camera'
 import {
   buildPart,
   type MachineDef,
@@ -9,6 +18,7 @@ import {
   type PartDef,
 } from '../src/experience/machine/part'
 import { lift, pointsMaterial, samplePoints } from '../src/experience/machine/points'
+import { applyStory, seek, story } from '../src/experience/timeline'
 import { TIERS } from '../src/state/tiers'
 import { useCloud } from './cloud'
 import { announcePose, onPose, pose, poseToUrl } from './camera'
@@ -40,10 +50,25 @@ function Part({ machine, part }: { machine: string; part: PartDef }) {
   )
 }
 
+/** Puts the timeline at a beat on the scrubber: 0 is Found and the last is Contact. */
+const seekBeat = (beat: number) => seek(beat / (beats.length - 1))
+
+/** The Machine outside the story: whole and dormant, as rounds 2 to 4 saw it. */
+function showWhole(material: ShaderMaterial) {
+  const uniforms = material.uniforms
+  ;(uniforms.uGather!.value as Vector4).setScalar(1)
+  ;(uniforms.uLock!.value as Vector4).setScalar(1)
+  ;(uniforms.uWake!.value as Vector4).setScalar(0)
+  uniforms.uTurn!.value = 0
+  uniforms.uDrift!.value = 0
+}
+
 /** Round 4: the Machine as a cloud of points sampled from the solid shape. */
 function Cloud({ machine }: { machine: MachineDef }) {
   const values = useWorkbench((state) => state.params[machine.id]!) as MachineValues
   const tier = useWorkbench((state) => state.tier)
+  const beat = useWorkbench((state) => state.beat)
+  const invalidate = useThree((state) => state.invalidate)
   const { density, weights, size, brightness, boost, thin } = useCloud()
   const bufferHeight = useThree((state) => state.size.height * state.viewport.dpr)
   const count = Math.round(TIERS[tier].points * density)
@@ -56,6 +81,16 @@ function Cloud({ machine }: { machine: MachineDef }) {
   const material = useMemo(() => pointsMaterial(), [])
   useEffect(() => () => geometry.dispose(), [geometry])
   useEffect(() => () => material.dispose(), [material])
+
+  // Round 6: the scrubber sets the story by hand. The beads do not drift here.
+  useEffect(() => {
+    if (beat === null) showWhole(material)
+    else {
+      seekBeat(beat)
+      applyStory(material)
+    }
+    invalidate()
+  }, [beat, material, invalidate])
 
   return (
     <points geometry={geometry} frustumCulled={false}>
@@ -125,6 +160,29 @@ function Rig() {
   )
 }
 
+/** The camera the visitor gets: where the timeline puts it at the scrubber's beat. */
+function StoryCamera() {
+  const beat = useWorkbench((state) => state.beat) ?? 0
+  const camera = useThree((state) => state.camera) as PerspectiveCamera
+  const size = useThree((state) => state.size)
+  const invalidate = useThree((state) => state.invalidate)
+
+  useEffect(() => {
+    seekBeat(beat)
+    applyCamera(camera, story.camera, size.width, size.height)
+    invalidate()
+  }, [beat, camera, size, invalidate])
+  // Hand the lens back as the free camera expects it.
+  useEffect(
+    () => () => {
+      camera.clearViewOffset()
+      camera.userData = {}
+    },
+    [camera],
+  )
+  return null
+}
+
 /**
  * Greybox lighting, so the form inside the outline can be read from any angle. The key light
  * rides above and beside the camera. The real Machine is unlit points; see docs/PERFORMANCE.md.
@@ -157,6 +215,7 @@ export function Viewport({ machine, main }: { machine: MachineDef; main: boolean
   const capDpr = useWorkbench((state) => state.capDpr)
   const shading = useWorkbench((state) => state.shading)
   const draw = useCloud((state) => state.draw)
+  const view = useWorkbench((state) => state.view)
   const cap = TIERS[tier].pixelRatioCap
 
   return (
@@ -178,7 +237,7 @@ export function Viewport({ machine, main }: { machine: MachineDef; main: boolean
             ))}
           </>
         )}
-        <Rig />
+        {view === 'story' ? <StoryCamera /> : <Rig />}
         {main && <Probe />}
       </Canvas>
       <figcaption>

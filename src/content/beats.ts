@@ -6,12 +6,24 @@ import { site } from './site'
 
 export type BeatId = 'found' | 'signal' | PartId | 'whole' | 'contact'
 
+/** The beats in story order. */
+export const beats: readonly BeatId[] = [
+  'found',
+  'signal',
+  'core',
+  'scanner',
+  'rings',
+  'lens',
+  'whole',
+  'contact',
+]
+
 /** One line per beat, in story order. */
 export const statements: Record<BeatId, string> = {
   found: `You've found ${site.firstName}.`,
   signal: 'Something was built here.',
   core: 'It started with pipes. 10,000 requests a second.',
-  scanner: 'I wrote software that turns laser scans into 3D models.',
+  scanner: "I wrote software that turns laser scans into 3D models. You've been looking at one.",
   rings: '10,000 people. One schedule that holds.',
   lens: "Language models for Singapore's government. Data in, decisions out.",
   whole: 'Five years. One machine.',

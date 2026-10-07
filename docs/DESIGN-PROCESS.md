@@ -48,7 +48,9 @@ Run `pnpm dev` and open `/workbench/`. How it is built and why it cannot ship is
 - **Readout.** Frame rate, CPU and GPU time per frame, draw calls, and a count of frames drawn. The count must stop when input stops. `Run benchmark` draws 240 frames back to back and reports what they cost.
 - **The URL holds the state:** `?tier=mid&view=front&compare=1&phone=1&shading=flat&panel=0`, changed parameters as `p=A.core.radius:0.8`, and a free camera as `cam=`. Reload it, screenshot it, or send it.
 
-Not built yet, because their rounds have not come: the progress scrubber (round 6) and the colour controls (round 5).
+- **Story.** `in the story` puts the Machine in the story at `beat`, from 0 (Found) to 7 (Contact); drag it to scrub. With it off the Machine is whole and dormant, as rounds 2 to 4 saw it. The `story` view gives the visitor's camera for that beat; any other view watches the same moment from outside. `/workbench/?draw=points&view=story&beat=3.5`. The beads do not drift here.
+
+Not built yet, because its round has not come: the colour controls (round 5).
 
 ## Rounds
 

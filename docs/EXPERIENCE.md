@@ -2,7 +2,7 @@
 
 What the visitor sees and does. Read [VISION](VISION.md) first.
 
-**Status of this doc:** the structure (one object, four parts, eight beats, the interaction rules) is the agreed direction. The Machine's silhouette and the detail of each part were settled on 2026-10-06, and how its points are drawn on 2026-10-07. Colour, type, motion and the wording of the copy are still open and get settled by prototyping. The last section says which is which.
+**Status of this doc:** the structure (one object, four parts, eight beats, the interaction rules) is the agreed direction. The Machine's silhouette and the detail of each part were settled on 2026-10-06 and redrawn on 2026-10-07 after outside feedback; how its points are drawn was settled on 2026-10-07. Colour, type, motion and the wording of the copy are still open and get settled by prototyping. The last section says which is which.
 
 ## The Machine
 
@@ -10,27 +10,29 @@ A strange instrument floating in darkness. It is not a robot, has no face, and i
 
 ### The shape
 
-Signed off by Rahul on 2026-10-06, as a grey solid on the workbench ([DECISIONS D23](DECISIONS.md)). It looks like computing hardware, not like an observatory instrument ([D22](DECISIONS.md)). Five words for the feeling: futuristic, nested, wired, kinetic, dense.
+Picked by Rahul on 2026-10-07, on the workbench, as the third of three ([DECISIONS D32](DECISIONS.md)). It replaces the shape signed off the day before ([D23](DECISIONS.md), [D25](DECISIONS.md)), keeping its rig and its outline. It looks like computing hardware, not like an observatory instrument ([D22](DECISIONS.md)). Five words for the feeling: futuristic, nested, wired, kinetic, dense.
 
-It is a tall rig that hangs, with a small crown on top.
+It is a tall rig that hangs. Every part is on the rig's axis and drawn in the rig's vocabulary: plates, posts, lines and cans. Nothing sticks out to one side and nothing stands on top as a second shape.
 
-- **The rig (Core).** A stack of round plates that narrow as they descend, joined by posts. The top plate is solid; the others are open in the middle, and a bundle of straight lines drops through all of them into a nozzle at the bottom. It hangs from a short mount at the top. The look is borrowed from the inside of a quantum computer; the Machine does not claim Rahul worked on one.
-- **The orbits (Rings).** The three lowest plates each carry a thin ring on three spokes, with a row of beads on it, more beads the wider the ring. The rings get wider as the plates get narrower, so the outline is a diamond. The beads are the things being scheduled: they drift round their rings and settle into even spacing ([DECISIONS D25](DECISIONS.md), [D26](DECISIONS.md)).
-- **The arm (Scanner).** A straight arm off the top plate, ending in a fork that holds a drum, drawn with the fan of thin beams it sweeps.
-- **The crown (Lens).** Standing on the mount, much smaller than the rig: a cube of eight cubes with a small city on its roof, held in two gimbal rings. The outer ring stands on one pin, like a toy gyroscope on its pedestal. The inner ring pivots inside it, and the cube sits on an axle through the inner ring. Nothing else is attached to the rings, because a ring that turns freely cannot carry anything.
+- **The rig (Core).** A stack of round plates that narrow as they descend, joined by posts. The top plate is solid; the others are open in the middle, and a bundle of straight lines drops through all of them. It hangs from a short mount at the top. The look is borrowed from the inside of a quantum computer; the Machine does not claim Rahul worked on one.
+- **The roof (Scanner).** The top plate is a roof. Four solar panels stand on it in a ring, tilted outward, each drawn as a grid of cells. A scanning puck sits on the mount above them and sweeps a fan of beams down one panel. The 3D scanning was for solar: roofs rebuilt in 3D and panels placed on them ([CONTENT](CONTENT.md)).
+- **The orbits (Rings).** The three lowest plates each carry a thin ring on three spokes, with a row of beads on it, more beads the wider the ring. The rings get wider as the plates get narrower, so the outline is a diamond. The spokes line up into three ribs and are drawn faintly. The beads are the things being scheduled: they drift round their rings and settle into even spacing ([DECISIONS D25](DECISIONS.md), [D26](DECISIONS.md)).
+- **The stage (Lens).** Under the last plate, where the chip sits in a real rig: a cube of eight cubes, drawn by its edges, on a small plate hung from three thin posts. Every line of the bundle runs into its roof and one tip leaves below. Data in, an answer out.
 
-The outline was signed off in round 2 and the detail of each part picked in round 3 ([D25](DECISIONS.md)). As points (round 4) it is one cloud sampled from these surfaces. The thinner a piece is, the more closely its points are packed, so the lines, rings and beams do not vanish behind the plates; and a point is sized as part of the object, so the Machine is the same picture on a phone as on a monitor ([D27](DECISIONS.md)). The look Rahul chose on 2026-10-07 sits between an even scan and a drawing led by its lines: the plates are a thin scatter and the lines, rings and beams are the brightest things in it ([D28](DECISIONS.md)).
+Because the Scanner is at the top, the Rings in the middle and the Lens at the bottom, the parts wake from the top of the Machine to the bottom, and after the Core the camera only travels down.
 
-The code is `src/experience/machine/machine.ts`, and every number in it is a slider on the workbench.
+As points (round 4) it is one cloud sampled from these surfaces. The thinner a piece is, the more closely its points are packed, so the lines, rings and beams do not vanish behind the plates; and a point is sized as part of the object, so the Machine is the same picture on a phone as on a monitor ([D27](DECISIONS.md)). The look Rahul chose on 2026-10-07 sits between an even scan and a drawing led by its lines: the plates are a thin scatter and the lines, rings and beams are the brightest things in it ([D28](DECISIONS.md)).
+
+The code is `flared` in `src/experience/machine/axial.ts`, and every number in it is a slider on the workbench, as variant C. The shape it replaced is still there as variant A, and a slimmer one that was passed over as B, until this one has been scrolled and signed off.
 
 It has four parts. Each part stands for **a kind of work** Rahul has done, and is one connected piece of the shape. The company and the years are small print beside it, not the point ([DECISIONS D24](DECISIONS.md)).
 
 | Part | The work | Which piece of the Machine | Small print |
 | --- | --- | --- | --- |
-| **Core** | Data engineering: pipelines, microservices, throughput | The rig: the tiers, the lines running down through them, and the tip | S2T, 2021 to 2023 |
-| **Scanner** | Turning LiDAR point clouds into 3D models | The arm and its head | Etavolt, 2023 to 2024 |
+| **Core** | Data engineering: pipelines, microservices, throughput | The rig: the tiers and the lines running down through them | S2T, 2021 to 2023 |
+| **Scanner** | Turning LiDAR point clouds into 3D models | The roof: the puck, its beams and the solar panels | Etavolt, 2023 to 2024 |
 | **Rings** | Scheduling, bookings, calendars: many moving things kept in order | The orbit rings | Uniad, 2024 onward |
-| **Lens** | LLM analytics: turning raw data into something a person can read | The crown: the cube in gimbals | Cognizant, 2024 onward |
+| **Lens** | LLM analytics: turning raw data into something a person can read | The stage: the cube under the last plate, and the tip | Cognizant, 2024 onward |
 
 The names are handles for us and never shown to a visitor; the Lens is no longer shaped like a lens. Parts still assemble **in the order Rahul came to the work**, so the Machine is built the way the career was.
 
@@ -58,6 +60,8 @@ The page is one long scroll. The canvas is fixed behind it and the Machine respo
 | 5 | **Lens** | A scatter of points is pulled through the Lens and resolves into something legible. | LLM products for Singapore's government. |
 | 6 | **Whole** | Camera pulls back. All four parts awake and working together, each labelled. The visitor can now rotate the Machine and click any part. | Five years, one machine. |
 | 7 | **Contact** | The Machine stays. Short line and three links. | How to get in touch. |
+
+**How the beats are built, so far.** First values from a chat, not yet scrolled by Rahul ([DECISIONS D31](DECISIONS.md)). At Signal all four parts gather from dust into a loose silhouette: the outline of the whole Machine can be read, but soft, as a haze. Then each part's beat closes that part up exactly and wakes it as it closes: each point turns to the accent as it lands, so the haze condenses into lit lines. A part that has not had its beat is still haze beside the sharp, lit ones. The Rings turn as they lock, and once awake their beads drift. The camera has one pose per beat and travels between them. A beat's picture is finished a little before its text has fully arrived, and holds a little after.
 
 ### The reveal budget
 

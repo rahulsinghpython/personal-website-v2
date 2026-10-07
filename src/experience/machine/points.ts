@@ -6,10 +6,11 @@ import {
   Mesh,
   ShaderMaterial,
   Vector3,
+  Vector4,
 } from 'three'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js'
 import { TIERS } from '../../state/tiers'
-import type { MachineDef, MachineValues, PartId } from './part'
+import { shareOf, spinOf, type MachineDef, type MachineValues, type PartId } from './part'
 
 // The Machine as a point cloud: points scattered over the surface of each part, and the material
 // that draws them. One geometry, one draw call, however many points there are.
@@ -93,11 +94,19 @@ function girth(geometry: BufferGeometry, area: number) {
   return area / Math.max(size.x, size.y, size.z, 1e-6)
 }
 
+/** How far the dust reaches from the middle of the Machine, in the Machine's units. */
+const DUST_RADIUS = 9
+/** The middle of the dust, about halfway up the Machine. */
+const DUST_HEIGHT = 0.4
+
 /**
  * Scatters `count` points over the Machine. A piece's share is its surface area times its part's
- * weight. By area alone the plates would take nearly every point and the thin pieces, the lines
+ * weight, and its own if it was given one. By area alone the plates would take nearly every point and the thin pieces, the lines
  * and the beams, would vanish, so `thin` packs points more closely the thinner a piece is: at 0
  * every surface is equally dense, at 1 a rod of half the radius is twice as dense.
+ *
+ * Each point also gets what the story needs: where it is while it is dust, how late in its part
+ * it wakes (top first), and how its piece turns about the Machine's axis.
  */
 export function samplePoints(
   machine: MachineDef,
@@ -111,8 +120,8 @@ export function samplePoints(
       const geometry = piece.index ? piece.toNonIndexed() : piece
       if (geometry !== piece) piece.dispose()
       const area = surfaceArea(geometry)
-      const share = area * girth(geometry, area) ** -thin * weights[part.id]
-      return { index, geometry, share }
+      const share = area * girth(geometry, area) ** -thin * weights[part.id] * shareOf(piece)
+      return { index, geometry, share, spin: spinOf(piece) }
     }),
   )
   const whole = pieces.reduce((sum, piece) => sum + piece.share, 0) || 1
@@ -120,6 +129,9 @@ export function samplePoints(
   const positions = new Float32Array(count * 3)
   const partIndex = new Float32Array(count)
   const jitter = new Float32Array(count)
+  const dust = new Float32Array(count * 3)
+  const order = new Float32Array(count)
+  const spin = new Float32Array(count * 2)
   const random = seeded(1)
   const point = new Vector3()
 
@@ -139,15 +151,46 @@ export function samplePoints(
         point.toArray(positions, written * 3)
         partIndex[written] = piece.index
         jitter[written] = random()
+        spin.set(piece.spin, written * 2)
       }
     }
     piece.geometry.dispose()
+  }
+
+  // Dust: evenly through a ball around the Machine. It has its own run of random numbers, so
+  // changing the dust leaves every point where it was on the Machine.
+  const scatter = seeded(2)
+  for (let i = 0; i < count; i++) {
+    const height = scatter() * 2 - 1
+    const angle = scatter() * Math.PI * 2
+    const radius = DUST_RADIUS * Math.cbrt(scatter())
+    const flat = Math.sqrt(1 - height * height) * radius
+    dust[i * 3] = Math.cos(angle) * flat
+    dust[i * 3 + 1] = height * radius + DUST_HEIGHT
+    dust[i * 3 + 2] = Math.sin(angle) * flat
+  }
+
+  // Waking runs down each part: 0 at its highest point, 1 at its lowest.
+  const top = machine.parts.map(() => -Infinity)
+  const bottom = machine.parts.map(() => Infinity)
+  for (let i = 0; i < count; i++) {
+    const part = partIndex[i]!
+    const y = positions[i * 3 + 1]!
+    top[part] = Math.max(top[part]!, y)
+    bottom[part] = Math.min(bottom[part]!, y)
+  }
+  for (let i = 0; i < count; i++) {
+    const part = partIndex[i]!
+    order[i] = (top[part]! - positions[i * 3 + 1]!) / Math.max(top[part]! - bottom[part]!, 1e-6)
   }
 
   const cloud = new BufferGeometry()
   cloud.setAttribute('position', new BufferAttribute(positions, 3))
   cloud.setAttribute('aPart', new BufferAttribute(partIndex, 1))
   cloud.setAttribute('aJitter', new BufferAttribute(jitter, 1))
+  cloud.setAttribute('aDust', new BufferAttribute(dust, 3))
+  cloud.setAttribute('aOrder', new BufferAttribute(order, 1))
+  cloud.setAttribute('aSpin', new BufferAttribute(spin, 2))
   return cloud
 }
 
@@ -158,6 +201,11 @@ export function samplePoints(
  * measured in. A point is part of the object, so it is drawn smaller when the Machine is: the
  * picture on a phone is the picture on a monitor, scaled. `uHeight` is the height of the drawing
  * buffer in pixels, which is what turns units into pixels.
+ *
+ * The rest tell the story (see ../timeline.ts). Three of them hold one number per part, in the order
+ * the parts assemble: `uGather` pulls a part's dust in to a loose silhouette, `uLock` closes what
+ * is left, and `uWake` turns the part from cold to the accent. As made here the Machine is whole
+ * and dormant, which is the look chosen in round 4.
  */
 export function pointsMaterial() {
   return new ShaderMaterial({
@@ -165,18 +213,65 @@ export function pointsMaterial() {
       uSize: { value: 0.012 },
       uBrightness: { value: 0.5 },
       uHeight: { value: 1 },
-      // Cold off-white: the dormant colour. The warm accent comes with round 5.
+      uGather: { value: new Vector4(1, 1, 1, 1) },
+      uLock: { value: new Vector4(1, 1, 1, 1) },
+      uWake: { value: new Vector4(0, 0, 0, 0) },
+      // How much of the way back to dust a gathered point still is, until its part locks.
+      uLoose: { value: 0.018 },
+      // How far the Rings still have to turn before they lock, in radians.
+      uTurn: { value: 0 },
+      // How far a bead moving at a speed of 1 has drifted round its ring, in radians.
+      uDrift: { value: 0 },
+      // How bright dust is, and how bright an awake point is, against a dormant one.
+      uDustGain: { value: 1 },
+      uAwakeGain: { value: 1.25 },
+      // Cold off-white is dormant. The accent is the working choice until round 5 settles it.
       uColour: { value: new Color('#e5e5e5') },
+      uAccent: { value: new Color('#ffa726') },
     },
     vertexShader: /* glsl */ `
       uniform float uSize;
       uniform float uBrightness;
       uniform float uHeight;
+      uniform vec4 uGather;
+      uniform vec4 uLock;
+      uniform vec4 uWake;
+      uniform float uLoose;
+      uniform float uTurn;
+      uniform float uDrift;
+      uniform float uDustGain;
+      uniform float uAwakeGain;
+      attribute float aPart;
       attribute float aJitter;
+      attribute vec3 aDust;
+      attribute float aOrder;
+      attribute vec2 aSpin;
       varying float vBrightness;
+      varying float vWake;
+
+      // Points do not move in step. Each takes "span" of the whole change, and starts earlier
+      // or later in it by its own "offset".
+      float staggered(float whole, float offset, float span) {
+        return smoothstep(0.0, 1.0, (whole - offset * (1.0 - span)) / span);
+      }
 
       void main() {
-        vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
+        int part = int(aPart + 0.5);
+        // A second random number, so the big points are not also the late ones.
+        float late = fract(aJitter * 7.13);
+        float gather = staggered(uGather[part], late, 0.6);
+        float lock = staggered(uLock[part], late, 0.6);
+        float away = mix(1.0, uLoose, gather) * (1.0 - lock);
+        // A point turns to the accent the way it arrived: in its own time, not in a sweep down
+        // the part. With the timeline waking a part as it locks, each point lights as it lands.
+        vWake = staggered(uWake[part], late, 0.6);
+
+        float angle = uTurn * aSpin.x + uDrift * aSpin.y;
+        float c = cos(angle);
+        float s = sin(angle);
+        vec3 home = vec3(position.x * c + position.z * s, position.y, position.z * c - position.x * s);
+
+        vec4 viewPosition = modelViewMatrix * vec4(mix(home, aDust, away), 1.0);
         gl_Position = projectionMatrix * viewPosition;
         float pixelsPerUnit = 0.5 * uHeight * projectionMatrix[1][1] / -viewPosition.z;
         float size = uSize * (0.6 + 0.8 * aJitter) * pixelsPerUnit;
@@ -184,15 +279,18 @@ export function pointsMaterial() {
         // and dimmer by the area it gained, so a small screen is not brighter than a large one.
         gl_PointSize = max(size, 1.0);
         vBrightness = uBrightness * (0.55 + 0.45 * aJitter) * min(1.0, size * size);
+        vBrightness *= mix(1.0, uDustGain, away) * mix(1.0, uAwakeGain, vWake);
       }
     `,
     fragmentShader: /* glsl */ `
       uniform vec3 uColour;
+      uniform vec3 uAccent;
       varying float vBrightness;
+      varying float vWake;
 
       void main() {
         float falloff = smoothstep(0.5, 0.0, length(gl_PointCoord - 0.5));
-        gl_FragColor = vec4(uColour * vBrightness * falloff, 1.0);
+        gl_FragColor = vec4(mix(uColour, uAccent, vWake) * vBrightness * falloff, 1.0);
       }
     `,
     blending: AdditiveBlending,

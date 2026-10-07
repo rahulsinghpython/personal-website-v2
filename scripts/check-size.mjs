@@ -11,7 +11,7 @@ const DIST = 'dist'
 const MANIFEST = '.vite/manifest.json'
 
 // Mirrors the Loading table in docs/PERFORMANCE.md. Change both together, with a DECISIONS entry.
-const BUDGET_KB = { critical: 100, scene: 300, whole: 1000 }
+const BUDGET_KB = { critical: 100, scene: 400, whole: 1000 }
 
 // The site's pages (src/routes.ts). Any other HTML in the build, the workbench say, is a failure.
 const PAGES = ['index.html', 'plain/index.html']

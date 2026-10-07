@@ -5,11 +5,13 @@ import { site } from '../content/site'
 import { INDEX_PATH } from '../routes'
 import { Beat } from './Beat'
 import { EraBeat } from './EraBeat'
+import { Scene } from './Scene'
 
 /** The content layer: the eight beats, in story order. */
 export function Story() {
   return (
     <>
+      <Scene />
       <header className="fixed top-0 right-0 z-10 p-3 sm:p-7">
         <a href={INDEX_PATH} className="readout block p-3 text-cold">
           Index

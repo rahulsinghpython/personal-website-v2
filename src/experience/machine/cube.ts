@@ -1,5 +1,5 @@
 import type { BufferGeometry } from 'three'
-import { box, noise } from './shapes'
+import { box, noise, rod, type Point } from './shapes'
 
 const SIDES = [-1, 1]
 const LOTS = 3
@@ -38,4 +38,34 @@ export function cubeCity(size: number, gap: number, skyline: number, centre = 0)
   )
 
   return [...cubes, ...blocks]
+}
+
+/**
+ * The twelve edges of each of the eight cubes of `cubeCity`, as thin bars. As points a cube's
+ * faces are a haze; its edges are what make it a cube.
+ */
+export function cubeFrame(size: number, gap: number, radius: number, centre = 0): BufferGeometry[] {
+  const cell = (size - gap) / 2
+  const offset = (cell + gap) / 2
+  const half = cell / 2
+  return SIDES.flatMap((x) =>
+    SIDES.flatMap((y) =>
+      SIDES.flatMap((z) => {
+        const middle: Point = [x * offset, centre + y * offset, z * offset]
+        return [0, 1, 2].flatMap((axis) =>
+          SIDES.flatMap((a) =>
+            SIDES.map((b) => {
+              /** A point on this edge, `along` from its middle. */
+              const at = (along: number) =>
+                middle.map(
+                  (value, i) =>
+                    value + (i === axis ? along : (i === (axis + 1) % 3 ? a : b) * half),
+                ) as Point
+              return rod(at(-half), at(half), radius)
+            }),
+          ),
+        )
+      }),
+    ),
+  )
 }

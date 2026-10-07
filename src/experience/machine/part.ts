@@ -64,6 +64,37 @@ export function defaultValues(schema: ParamSchema): Record<string, number> {
   return Object.fromEntries(Object.entries(schema).map(([key, spec]) => [key, spec.value]))
 }
 
+/** A Machine with every parameter at the value it was given in code. */
+export function machineDefaults(machine: MachineDef): MachineValues {
+  return Object.fromEntries(
+    machine.parts.map((part) => [part.id, defaultValues(part.params)]),
+  ) as MachineValues
+}
+
+/**
+ * How a piece turns about the Machine's axis in the story. `turn` is its share of the turn the
+ * Rings make as they lock; `drift` is how fast it keeps moving afterwards, in radians a second.
+ * It is kept on the geometry, so it stays with the piece as the piece is moved into place.
+ */
+export function spinning(piece: BufferGeometry, turn: number, drift = 0): BufferGeometry {
+  piece.userData.spin = [turn, drift]
+  return piece
+}
+
+export const spinOf = (piece: BufferGeometry): [turn: number, drift: number] =>
+  piece.userData.spin ?? [0, 0]
+
+/**
+ * Gives a piece more or less than its share of the points: 1 is what its size earns it. For a
+ * piece that holds the shape together and should not be the brightest thing in it.
+ */
+export function weighted(piece: BufferGeometry, share: number): BufferGeometry {
+  piece.userData.share = share
+  return piece
+}
+
+export const shareOf = (piece: BufferGeometry): number => piece.userData.share ?? 1
+
 /** Builds a part as a single geometry, so a part is one draw call and one surface to sample. */
 export function buildPart(part: PartDef, values: MachineValues): BufferGeometry {
   const pieces = part.build(values)
