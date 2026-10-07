@@ -58,13 +58,13 @@ The site picks a tier at startup from device signals, and steps down a tier if m
 | | High | Mid | Low |
 | --- | --- | --- | --- |
 | Typical device | Desktop or laptop with a discrete GPU | Laptop with integrated graphics, recent phone | Older or budget phone |
-| Points | up to 150,000 | up to 60,000 | up to 20,000 |
+| Points | up to 600,000 | up to 60,000 | up to 20,000 |
 | Pixel ratio cap | 2 | 1.5 | 1 |
 | Pointer torch | Yes | Yes | Off |
 | Optional per-part interactions | Yes | Yes | Off |
 | Post-processing | Only if a decision allows it | No | No |
 
-Stepping down must never change the story, only the density. The point counts are starting guesses. The greybox phase measured only the development machine, so they are set when the site is tested on real devices, in Phase 5 ([DECISIONS D28](DECISIONS.md)). The look chosen in round 4 draws three quarters of each count.
+Stepping down must never change the story, only the density. The point counts are starting guesses. The greybox phase measured only the development machine, so they are set when the site is tested on real devices, in Phase 5 ([DECISIONS D28](DECISIONS.md)). The look chosen in round 4 draws three quarters of each count. The high count was raised from 150,000 on 2026-10-08, from one tablet judged by eye ([DECISIONS D33](DECISIONS.md)); the mid and low counts are untouched.
 
 ## Rules
 
@@ -151,6 +151,6 @@ With the camera about three times closer than the whole-Machine view, where each
 
 What this does not show:
 
-- **Frame rate on a mid or low device.** Not measured. The tier point counts above are still the starting guesses.
+- **Frame rate on a mid or low device.** Not measured. The tier point counts above are still the starting guesses. One data point, by eye: the high tier did not lag on Rahul's Samsung Galaxy Tab FE on 2026-10-08, so tablets are now guessed to be high ([DECISIONS D31](DECISIONS.md)).
 - **Sampling on a slow CPU.** It is the number to watch. It has a fixed part of about 10 ms that does not shrink with the point count, and a low-tier phone's CPU is several times slower than this one, so 15 ms here is likely to pass the 50 ms limit above there. Measure it on a phone before deciding whether sampling moves to build time or a worker.
 - **Start-up in a production build.** The workbench is the development server: loading it showed three long tasks, of 219, 101 and 56 ms, which include unminified modules and React's development build. Measure long tasks again on the built site once the scene is mounted, in Phase 3.

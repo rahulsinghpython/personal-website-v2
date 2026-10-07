@@ -42,7 +42,7 @@ Every point, and so every part, is in one of three states.
 
 1. **Dust.** Scattered, dim, unreadable. Looks like noise or stars.
 2. **Dormant.** In position. The shape is readable but cold and unlit.
-3. **Awake.** Powered on. Warm accent colour, lines drawn, surfaces filled.
+3. **Awake.** Powered on. Warm accent colour, lines drawn, surfaces filled. The lines are built, as a first version ([DECISIONS D34](DECISIONS.md)); the surfaces are not.
 
 Colour carries state, not decoration: cold white means dormant, the warm accent means awake. A visitor should be able to tell how far through the story they are from colour alone.
 

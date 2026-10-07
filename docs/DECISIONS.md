@@ -319,7 +319,7 @@ What a chat built so that there is something to scroll. None of it has been seen
 
 **The awake colour is a placeholder amber,** `#ffa726`, and an awake point is a quarter brighter than a dormant one. Round 5 picks the accent.
 
-**The tier is guessed:** a touch device is mid, anything else is high, nothing is low, and `?tier=` in the address sets it by hand. Detection is Phase 5.
+**The tier is guessed:** a phone is mid, anything else is high, nothing is low, and `?tier=` in the address sets it by hand. Detection is Phase 5. At first every touch device was mid. On 2026-10-08 Rahul found the Machine grainy and sparse on his tablet, a Samsung Galaxy Tab FE, tried `?tier=high`, and reported that it looked better and did not lag. So a touch screen at least 600 CSS pixels across its shorter side is now high. That is one tablet judged by eye, not a measurement.
 
 **Reduced motion is honoured now,** in the plain form ARCHITECTURE describes, because shipping the animation without it would be worse than shipping it early.
 
@@ -344,3 +344,27 @@ Reopens the shape signed off in D23 and D25. Three shapes were on the workbench:
 **The camera.** A new pose for every beat, first values from the chat like the rest of D31. The parts now wake from the top of the Machine to the bottom, so after the Core the camera only travels down. The Lens is seen from a little below, so the lowest ring does not cut across the frame.
 
 **A and B were removed from the code the same day,** once the commit that holds them was pushed (`31d5e96`). The picked shape is `src/experience/machine/machine.ts`, and the workbench shows it as its one variant. **Not done:** the city on the cube's roof does not read as points. The Scanner beat's sweep (EXPERIENCE) is not built; the fan of beams is where it would start.
+
+### D33. The high tier draws four times the points — Accepted, 2026-10-08
+
+Rahul's direction; the number is the chat's. On his tablet, a Samsung Galaxy Tab FE, the Machine looked grainy and sparse. His words: the performance guesses were "a bit conservative", and "I kinda want it to blow my mind".
+
+**What he tried,** with `?points=` in the address, which sets a tier's count by hand (`tierBudget` in `src/state/tiers.ts`; `?dpr=` does the same for the pixel-ratio cap). 300,000 and 600,000 points drawn were smooth. 1,200,000 lagged a little.
+
+**What changes.** The high tier's count goes from 150,000 to 600,000, so 450,000 are drawn: below the last count he saw run smoothly, to leave room for a device slower than his. A tablet is guessed to be high (D31).
+
+**Points get finer, not brighter.** A point's size and brightness were chosen at 150,000 (D28). That count is now a constant of the look, apart from the tier table, so more points are each drawn smaller and dimmer and the whole stays about as bright. Before, the look was tied to whatever the high tier's count was, and raising it would have changed nothing but the cost.
+
+**What this has not been checked against.** It is one device, by eye, with no frame times. The mid and low counts are unchanged and still unmeasured, so a phone now draws a tenth of what a tablet does. Anything that is not a phone is guessed to be high, which includes a laptop with integrated graphics on a large screen, and nothing steps a tier down yet when frames are slow; both are Phase 5. Sampling 450,000 points at startup has not been timed on any device; PERFORMANCE asks for it to be moved to build time or a worker if it is slow.
+
+### D34. An awake part is drawn with lines, and the far side is dimmer — Proposed, 2026-10-08
+
+Built for Rahul to compare on his tablet; not yet seen by him. After D33 he said the Machine was still missing something and asked whether more points was the only way to make it crisp. The chat's answer: points are soft at any count, and two things were missing.
+
+**Lines.** EXPERIENCE has always said an awake part has "lines drawn"; waking only changed the colour. Now the centre line of every rod and ring and the rim of every plate and can is a true one-pixel line (`src/experience/machine/lines.ts`), a few thousand segments in one more draw call. They are read back from each shape's vertices, so they follow every move a shape is given. A part's lines are drawn in during the last third of its waking, each from one end and in its own time: the haze closes into a scan, then the scan resolves into a drawing. **Passed over for now:** lines wider than a pixel, which three.js does with an add-on that would add to the scene chunk; filled surfaces, the other half of that sentence in EXPERIENCE.
+
+**Depth.** Everything is added on top of everything else, so the far side of the Machine was as bright as the near side and it read as flat. A point or a line is now up to 60% dimmer the farther behind the Machine's middle it is, and up to a quarter brighter in front. It is a few lines in the vertex shader and costs nothing to draw.
+
+**Comparing.** `?lines=0` and `?depth=0` in the address turn each off.
+
+**Still Rahul's:** whether either stays, and how strong. Both numbers are first values.

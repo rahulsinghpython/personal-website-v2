@@ -17,6 +17,7 @@ import {
   type MachineValues,
   type PartDef,
 } from '../src/experience/machine/part'
+import { linesMaterial, sampleLines } from '../src/experience/machine/lines'
 import { lift, pointsMaterial, samplePoints } from '../src/experience/machine/points'
 import { applyStory, seek, story } from '../src/experience/timeline'
 import { TIERS } from '../src/state/tiers'
@@ -81,27 +82,36 @@ function Cloud({ machine }: { machine: MachineDef }) {
   const material = useMemo(() => pointsMaterial(), [])
   useEffect(() => () => geometry.dispose(), [geometry])
   useEffect(() => () => material.dispose(), [material])
+  const lines = useMemo(() => sampleLines(machine, values), [machine, values])
+  const lineMaterial = useMemo(() => linesMaterial(), [])
+  useEffect(() => () => lines.dispose(), [lines])
+  useEffect(() => () => lineMaterial.dispose(), [lineMaterial])
 
   // Round 6: the scrubber sets the story by hand. The beads do not drift here.
   useEffect(() => {
-    if (beat === null) showWhole(material)
-    else {
-      seekBeat(beat)
-      applyStory(material)
+    for (const each of [material, lineMaterial]) {
+      if (beat === null) showWhole(each)
+      else {
+        seekBeat(beat)
+        applyStory(each)
+      }
     }
     invalidate()
-  }, [beat, material, invalidate])
+  }, [beat, material, lineMaterial, invalidate])
 
   return (
-    <points geometry={geometry} frustumCulled={false}>
-      <primitive
-        object={material}
-        attach="material"
-        uniforms-uSize-value={size * scale}
-        uniforms-uBrightness-value={brightness * scale}
-        uniforms-uHeight-value={bufferHeight}
-      />
-    </points>
+    <>
+      <points geometry={geometry} frustumCulled={false}>
+        <primitive
+          object={material}
+          attach="material"
+          uniforms-uSize-value={size * scale}
+          uniforms-uBrightness-value={brightness * scale}
+          uniforms-uHeight-value={bufferHeight}
+        />
+      </points>
+      <lineSegments geometry={lines} material={lineMaterial} frustumCulled={false} />
+    </>
   )
 }
 

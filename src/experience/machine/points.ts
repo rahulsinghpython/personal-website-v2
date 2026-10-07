@@ -9,7 +9,6 @@ import {
   Vector4,
 } from 'three'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js'
-import { TIERS } from '../../state/tiers'
 import { shareOf, spinOf, type MachineDef, type MachineValues, type PartId } from './part'
 
 // The Machine as a point cloud: points scattered over the surface of each part, and the material
@@ -26,8 +25,9 @@ export type PointLook = {
   size: number
   brightness: number
   /**
-   * How much bigger and brighter each point gets as the count drops, so a low tier still reads.
-   * 0 is no help; at 0.5 a quarter of the points are each twice as big and twice as bright.
+   * How much bigger and brighter each point gets as the count drops, so a low tier still reads,
+   * and how much finer as it rises. 0 is no change; at 0.5 a quarter of the points are each
+   * twice as big and twice as bright.
    */
   boost: number
   /**
@@ -51,9 +51,14 @@ export const POINT_LOOK: PointLook = {
   weights: { core: 1, scanner: 1, rings: 2, lens: 0.75 },
 }
 
+/**
+ * The count the look was chosen at. A point's size and brightness in `POINT_LOOK` are right for
+ * this many points; more are each drawn finer and fewer each bolder, so the whole stays as bright.
+ */
+const CHOSEN_AT = 150_000
+
 /** What `boost` multiplies a point's size and brightness by when `count` points are drawn. */
-export const lift = (count: number, boost: number) =>
-  (TIERS.high.points / Math.max(1, count)) ** boost
+export const lift = (count: number, boost: number) => (CHOSEN_AT / Math.max(1, count)) ** boost
 
 /** The same "random" numbers every time, so the same Machine always gives the same cloud. */
 function seeded(seed: number) {
@@ -195,6 +200,23 @@ export function samplePoints(
 }
 
 /**
+ * Depth, for both materials: a point or a line is dimmer the farther behind the Machine's middle
+ * it is, and a little brighter in front of it. Everything is added on top of everything else, so
+ * without this the far side is as bright as the near side and the Machine reads as flat.
+ * `uDepth` is how much is taken off at the back; 0 turns it off.
+ */
+export const DEPTH_GLSL = /* glsl */ `
+  uniform float uDepth;
+
+  float depthFade(vec4 viewPosition) {
+    // The Machine's middle is a little below the origin, and it reaches about 2.2 either way.
+    float middle = (modelViewMatrix * vec4(0.0, -0.3, 0.0, 1.0)).z;
+    float behind = clamp((middle - viewPosition.z) / 2.2, -1.0, 1.0);
+    return mix(1.0 + 0.4 * uDepth, 1.0 - uDepth, behind * 0.5 + 0.5);
+  }
+`
+
+/**
  * Soft round points, added on top of each other so dense areas glow without a bloom pass.
  *
  * `uSize` is a point's width in the Machine's own units, the units its rods and rings are
@@ -222,6 +244,7 @@ export function pointsMaterial() {
       uTurn: { value: 0 },
       // How far a bead moving at a speed of 1 has drifted round its ring, in radians.
       uDrift: { value: 0 },
+      uDepth: { value: 0.6 },
       // How bright dust is, and how bright an awake point is, against a dormant one.
       uDustGain: { value: 1 },
       uAwakeGain: { value: 1.25 },
@@ -248,6 +271,7 @@ export function pointsMaterial() {
       attribute vec2 aSpin;
       varying float vBrightness;
       varying float vWake;
+      ${DEPTH_GLSL}
 
       // Points do not move in step. Each takes "span" of the whole change, and starts earlier
       // or later in it by its own "offset".
@@ -280,6 +304,7 @@ export function pointsMaterial() {
         gl_PointSize = max(size, 1.0);
         vBrightness = uBrightness * (0.55 + 0.45 * aJitter) * min(1.0, size * size);
         vBrightness *= mix(1.0, uDustGain, away) * mix(1.0, uAwakeGain, vWake);
+        vBrightness *= depthFade(viewPosition);
       }
     `,
     fragmentShader: /* glsl */ `
