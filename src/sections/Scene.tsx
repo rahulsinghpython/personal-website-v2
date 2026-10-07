@@ -29,8 +29,15 @@ export function Scene() {
   )
   if (!wanted) return null
 
+  // As tall as the window is with the browser's toolbar hidden, and no taller or shorter as the
+  // toolbar comes and goes. A phone or tablet hides it on the first scroll down, and a canvas
+  // that followed it would be resized on every frame of that, which is a new drawing buffer each
+  // time.
   return (
-    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 print:hidden">
+    <div
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-lvh print:hidden"
+    >
       <Optional>
         <Suspense fallback={null}>
           <Experience />

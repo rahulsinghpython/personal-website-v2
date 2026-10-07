@@ -357,6 +357,8 @@ Rahul's direction; the number is the chat's. On his tablet, a Samsung Galaxy Tab
 
 **What this has not been checked against.** It is one device, by eye, with no frame times. The mid and low counts are unchanged and still unmeasured, so a phone now draws a tenth of what a tablet does. Anything that is not a phone is guessed to be high, which includes a laptop with integrated graphics on a large screen, and nothing steps a tier down yet when frames are slow; both are Phase 5. Sampling 450,000 points at startup has not been timed on any device; PERFORMANCE asks for it to be moved to build time or a worker if it is slow.
 
+**The dust is thinner than the Machine, from the same day.** At the new count the opening dropped frames on Rahul's tablet while the dust dispersed and formed, and nowhere else. Dust fills the window, which costs far more than the same points packed into the Machine. So only about 110,000 points are drawn as dust, roughly what the high tier drew before, each bolder so the dust is as bright; the rest are not drawn until they are most of the way in, and so appear as the cloud closes (`dustLook` in `points.ts`). Not yet confirmed on the tablet. Two smaller things went in with it: the canvas no longer changes size as a touch browser's toolbar hides, and is no longer re-measured on every scroll event.
+
 ### D34. An awake part is drawn with lines, and the far side is dimmer — Proposed, 2026-10-08
 
 Built for Rahul to compare on his tablet; not yet seen by him. After D33 he said the Machine was still missing something and asked whether more points was the only way to make it crisp. The chat's answer: points are soft at any count, and two things were missing.

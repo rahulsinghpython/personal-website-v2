@@ -7,7 +7,7 @@ import { applyCamera } from './camera/camera'
 import { machine } from './machine/machine'
 import { machineDefaults } from './machine/part'
 import { linesMaterial, sampleLines } from './machine/lines'
-import { lift, POINT_LOOK, pointsMaterial, samplePoints } from './machine/points'
+import { dustLook, lift, POINT_LOOK, pointsMaterial, samplePoints } from './machine/points'
 import { applyStory, seek, seekStill, story } from './timeline'
 
 // The scene: the Machine as points, drawn behind the page and driven by how far it is scrolled.
@@ -36,6 +36,7 @@ function Machine({ tier, points, still }: { tier: Tier; points: number; still: b
   const bufferHeight = useThree((state) => state.size.height * state.viewport.dpr)
   const count = Math.round(points * POINT_LOOK.density)
   const scale = lift(count, POINT_LOOK.boost)
+  const dust = dustLook(count, POINT_LOOK.boost)
 
   const geometry = useMemo(
     () => samplePoints(machine, values, count, POINT_LOOK.weights, POINT_LOOK.thin),
@@ -112,6 +113,8 @@ function Machine({ tier, points, still }: { tier: Tier; points: number; still: b
           uniforms-uSize-value={POINT_LOOK.size * scale}
           uniforms-uBrightness-value={POINT_LOOK.brightness * scale}
           uniforms-uHeight-value={bufferHeight}
+          uniforms-uDustShare-value={dust.share}
+          uniforms-uDustLift-value={dust.lift}
           {...(depth === 0 && { 'uniforms-uDepth-value': 0 })}
         />
       </points>
@@ -144,6 +147,9 @@ export default function Experience() {
       frameloop="demand"
       dpr={Math.min(window.devicePixelRatio, budget.pixelRatioCap)}
       gl={{ antialias: false }}
+      // The canvas is fixed to the window, so scrolling cannot move it: do not re-measure it on
+      // every scroll event.
+      resize={{ scroll: false }}
       camera={{ near: 0.1, far: 100 }}
     >
       <color attach="background" args={[VOID]} />

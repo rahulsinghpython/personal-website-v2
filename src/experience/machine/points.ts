@@ -60,6 +60,23 @@ const CHOSEN_AT = 150_000
 /** What `boost` multiplies a point's size and brightness by when `count` points are drawn. */
 export const lift = (count: number, boost: number) => (CHOSEN_AT / Math.max(1, count)) ** boost
 
+/**
+ * How many points are drawn while the Machine is dust. Dust fills the window, which costs a
+ * tablet far more than the same points packed into the Machine, and at the high tier's count the
+ * opening dropped frames on Rahul's (docs/DECISIONS.md, D33). This is about the count the high
+ * tier drew before it was raised, which did not.
+ */
+const DUST_POINTS = 110_000
+
+/**
+ * The share of `count` points that are drawn as dust, and what `boost` multiplies their size and
+ * brightness by while they are, so thinner dust is as bright. The rest appear as they gather.
+ */
+export function dustLook(count: number, boost: number): { share: number; lift: number } {
+  const share = Math.min(1, DUST_POINTS / Math.max(1, count))
+  return { share, lift: share ** -boost }
+}
+
 /** The same "random" numbers every time, so the same Machine always gives the same cloud. */
 function seeded(seed: number) {
   let state = seed >>> 0
@@ -247,6 +264,9 @@ export function pointsMaterial() {
       uDepth: { value: 0.6 },
       // How bright dust is, and how bright an awake point is, against a dormant one.
       uDustGain: { value: 1 },
+      // The share of points drawn as dust, and how much bolder each of those is (see dustLook).
+      uDustShare: { value: 1 },
+      uDustLift: { value: 1 },
       uAwakeGain: { value: 1.25 },
       // Cold off-white is dormant. The accent is the working choice until round 5 settles it.
       uColour: { value: new Color('#e5e5e5') },
@@ -263,6 +283,8 @@ export function pointsMaterial() {
       uniform float uTurn;
       uniform float uDrift;
       uniform float uDustGain;
+      uniform float uDustShare;
+      uniform float uDustLift;
       uniform float uAwakeGain;
       attribute float aPart;
       attribute float aJitter;
@@ -298,13 +320,20 @@ export function pointsMaterial() {
         vec4 viewPosition = modelViewMatrix * vec4(mix(home, aDust, away), 1.0);
         gl_Position = projectionMatrix * viewPosition;
         float pixelsPerUnit = 0.5 * uHeight * projectionMatrix[1][1] / -viewPosition.z;
-        float size = uSize * (0.6 + 0.8 * aJitter) * pixelsPerUnit;
+        // Only some points are dust, each bolder for it. The others are not drawn until they
+        // are most of the way in: a third random number picks which.
+        float dusty = step(fract(aJitter * 13.37), uDustShare);
+        float shown = max(dusty, smoothstep(0.6, 0.15, away));
+        float bold = mix(1.0, uDustLift, away);
+        float size = uSize * (0.6 + 0.8 * aJitter) * pixelsPerUnit * bold;
         // Nothing is drawn narrower than a pixel. A point that should be is drawn one pixel wide
         // and dimmer by the area it gained, so a small screen is not brighter than a large one.
         gl_PointSize = max(size, 1.0);
         vBrightness = uBrightness * (0.55 + 0.45 * aJitter) * min(1.0, size * size);
         vBrightness *= mix(1.0, uDustGain, away) * mix(1.0, uAwakeGain, vWake);
-        vBrightness *= depthFade(viewPosition);
+        vBrightness *= depthFade(viewPosition) * bold * shown;
+        // Outside the view, so a point that is not shown costs nothing to draw.
+        if (shown <= 0.0) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
       }
     `,
     fragmentShader: /* glsl */ `

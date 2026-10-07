@@ -18,7 +18,7 @@ import {
   type PartDef,
 } from '../src/experience/machine/part'
 import { linesMaterial, sampleLines } from '../src/experience/machine/lines'
-import { lift, pointsMaterial, samplePoints } from '../src/experience/machine/points'
+import { dustLook, lift, pointsMaterial, samplePoints } from '../src/experience/machine/points'
 import { applyStory, seek, story } from '../src/experience/timeline'
 import { TIERS } from '../src/state/tiers'
 import { useCloud } from './cloud'
@@ -74,6 +74,7 @@ function Cloud({ machine }: { machine: MachineDef }) {
   const bufferHeight = useThree((state) => state.size.height * state.viewport.dpr)
   const count = Math.round(TIERS[tier].points * density)
   const scale = lift(count, boost)
+  const dust = dustLook(count, boost)
 
   const geometry = useMemo(
     () => timeBuild(() => samplePoints(machine, values, count, weights, thin)),
@@ -108,6 +109,8 @@ function Cloud({ machine }: { machine: MachineDef }) {
           uniforms-uSize-value={size * scale}
           uniforms-uBrightness-value={brightness * scale}
           uniforms-uHeight-value={bufferHeight}
+          uniforms-uDustShare-value={dust.share}
+          uniforms-uDustLift-value={dust.lift}
         />
       </points>
       <lineSegments geometry={lines} material={lineMaterial} frustumCulled={false} />
