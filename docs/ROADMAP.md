@@ -58,7 +58,7 @@ Make scrolling build it.
 - Done, first version: camera path through the eight beats, in step with the DOM sections.
 - Done: scrolling back reverses everything exactly. Checked by scrolling away and back and comparing the camera.
 - Not started: round 6 of [DESIGN-PROCESS](DESIGN-PROCESS.md). Rahul scrolls it on a real device; dust layout, assembly order and overlap, easing and the camera path are settled, as options where there is a real choice.
-- Done: the shape was redrawn after outside feedback. Rahul picked the third of three on the workbench: every part on the rig's axis, solar panels on the top plate, the wide rings kept ([D32](DECISIONS.md)). The home page draws it, with a new camera pose for every beat. Left: remove the two shapes passed over once this one has been scrolled.
+- Done: the shape was redrawn after outside feedback. Rahul picked the third of three on the workbench: every part on the rig's axis, solar panels on the top plate, the wide rings kept ([D32](DECISIONS.md)). The home page draws it, with a new camera pose for every beat.
 - Not started: show it to someone who has not seen it, for the reveal test.
 - Known and left for later: on a phone the text of the era beats covers the lower part of the Machine (spacing is Phase 5); the Lens beat's text touches the top of the rig on a wide window; React Three Fiber logs a three.js deprecation warning (`THREE.Clock`) to the console; nothing labels a part on the Machine itself yet.
 

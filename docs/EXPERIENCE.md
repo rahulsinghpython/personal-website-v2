@@ -23,7 +23,7 @@ Because the Scanner is at the top, the Rings in the middle and the Lens at the b
 
 As points (round 4) it is one cloud sampled from these surfaces. The thinner a piece is, the more closely its points are packed, so the lines, rings and beams do not vanish behind the plates; and a point is sized as part of the object, so the Machine is the same picture on a phone as on a monitor ([D27](DECISIONS.md)). The look Rahul chose on 2026-10-07 sits between an even scan and a drawing led by its lines: the plates are a thin scatter and the lines, rings and beams are the brightest things in it ([D28](DECISIONS.md)).
 
-The code is `flared` in `src/experience/machine/axial.ts`, and every number in it is a slider on the workbench, as variant C. The shape it replaced is still there as variant A, and a slimmer one that was passed over as B, until this one has been scrolled and signed off.
+The code is `src/experience/machine/machine.ts`, and every number in it is a slider on the workbench.
 
 It has four parts. Each part stands for **a kind of work** Rahul has done, and is one connected piece of the shape. The company and the years are small print beside it, not the point ([DECISIONS D24](DECISIONS.md)).
 

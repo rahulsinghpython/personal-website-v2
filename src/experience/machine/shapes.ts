@@ -76,9 +76,6 @@ export function box(width: number, height: number, depth: number): BufferGeometr
   return new BoxGeometry(width, height, depth)
 }
 
-/** How thick a gimbal ring is, from its inner face to its outer face. */
-export const GIMBAL_THICK = 0.06
-
 /** A repeatable number from 0 to 1 for a grid cell, so "random" detail is the same every build. */
 export function noise(x: number, y: number): number {
   const value = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453

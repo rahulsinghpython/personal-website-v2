@@ -325,15 +325,17 @@ What a chat built so that there is something to scroll. None of it has been seen
 
 ### D32. The shape is redrawn: every part on the rig's axis, solar panels on the roof — Accepted, 2026-10-07
 
-Reopens the shape signed off in D23 and D25. Rahul picked C, the third of three, on the workbench, from a tablet. The home page draws it. His words: "yes C is nice". The motion is still unsettled (D31), and he has not yet scrolled it.
+Reopens the shape signed off in D23 and D25. Three shapes were on the workbench: A, the one signed off; B, with every part moved onto the rig's axis; and C, which is B with A's wide rings. Rahul picked C, from a tablet. The home page draws it. His words: "yes C is nice". The motion is still unsettled (D31), and he has not yet scrolled it.
 
 **Why it was reopened.** Two new reasons, both after the Machine was first seen assembled on the page. Rahul: the rig in the middle is good, but the parts around it are confusing and do not sit with a portfolio this technical. Someone he showed it to: the top part and the left part look off. Those are the crown and the arm, the two pieces that break the rig's symmetry. The rig is drawn like computing hardware (D22); the crown is a gyroscope, the arm is a lamp on a bracket and the orbits are an orrery, which is the instrument look D22 moved away from.
 
-**What B changes.** The rig is kept. The other three parts are redrawn in its vocabulary (plates, posts, lines, cans) and moved onto its axis.
+**What B changed.** The rig is kept. The other three parts are redrawn in its vocabulary (plates, posts, lines, cans) and moved onto its axis.
 
 - **Scanner:** a scanning puck on the mount, over a roof of solar panels standing on the top plate, with beams from the puck down onto each panel. The panels are Rahul's addition: the 3D work was for solar, rebuilding roofs and placing panels on them ([CONTENT](CONTENT.md)).
-- **Rings:** a beaded track close around each of the three lowest plates, on short spokes. They follow the rig's taper, so the outline stays the rig's.
+- **Rings:** a beaded track close around each of the three lowest plates, on short spokes, following the rig's taper.
 - **Lens:** the cube of cubes on a stage hung under the last plate, where the chip sits in a real rig. The lines of the bundle run into its roof and one tip leaves below. This is the idea D23 said was worth remembering from the cable silhouette: lines that visibly run from the Core into the Lens.
+
+**What C changed from B.** Shown A and B side by side, Rahul liked B but said A also has a really nice shape, and asked for something in between. C has A's outline back: the rings widen as the plates narrow, so the rig is a diamond. They are narrower than A's, and their spokes line up into three ribs instead of pointing three ways.
 
 **What does not change:** one object, four parts, the work each stands for, the order they assemble in. D23's rule that nothing is bolted onto a ring that turns still holds: the spokes turn with their ring.
 
@@ -341,4 +343,4 @@ Reopens the shape signed off in D23 and D25. Rahul picked C, the third of three,
 
 **The camera.** A new pose for every beat, first values from the chat like the rest of D31. The parts now wake from the top of the Machine to the bottom, so after the Core the camera only travels down. The Lens is seen from a little below, so the lowest ring does not cut across the frame.
 
-**Not done.** A and B are still in the code, as workbench variants. A was never committed in its final form, so it stays until C has been scrolled and signed off; then it and B go, and the shape moves into `machine.ts`. The city on the cube's roof does not read as points. The Scanner beat's sweep (EXPERIENCE) is not built; the fan of beams is where it would start.
+**A and B were removed from the code the same day,** once the commit that holds them was pushed (`31d5e96`). The picked shape is `src/experience/machine/machine.ts`, and the workbench shows it as its one variant. **Not done:** the city on the cube's roof does not read as points. The Scanner beat's sweep (EXPERIENCE) is not built; the fan of beams is where it would start.

@@ -1,24 +1,32 @@
 import type { BufferGeometry } from 'three'
-import { cubeCity } from './cube'
-import { defineMachine, param, spinning, type MachineDef, type MachineValues } from './part'
-import { around, ball, band, box, drum, GIMBAL_THICK, lathe, rad, ring, rod } from './shapes'
+import { cubeCity, cubeFrame } from './cube'
+import {
+  defineMachine,
+  param,
+  spinning,
+  weighted,
+  type MachineDef,
+  type MachineValues,
+} from './part'
+import { around, ball, box, band, drum, lathe, rad, ring, rod } from './shapes'
 
-// The Machine, in the silhouette Rahul signed off in round 2 (docs/DECISIONS.md, D23): a tiered
-// rig that hangs, with orbit rings, an arm, and a small cube in gimbals standing on top.
+// The Machine, in the shape Rahul picked on 2026-10-07 (docs/DECISIONS.md, D32): a tiered rig
+// that hangs, with every part on its axis and drawn in its vocabulary of plates, posts, lines
+// and cans.
 //
 // Each part stands for a kind of work (D24), and is one connected piece of the shape:
-//   core     data pipelines   the tiers, the lines running down through them, and the tip
-//   scanner  3D scanning      the arm and its head
-//   rings    scheduling       the orbit rings
-//   lens     AI               the crown: the cube in gimbals
+//   core     data pipelines   the tiers and the lines running down through them
+//   scanner  3D scanning      a scanning puck on the mount, over solar panels on the top plate
+//   rings    scheduling       a beaded ring round each of the lowest plates
+//   lens     AI               the cube of cubes on a stage under the last plate
 //
-// The detail of each part is the version Rahul picked in round 3 (D25). The versions he passed
-// over are in git history, at 4393c8e.
+// The shape it replaced (D23, D25) and a slimmer one passed over with it are in git history, at
+// 31d5e96.
 
 /** Height of the top plate. */
-export const TOP = 1.1
-/** The top face of the mount, where the crown stands. */
-export const MOUNT_TOP = TOP + 0.405
+const TOP = 1.1
+/** The top face of the mount, where the puck stands. */
+const MOUNT_TOP = TOP + 0.405
 
 const schema = {
   core: {
@@ -29,40 +37,39 @@ const schema = {
     lines: param(6, 0, 16, 1),
   },
   scanner: {
-    reach: param(0.5, 0.2, 1.2),
-    size: param(0.2, 0.1, 0.4),
+    size: param(0.2, 0.1, 0.35),
+    panels: param(4, 3, 10, 1),
+    length: param(0.56, 0.2, 0.7),
+    tilt: param(16, 0, 60, 1),
+    beams: param(5, 0, 9, 1),
   },
   rings: {
     count: param(3, 1, 4, 1),
-    radius: param(1.25, 0.8, 2),
-    grow: param(0.3, 0, 0.6),
-    phase: param(130, 0, 360, 1),
+    radius: param(1.12, 0.8, 2),
+    grow: param(0.2, 0, 0.6),
+    phase: param(0, 0, 360, 1),
   },
   lens: {
-    scale: param(0.38, 0.2, 0.7),
-    tilt: param(62, 0, 90, 1),
-    yaw: param(25, -90, 90, 1),
-    spin: param(20, -90, 90, 1),
+    scale: param(0.5, 0.3, 0.8),
+    drop: param(0.34, 0.1, 0.8),
     skyline: param(0.16, 0, 0.3),
   },
 }
 type Values = MachineValues<typeof schema>
-export type Core = Values['core']
+type Core = Values['core']
 
-export const tierCount = (c: Core) => Math.round(c.tiers)
-export const tierY = (c: Core, tier: number) => TOP - tier * c.drop
-export const tierRadius = (c: Core, tier: number) => Math.max(0.12, c.radius * (1 - c.taper * tier))
-export const lastTier = (c: Core) => tierCount(c) - 1
+const tierCount = (c: Core) => Math.round(c.tiers)
+const tierY = (c: Core, tier: number) => TOP - tier * c.drop
+const tierRadius = (c: Core, tier: number) => Math.max(0.12, c.radius * (1 - c.taper * tier))
+const lastTier = (c: Core) => tierCount(c) - 1
 
 // ---------------------------------------------------------------------------------------------
 // Core: data pipelines. Stage after stage, with the lines that run through them. The plates are
-// open in the middle and the lines drop straight through them as one bundle, gathering into a
-// nozzle.
+// open in the middle and the lines drop straight through them as one bundle, on into the Lens.
 
 function core({ core }: Values): BufferGeometry[] {
   const each = Array.from({ length: tierCount(core) }, (_, tier) => tier)
   const last = lastTier(core)
-  const tipTop = tierY(core, last) - 0.14
 
   const mount = [
     drum(0.16, 0.35).translate(0, TOP + 0.2, 0),
@@ -82,48 +89,85 @@ function core({ core }: Values): BufferGeometry[] {
   const bundle = around(Math.round(core.lines) * 2, () =>
     rod([core.radius * 0.3, TOP, 0], [tierRadius(core, last) * 0.3, tierY(core, last), 0], 0.014),
   )
-  const nozzle = lathe([
-    [tierRadius(core, last) * 0.3 + 0.04, tierY(core, last)],
-    [0.05, tipTop - 0.5],
-    [0, tipTop - 0.5],
-  ])
-  return [...mount, ...posts, ...plates, ...bundle, nozzle]
+  return [...mount, ...posts, ...plates, ...bundle]
 }
 
 // ---------------------------------------------------------------------------------------------
-// Scanner: 3D scanning. A drum held in a fork at the end of an arm, drawn with the fan of beams
-// it sweeps.
+// Scanner: 3D scanning, which was for solar (docs/CONTENT.md): roofs rebuilt in 3D and panels
+// placed on them. The top plate is the roof. Panels stand on it in a ring, tilted outward, and a
+// scanning puck on the mount sweeps a fan of beams down one of them.
 
-function scanner({ core, scanner }: Values): BufferGeometry[] {
+/** How far from the axis the panels' raised edge is. It clears the mount. */
+const PANEL_INNER = 0.46
+/** How far the low edge of a panel is off the roof. */
+const PANEL_LIFT = 0.03
+
+function scanner({ scanner }: Values): BufferGeometry[] {
   const s = scanner.size
-  const out = -core.radius - scanner.reach
-  const arm = TOP + 0.05
-  const head = TOP - 0.3
-  const fan = Array.from({ length: 7 }, (_, i) => {
-    const angle = rad(-36 + i * 12)
-    return rod(
-      [out, head, 0],
-      [out + Math.sin(angle) * 1.1, head - Math.cos(angle) * 1.1, 0],
-      0.008,
-    )
-  })
-  return [
-    rod([-core.radius + 0.15, arm, 0], [out, arm, 0], 0.03),
-    box(0.06, 0.06, s * 2.6).translate(out, arm, 0),
-    ...[-1, 1].map((side) => rod([out, arm, side * s * 1.25], [out, head, side * s * 1.25], 0.025)),
-    drum(s, s * 2.2)
-      .rotateX(Math.PI / 2)
-      .translate(out, head, 0),
-    ...fan,
+  const tall = s * 1.3
+  const eye = MOUNT_TOP + 0.06 + tall / 2
+  const puck = [
+    drum(0.07, 0.06).translate(0, MOUNT_TOP + 0.03, 0),
+    drum(s, tall).translate(0, eye, 0),
+    // The window the beams leave through, and the rims that make the puck a can and not a blur.
+    ...[-0.5, 0, 0.5].map((at) => ring(s + 0.004, 0.011).translate(0, eye + at * tall, 0)),
+    drum(s * 0.55, 0.03).translate(0, eye + tall / 2 + 0.015, 0),
   ]
+
+  const count = Math.round(scanner.panels)
+  const tilt = rad(scanner.tilt)
+  const length = scanner.length
+  const width = Math.min(0.9, 2 * PANEL_INNER * Math.tan(Math.PI / count) * 0.86)
+  const roof = TOP + 0.025
+  const high = roof + PANEL_LIFT + Math.sin(tilt) * length
+  /** A point on the panel at angle 0: `along` from its raised edge, `across` from its middle. */
+  const on = (along: number, across: number): [number, number, number] => [
+    PANEL_INNER + Math.cos(tilt) * along,
+    high - Math.sin(tilt) * along,
+    across,
+  ]
+  const rows = 3
+  const columns = Math.max(2, Math.round(width / 0.18))
+  const beams = Math.round(scanner.beams)
+
+  const panels = Array.from({ length: count }, (_, panel) =>
+    [
+      box(length, 0.012, width)
+        .rotateZ(-tilt)
+        .translate(...on(length / 2, 0)),
+      // The cells, drawn as their borders so the grid survives as points.
+      ...Array.from({ length: rows + 1 }, (_, row) => {
+        const along = (row / rows) * length
+        return rod(on(along, -width / 2), on(along, width / 2), 0.007)
+      }),
+      ...Array.from({ length: columns + 1 }, (_, column) => {
+        const across = (column / columns - 0.5) * width
+        return rod(on(0, across), on(length, across), 0.007)
+      }),
+      ...[-1, 1].map((side) =>
+        rod([PANEL_INNER, roof, side * width * 0.38], on(0, side * width * 0.38), 0.012),
+      ),
+    ].map((piece) => piece.rotateY((panel / count) * Math.PI * 2)),
+  ).flat()
+
+  // One fan, on one panel: the scan caught part-way round.
+  const fan = Array.from({ length: beams }, (_, beam) =>
+    rod([s, eye, 0], on(((beam + 0.5) / beams) * length, 0), 0.006),
+  )
+
+  return [...puck, ...panels, ...fan]
 }
 
 // ---------------------------------------------------------------------------------------------
 // Rings: scheduling. Many moving things kept in order. Each ring sits on three spokes and carries
-// a row of beads, more of them the wider the ring. The beads are the things being scheduled.
+// a row of beads, more of them the wider the ring. The beads are the things being scheduled. The
+// rings widen as the plates narrow, so the outline is a diamond, and the spokes line up into
+// three ribs.
 
 /** How fast the beads of the innermost ring drift once the Rings are awake, in radians a second. */
 const BEAD_DRIFT = 0.06
+/** The spokes hold the rings up; the beads and the rings are the part. */
+const SPOKE_SHARE = 0.3
 
 function rings({ core, rings }: Values): BufferGeometry[] {
   const count = Math.min(Math.round(rings.count), tierCount(core))
@@ -138,54 +182,50 @@ function rings({ core, rings }: Values): BufferGeometry[] {
     const way = orbit % 2 === 0 ? 1 : -1
     const drift = (way * BEAD_DRIFT) / (1 + orbit * 0.4)
     return [
-      spinning(ring(radius, 0.02).translate(0, y, 0), way),
-      ...around(3, () => spinning(rod([plate, y, 0], [radius, y, 0], 0.018), way)),
-      ...around(4 + orbit * 2, () => spinning(ball(0.065).translate(radius, y, 0), way, drift)),
+      spinning(ring(radius, 0.018).translate(0, y, 0), way),
+      ...around(3, () =>
+        weighted(spinning(rod([plate, y, 0], [radius, y, 0], 0.014), way), SPOKE_SHARE),
+      ),
+      ...around(4 + orbit * 2, () => spinning(ball(0.055).translate(radius, y, 0), way, drift)),
     ].map((piece) => piece.rotateY(turn))
   }).flat()
 }
 
 // ---------------------------------------------------------------------------------------------
-// Lens: AI. The crown, standing on the mount: a cube of cubes in two gimbal rings.
-//
-// The gimbal is built the way a real one is (D23): the outer ring stands on one pin, the inner
-// ring pivots inside it, and the cube sits on an axle through the inner ring. Nothing else
-// touches the rings. It is built at full size and then shrunk as a whole.
+// Lens: AI. The cube of cubes on a stage hung under the last plate, where the chip sits in a real
+// rig. Every line of the bundle runs into its roof and one tip leaves below: data in, an answer
+// out.
 
-const RADIUS = 1.32
-const DEPTH = 0.14
-/** How far the pin lifts the outer ring off the mount. */
-const PIN = 0.1
+/** The cube's faces are drawn faintly, so its edges carry it. */
+const FACE_SHARE = 0.35
 
-function lens({ lens }: Values): BufferGeometry[] {
-  const centre = MOUNT_TOP + PIN + RADIUS * lens.scale
-  const tilt = rad(lens.tilt)
-  const place = (pieces: BufferGeometry[]) =>
-    pieces.map((piece) =>
-      piece
-        .rotateY(rad(lens.yaw))
-        .scale(lens.scale, lens.scale, lens.scale)
-        .translate(0, centre, 0),
-    )
-  const stand = [
-    rod([0, MOUNT_TOP, 0], [0, centre - RADIUS * lens.scale + 0.02, 0], 0.03),
-    drum(0.06, 0.04).translate(0, MOUNT_TOP + 0.02, 0),
-  ]
-  const inner = RADIUS - 0.2
-  const faceOn = (outer: number) => band(outer - GIMBAL_THICK, outer, DEPTH).rotateX(Math.PI / 2)
-  const reach = inner - GIMBAL_THICK
-  return [
-    ...stand,
-    ...place([
-      faceOn(RADIUS),
-      ...[-1, 1].map((side) => rod([side * reach, 0, 0], [side * (RADIUS - 0.03), 0, 0], 0.03)),
-      ...[
-        faceOn(inner),
-        rod([0, -reach, 0], [0, reach, 0], 0.035),
-        ...cubeCity(1.05, 0.09, lens.skyline).map((piece) => piece.rotateY(rad(lens.spin))),
-      ].map((piece) => piece.rotateX(tilt)),
-    ]),
-  ]
+function lens({ core, lens }: Values): BufferGeometry[] {
+  const last = lastTier(core)
+  const top = tierY(core, last)
+  const size = 1.05 * lens.scale
+  const roofline = top - lens.drop
+  const floor = roofline - size
+  const stage = Math.max(tierRadius(core, last) * 0.85, size * 0.62)
+
+  const cube = [
+    ...cubeCity(1.05, 0.09, lens.skyline).map((piece) => weighted(piece, FACE_SHARE)),
+    ...cubeFrame(1.05, 0.09, 0.012),
+  ].map((piece) =>
+    piece.scale(lens.scale, lens.scale, lens.scale).translate(0, roofline - size / 2, 0),
+  )
+  const feed = around(Math.round(core.lines) * 2, () =>
+    rod([tierRadius(core, last) * 0.3, top, 0], [size * 0.36, roofline, 0], 0.012),
+  )
+  // Three thin posts, clear of the cube's corners, so the stage hangs without caging the cube.
+  const cage = around(3, () =>
+    weighted(rod([stage * 0.94, top, 0], [stage * 0.94, floor, 0], 0.012), 0.5),
+  )
+  const tip = lathe([
+    [stage * 0.4, floor - 0.04],
+    [0.04, floor - 0.42],
+    [0, floor - 0.42],
+  ])
+  return [...feed, ...cube, ...cage, drum(stage, 0.04).translate(0, floor - 0.02, 0), tip]
 }
 
 export const machine: MachineDef = defineMachine({
