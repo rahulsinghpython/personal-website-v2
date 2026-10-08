@@ -385,3 +385,18 @@ Two camera paths were on the home page for Rahul to scroll on his tablet, the se
 **Passed over:** the first path, in git history at `cdb79af`.
 
 **The assembly stays as built.** Asked about the opening, each part's arrival against its text, and how closely the scene follows the scroll, Rahul answered "all fine". So the dust layout, the order and overlap of assembly, the easing and the poses from Found to Rings are the values of D31 and D32, now chosen and no longer first guesses. No second option was built for any of them: he did not find anything wrong to answer with one. That ends round 6. The top-down wake order that D31 kept in case (`aOrder`) is removed.
+
+### D36. The pointer torch — Proposed, 2026-10-08
+
+The first interaction of Phase 4, built as EXPERIENCE describes it: at Found, moving the pointer lights the dust near it. Rahul has not tried it yet; every number is a first value from the chat.
+
+**What it does.** Dust within a circle round the pointer is up to three and a half times as bright, fading to nothing at the circle's edge, which is 0.42 of half the window's height away. Inside the circle the dust that is normally held back is drawn too (D33 draws only about a quarter of the points as dust), so the dark under the torch is denser as well as brighter. The light follows the pointer a moment behind, and comes up and goes down over about a third of a second when the pointer arrives or leaves the window.
+
+**It lights dust and nothing else.** How lit a point is, is scaled by how far it still is from its place on the Machine. So the torch fades by itself as the dust gathers at Signal and is gone once the silhouette has formed; it never touches the Machine. That also keeps the cost where it is cheap: a pointer moving asks for frames only until the last part has gathered, and after that it asks for none.
+
+**Who gets it.** A mouse only. Touch has no hover, as EXPERIENCE says. It is off on the low tier (PERFORMANCE). With reduced motion there is no dust, so there is nothing to light.
+
+**All in the vertex shader,** as ARCHITECTURE planned: three uniforms, no work per point in JavaScript, no new draw call. Checked in a still with the torch placed by hand, in the software renderer. **Not checked:** how it feels to move, which is Rahul's; its frame cost with a real pointer on a real GPU.
+
+**A fault found on the way.** At Found a few orange specks stood where the Machine would be: the first pixel of every drawn line (D34) was showing before the line had begun. Fixed in `lines.ts`.
+

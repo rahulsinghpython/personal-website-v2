@@ -5,6 +5,7 @@ import {
   Color,
   Mesh,
   ShaderMaterial,
+  Vector2,
   Vector3,
   Vector4,
 } from 'three'
@@ -229,6 +230,10 @@ export const DEPTH_GLSL = /* glsl */ `
  * the parts assemble: `uGather` pulls a part's dust in to a loose silhouette, `uLock` closes what
  * is left, and `uWake` turns the part from cold to the accent. As made here the Machine is whole
  * and dormant, which is the look chosen in round 4.
+ *
+ * `uTorch` is the pointer torch: where it is in the window, from -1 to 1 each way, and how lit it
+ * is. Dust near it is brighter and there is more of it. `uAspect` is the window's width over its
+ * height, which keeps the torch round. It lights dust only, so it fades out as the dust gathers.
  */
 export function pointsMaterial() {
   return new ShaderMaterial({
@@ -246,6 +251,11 @@ export function pointsMaterial() {
       // How far a bead moving at a speed of 1 has drifted round its ring, in radians.
       uDrift: { value: 0 },
       uDepth: { value: 0.6 },
+      uTorch: { value: new Vector3(0, 0, 0) },
+      uAspect: { value: 1 },
+      // How far the torch reaches, as a share of half the window's height, and how many times
+      // brighter the dust at its middle is.
+      uTorchReach: { value: new Vector2(0.42, 2.5) },
       // How bright dust is, and how bright an awake point is, against a dormant one.
       uDustGain: { value: 1 },
       // The share of points drawn as dust, and how much bolder each of those is (see dustLook).
@@ -270,6 +280,9 @@ export function pointsMaterial() {
       uniform float uDustShare;
       uniform float uDustLift;
       uniform float uAwakeGain;
+      uniform vec3 uTorch;
+      uniform float uAspect;
+      uniform vec2 uTorchReach;
       attribute float aPart;
       attribute float aJitter;
       attribute vec3 aDust;
@@ -306,7 +319,11 @@ export function pointsMaterial() {
         // Only some points are dust, each bolder for it. The others are not drawn until they
         // are most of the way in: a third random number picks which.
         float dusty = step(fract(aJitter * 13.37), uDustShare);
-        float shown = max(dusty, smoothstep(0.6, 0.15, away));
+        // The torch: how lit this point is, by how near the pointer it is drawn. It also shows
+        // the dust that is otherwise held back, so the dark turns out to be full.
+        vec2 fromTorch = (gl_Position.xy / gl_Position.w - uTorch.xy) * vec2(uAspect, 1.0);
+        float torch = uTorch.z * away * smoothstep(uTorchReach.x, 0.0, length(fromTorch));
+        float shown = max(max(dusty, torch), smoothstep(0.6, 0.15, away));
         float bold = mix(1.0, uDustLift, away);
         float size = uSize * (0.6 + 0.8 * aJitter) * pixelsPerUnit * bold;
         // Nothing is drawn narrower than a pixel. A point that should be is drawn one pixel wide
@@ -314,7 +331,7 @@ export function pointsMaterial() {
         gl_PointSize = max(size, 1.0);
         vBrightness = uBrightness * (0.55 + 0.45 * aJitter) * min(1.0, size * size);
         vBrightness *= mix(1.0, uDustGain, away) * mix(1.0, uAwakeGain, vWake);
-        vBrightness *= depthFade(viewPosition) * bold * shown;
+        vBrightness *= depthFade(viewPosition) * bold * shown * (1.0 + uTorchReach.y * torch);
         // Outside the view, so a point that is not shown costs nothing to draw.
         if (shown <= 0.0) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
       }

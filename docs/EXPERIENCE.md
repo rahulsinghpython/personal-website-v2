@@ -92,7 +92,7 @@ Only the first two are in scope for the first release. The rest are later phases
 
 | Where | Input | Result | Release |
 | --- | --- | --- | --- |
-| Found | Pointer move | Dust near the pointer brightens, like a torch | First |
+| Found | Pointer move | Dust near the pointer brightens, like a torch, and more of it shows. Built ([DECISIONS D36](DECISIONS.md)) | First |
 | Scanner | Pointer sweep, or drag on touch | Points under the beam become surface | First |
 | Whole | Drag | Rotate the Machine | First |
 | Whole | Click a part | Camera goes to the part; its detail opens | First |

@@ -10,7 +10,7 @@ The authority on what is built and what comes next. Update the status table when
 | 1 | Foundations | In progress since 2026-10-05. Built on 2026-10-05: facts confirmed by Rahul, content modules, content layer, the Index at `/plain`, prerendering. Readable with scripts blocked; Lighthouse mobile performance 100 on both pages, measured on a local production build. Left: deploy to Vercel (Rahul will say when), then re-measure on the deployed preview. |
 | 2 | Greybox | Done 2026-10-07, begun 2026-10-05. Built: the bundle-size check and CI ([D19](DECISIONS.md)); the workbench, showing placeholder shapes ([D20](DECISIONS.md), [D21](DECISIONS.md)). Round 1 finished on 2026-10-06: nine references liked, outcome in [REFERENCES](REFERENCES.md), look drawn from computing hardware ([D22](DECISIONS.md)). Round 2 finished on 2026-10-06: Rahul signed off the silhouette, a hanging tiered rig with a small cube in gimbals on top ([D23](DECISIONS.md), [EXPERIENCE](EXPERIENCE.md#the-shape)). Round 3: each part now stands for a kind of work, with the company as small print ([D24](DECISIONS.md)); Round 3 finished on 2026-10-06: version 2 of all four parts ([D25](DECISIONS.md)). Small ambient motion is now allowed ([D26](DECISIONS.md)). Round 4 finished on 2026-10-07: the Machine as points, in a look between two of the three shown ([D27](DECISIONS.md), [D28](DECISIONS.md)). The scene chunk was measured with a throwaway build: 243.8 kB against a budget of 300 kB, raised to 400 kB the same day ([D29](DECISIONS.md), [PERFORMANCE](PERFORMANCE.md#the-bundle-check)). **Finished on 2026-10-07, with one criterion put off by Rahul:** frame rate was measured on the development machine only; the mid and low tiers move to Phase 5 ([D28](DECISIONS.md)). |
 | 3 | Choreography | Done 2026-10-08, begun 2026-10-07. Built: the scene mounted on the home page through one lazy import; progress read from scroll and eased; rendering on demand; dust to dormant to awake in the vertex shader, per part; a camera pose per beat; the beads drifting once the Rings are awake; the workbench's story scrubber. GSAP's core only ([D30](DECISIONS.md)). Round 6 finished on 2026-10-08: Rahul scrolled it on his tablet, picked the second of two camera paths and kept the assembly as built ([D31](DECISIONS.md), [D35](DECISIONS.md)). The first-time-viewer test is Rahul's report of one showing. **Finished with device frame rates still unmeasured,** as Phase 2 left them. |
-| 4 | Interactions | Not started |
+| 4 | Interactions | In progress since 2026-10-08. Built, first version: the pointer torch ([D36](DECISIONS.md)). Left: Rahul trying it; the Scanner sweep; the Whole beat's drag, click and project panels. |
 | 5 | Finish | Not started |
 | 6 | Later | Not scheduled |
 
@@ -70,7 +70,7 @@ Make scrolling build it.
 
 The first-release interactions from [EXPERIENCE](EXPERIENCE.md#interactions-by-part).
 
-- Pointer torch on the dust.
+- Built, first version, not yet tried by Rahul: pointer torch on the dust ([D36](DECISIONS.md)).
 - Scanner sweep: points become surface under the beam.
 - Whole beat: drag to rotate, click a part to open it, project panels.
 

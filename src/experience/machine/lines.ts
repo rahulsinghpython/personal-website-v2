@@ -169,7 +169,8 @@ export function linesMaterial() {
       varying float vBrightness;
 
       void main() {
-        if (vAlong > vDrawn) discard;
+        // Not drawn at all until it has begun, or the first pixel of every line would show.
+        if (vDrawn <= 0.0 || vAlong > vDrawn) discard;
         gl_FragColor = vec4(uAccent * vBrightness, 1.0);
       }
     `,
