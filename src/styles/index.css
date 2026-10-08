@@ -30,6 +30,12 @@ body {
     background-color: #fff;
     color: #000;
   }
+
+  /* The scene rubs the opening line out as it crumbles (src/experience/ink.ts). Paper has no
+     scene. */
+  #found-title {
+    mask-image: none !important;
+  }
 }
 
 @layer components {

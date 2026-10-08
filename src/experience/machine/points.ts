@@ -79,7 +79,7 @@ export function dustLook(count: number, boost: number): { share: number; lift: n
 }
 
 /** The same "random" numbers every time, so the same Machine always gives the same cloud. */
-function seeded(seed: number) {
+export function seeded(seed: number) {
   let state = seed >>> 0
   return () => {
     state = (state + 0x6d2b79f5) >>> 0
@@ -202,6 +202,52 @@ export function samplePoints(
 }
 
 /**
+ * How the opening line crumbles (see ../ink.ts). The line goes from its left end to its right:
+ * `sweep` is how much of a grain's turn to leave is set by how far along the line it stands, the
+ * rest being chance, and `span` is the share of the whole crumbling that one grain takes to go.
+ */
+export const CRUMBLE = { sweep: 0.75, span: 0.4 }
+
+/**
+ * How far from the middle of the cloud a grain of the opening line may land, in the Machine's
+ * units. About as far as the window reaches at Found, so the line scatters across all of it.
+ */
+const GRAIN_REACH = 4.2
+
+/**
+ * The grains of the opening line: points whose dust is within reach of the middle of the cloud,
+ * picked evenly, drawn a second time, each starting on a letter. `ink` holds three numbers a
+ * grain: how far across and down the line it stands, in CSS pixels, and when it leaves, from 0
+ * to 1.
+ *
+ * A grain is a copy of a point of the Machine, so nothing is added to the cloud for it: when it
+ * has flown from its letter it is where that point is, and is drawn only if the point itself is
+ * held back.
+ */
+export function sampleGrains(cloud: BufferGeometry, ink: Float32Array) {
+  const dust = cloud.getAttribute('aDust')
+  const near: number[] = []
+  for (let i = 0; i < dust.count; i++) {
+    const far = Math.hypot(dust.getX(i), dust.getY(i) - DUST_HEIGHT, dust.getZ(i))
+    if (far < GRAIN_REACH) near.push(i)
+  }
+  const count = Math.min(ink.length / 3, near.length)
+
+  const grains = new BufferGeometry()
+  for (const [name, attribute] of Object.entries(cloud.attributes)) {
+    const size = attribute.itemSize
+    const copy = new Float32Array(count * size)
+    for (let i = 0; i < count; i++) {
+      const from = near[Math.floor((i * near.length) / count)]! * size
+      for (let j = 0; j < size; j++) copy[i * size + j] = attribute.array[from + j]!
+    }
+    grains.setAttribute(name, new BufferAttribute(copy, size))
+  }
+  grains.setAttribute('aWord', new BufferAttribute(ink.slice(0, count * 3), 3))
+  return grains
+}
+
+/**
  * Depth, for both materials: a point or a line is dimmer the farther behind the Machine's middle
  * it is, and a little brighter in front of it. Everything is added on top of everything else, so
  * without this the far side is as bright as the near side and the Machine reads as flat.
@@ -234,9 +280,16 @@ export const DEPTH_GLSL = /* glsl */ `
  * `uTorch` is the pointer torch: where it is in the window, from -1 to 1 each way, and how lit it
  * is. Dust near it is brighter and there is more of it. `uAspect` is the window's width over its
  * height, which keeps the torch round. It lights dust only, so it fades out as the dust gathers.
+ *
+ * With `grains` it draws the grains of the opening line (see sampleGrains). `uCrumble` is how far
+ * the line has crumbled. `uLine` is where the line's corner is in the window, from -1 to 1 each
+ * way, and how big a CSS pixel is there. `uGrain` is a grain's width in the drawing buffer's
+ * pixels and its brightness, while it stands on its letter, and how much wider and brighter it
+ * is once it has left, so that it can be told from the dust it flies through. `uBow` is how far a grain's flight bends, as a share of its length.
  */
-export function pointsMaterial() {
+export function pointsMaterial(grains = false) {
   return new ShaderMaterial({
+    defines: grains ? { GRAINS: '' } : {},
     uniforms: {
       uSize: { value: 0.012 },
       uBrightness: { value: 0.5 },
@@ -256,6 +309,10 @@ export function pointsMaterial() {
       // How far the torch reaches, as a share of half the window's height, and how many times
       // brighter the dust at its middle is.
       uTorchReach: { value: new Vector2(0.42, 2.5) },
+      uCrumble: { value: 0 },
+      uLine: { value: new Vector4(0, 0, 0, 0) },
+      uGrain: { value: new Vector3(1.5, 1, 1.6) },
+      uBow: { value: 0.45 },
       // How bright dust is, and how bright an awake point is, against a dormant one.
       uDustGain: { value: 1 },
       // The share of points drawn as dust, and how much bolder each of those is (see dustLook).
@@ -289,6 +346,13 @@ export function pointsMaterial() {
       attribute vec2 aSpin;
       varying float vBrightness;
       varying float vWake;
+      #ifdef GRAINS
+        uniform float uCrumble;
+        uniform vec4 uLine;
+        uniform vec3 uGrain;
+        uniform float uBow;
+        attribute vec3 aWord;
+      #endif
       ${DEPTH_GLSL}
 
       // Points do not move in step. Each takes "span" of the whole change, and starts earlier
@@ -331,9 +395,35 @@ export function pointsMaterial() {
         gl_PointSize = max(size, 1.0);
         vBrightness = uBrightness * (0.55 + 0.45 * aJitter) * min(1.0, size * size);
         vBrightness *= mix(1.0, uDustGain, away) * mix(1.0, uAwakeGain, vWake);
-        vBrightness *= depthFade(viewPosition) * bold * shown * (1.0 + uTorchReach.y * torch);
-        // Outside the view, so a point that is not shown costs nothing to draw.
-        if (shown <= 0.0) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        vBrightness *= depthFade(viewPosition) * bold * (1.0 + uTorchReach.y * torch);
+
+        #ifdef GRAINS
+          // A grain stands on its letter until the line crumbles as far as it, then flies to its
+          // place in the dust, in the window and not in the Machine's space: the line is on the
+          // page. It bends on the way, each grain its own amount, so they do not fly as a sheet.
+          float held = 1.0 - staggered(uCrumble, aWord.z, ${CRUMBLE.span.toFixed(2)});
+          // It has landed a little before its turn is over, and spends the rest cooling.
+          float flown = smoothstep(1.0, 0.25, held);
+          vec2 from = uLine.xy + aWord.xy * uLine.zw;
+          vec2 to = gl_Position.xy / gl_Position.w;
+          vec2 flight = (to - from) * vec2(uAspect, 1.0);
+          float bend = sin(3.14159 * flown) * (fract(aJitter * 5.31) - 0.3) * uBow;
+          vec2 at = mix(from, to, flown) + vec2(-flight.y, flight.x) * bend / vec2(uAspect, 1.0);
+          gl_Position = vec4(at, 0.0, 1.0);
+          // It is as bright as the letter it was all the way out into the dust and in again,
+          // and cools as it settles into the silhouette, so the eye can follow the line into
+          // the Machine. Cooled, it is the point it is a copy of, for as long as that point is
+          // held back: the two are never both drawn.
+          float lit = max(smoothstep(0.0, 0.25, held), smoothstep(0.1, 0.5, away));
+          float bright = uGrain.y * (0.7 + 0.3 * aJitter) * (1.0 + uGrain.z * flown);
+          vBrightness = mix(vBrightness * (1.0 - shown), bright, lit);
+          gl_PointSize = mix(gl_PointSize, uGrain.x * (1.0 + uGrain.z * flown), lit);
+          if (vBrightness <= 0.0) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        #else
+          vBrightness *= shown;
+          // Outside the view, so a point that is not shown costs nothing to draw.
+          if (shown <= 0.0) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
+        #endif
       }
     `,
     fragmentShader: /* glsl */ `

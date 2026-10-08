@@ -18,8 +18,9 @@ export function Story() {
         </a>
       </header>
       <main>
-        <Beat id="found">
-          <h1 id="found-title" className="statement">
+        <Beat id="found" centred>
+          {/* A size up from the other statements: it stands alone in the middle (D37). */}
+          <h1 id="found-title" className="statement text-xl sm:text-2xl">
             {statements.found}
           </h1>
         </Beat>

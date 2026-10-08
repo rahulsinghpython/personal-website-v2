@@ -52,8 +52,8 @@ The page is one long scroll. The canvas is fixed behind it and the Machine respo
 
 | # | Beat | What the visitor sees | What they learn |
 | --- | --- | --- | --- |
-| 0 | **Found** | Black. Small type: `YOU'VE FOUND RAHUL.` Faint dust in the dark. Moving the pointer lights the dust near it. | Something is here. Nothing is explained. |
-| 1 | **Signal** | First scroll. The dust pulls inward and a silhouette forms. Dormant, unlabelled. | The dust was an object all along. |
+| 0 | **Found** | Black. Small type in the middle of the window, a size up from the other statements: `YOU'VE FOUND RAHUL.` Faint dust in the dark. Moving the pointer lights the dust near it. | Something is here. Nothing is explained. |
+| 1 | **Signal** | First scroll. The opening line crumbles into bright grains that scatter across the window and then travel into the silhouette with the dust (proposed, [DECISIONS D37](DECISIONS.md)). The dust pulls inward and a silhouette forms. Dormant, unlabelled. | The dust was an object all along. |
 | 2 | **Core** | Camera moves in. The Core locks together and wakes. First label appears: the work, with the years and the company in small print. | The object has parts, and a part is a kind of work. |
 | 3 | **Scanner** | The Scanner assembles as raw points. The visitor sweeps across it and surface appears where they sweep. | Rahul built this kind of software. They have been looking at it the whole time. |
 | 4 | **Rings** | Rings form around the Core, turn, and lock. | Scale and orchestration: 10,000+ users. |
@@ -131,7 +131,7 @@ Direction only. Exact tokens are chosen during the build.
 - **Points, dormant:** cold off-white, low brightness.
 - **Accent, awake:** one warm colour. Working choice is a solar amber, which fits "powering on" and the Etavolt solar work. One accent only.
 - **Type:** two families. A tight grotesque for statements, set small and in capitals. A monospace for instrument readouts: years, numbers, labels on parts.
-- **Text placement:** at the edges, never over the Machine. The object owns the centre.
+- **Text placement:** at the edges, never over the Machine. The object owns the centre. The one exception is the opening line, which stands in the middle because there is no Machine yet ([DECISIONS D37](DECISIONS.md)).
 - **Words:** few. See the voice rules in [CONTENT](CONTENT.md).
 
 ## Fixed versus open

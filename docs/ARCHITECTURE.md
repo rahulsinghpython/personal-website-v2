@@ -138,6 +138,7 @@ src/
       variants.ts  the shapes the workbench switches between; one, now the shape is settled
     camera/        camera.ts: the camera's pose at each beat, and how a pose is applied
     timeline.ts    the master timeline, and the plain object it writes the story into
+    ink.ts         where the letters of the opening line are on the page, and the mask that rubs it out (D37)
     Experience.tsx the lazy-loaded entry to the scene: the canvas and the frame loop
   state/           progress.ts: progress, read from scroll. tiers.ts: the tier numbers, and a
                    stand-in for tier detection until Phase 5. The store is not built yet.

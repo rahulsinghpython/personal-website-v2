@@ -400,3 +400,30 @@ The first interaction of Phase 4, built as EXPERIENCE describes it: at Found, mo
 
 **A fault found on the way.** At Found a few orange specks stood where the Machine would be: the first pixel of every drawn line (D34) was showing before the line had begun. Fixed in `lines.ts`.
 
+### D37. The opening line crumbles into the dust — Proposed, 2026-10-08
+
+Someone Rahul showed the site to suggested drawing `YOU'VE FOUND RAHUL.` in points, letting it disperse into the cloud, and then forming the Machine as now. Rahul asked what the chat thought, chose the chat's quieter version to try, and asked while it was being built for the line to be centred. He has not scrolled it yet; every number is a first value from the chat. This reopens the opening that D35 kept as built, on the same ground D32 reopened the shape: feedback from outside.
+
+**What was passed over: a title drawn in points.** Points cannot draw small capitals, so the line would become a large title, which is the best-known three.js effect there is. It would also show in the first frame that points form things, which is the discovery Signal is for. And the real heading has to stay in the page (rule 3), so it would show first and be swapped for points when the scene loads.
+
+**What is built.** The heading stays what it is: real text, drawn by the browser. Up to 5,000 points stand on its letters, hidden under the ink. On the first scroll the line is rubbed out from its left end, a moment ahead of the points on each letter, so for an instant each letter stands as grains; then the grains leave, each in its own time, and scatter outward across the window on curved paths. `RAHUL.` goes last. They are larger and brighter than the dust they fly through, and stay so while the dust gathers, so they can be followed out and then in: they cool only as they settle into the silhouette. Scrolling back puts the line together again.
+
+**The line is centred.** Rahul, while it was being built: at the bottom left it "is not really catching my eye". The Found line now stands in the middle of the window, which is where the Machine forms, so it crumbles on the spot. This is the one exception to "text at the edges": at Found there is no Machine for the text to be beside. The other seven beats keep their text at the edge. After seeing the scatter he asked for the font to be "slightly bigger": the line is a size up from the other statements, 24 CSS pixels against 18 on a wide window and 20 against 16 on a phone. The step is the chat's.
+
+**How it got there, in three tries on 2026-10-08.** First every grain went to the middle of the cloud and stayed lit until the cloud closed. Rahul: "I still liked how you were dispersing it out but just wanted it in center". Second, the grains scattered and cooled into the dust where they landed, as they had when the line was at the bottom left. Before he had seen that he asked for something else: "scatter them slowly into the model", which "will leave more time for anyone to notice", "with a more prominent path". The third is what is built: scattered wide, slower, and lit all the way in.
+
+**The grains are the Machine's own points.** Each is a copy of a point of the cloud, picked evenly from those whose place as dust is within 4.2 units of the middle, which is about what the window shows at Found. Nothing is drawn twice: a landed grain is drawn only while the point it is a copy of is one that D33 holds back, and not once that point appears. It is one more draw call of a few thousand points, during the first beat only.
+
+**How the letters are found.** Each letter is drawn onto a canvas that is never shown, where the browser put it and in the font the browser used, and the grains are placed on the pixels that came out inked (`src/experience/ink.ts`). It is read again when the line is laid out differently or a font arrives. **No package:** nothing was found that reads the ink of a heading already on the page; the text libraries for three.js draw their own text from their own font files, which is the title that was passed over.
+
+**How the line is rubbed out.** A mask on the heading, moved by an animation that is never played, only set to a position on each frame. Setting a style each frame would make a string each frame, and PERFORMANCE allows no allocation in the frame loop. At rest the heading has nothing of ours on it. The mask does not print.
+
+**Who gets it.** Every tier, with fewer grains where there are fewer points (3% of the cloud, at most 5,000). Not with reduced motion, where there is no dust. With no scene the heading is simply a centred heading. `?words=0` in the address leaves the line alone, to compare.
+
+**What it cost.** The scene chunk went from 267.4 kB to 269.6 kB.
+
+**Checked** in stills through the first scroll, in a wide window. The first try was also looked at in a phone-sized window and by scrolling away and back, which put the line back whole; the third changed only where the grains go and how long they stay lit. **Not checked:** how it feels to scroll, which is Rahul's; the third try at phone size; a real phone or tablet; a line that wraps onto two lines, which is built for but has not happened at any size tried.
+
+**Still Rahul's:** whether it stays; how fast it crumbles (the last grain has landed 0.6 of the way to Signal); how far the grains scatter (4.2 units); how many there are, and how much larger and brighter than the dust (about four CSS pixels across against the dust's two or three). In stills the middle of the scatter is close to a snowfall, and fewer or softer grains would calm it.
+
+**One thing slowness costs.** The page scrolls natively, so the line travels up the window as it crumbles: `RAHUL.` goes when the line is about a fifth of the way from the top. Any slower and it would leave the window before it had finished. Holding the line in the middle while it crumbles would remove the limit, and would be the first thing on the page to be pinned (D30). Not built; Rahul's to ask for.

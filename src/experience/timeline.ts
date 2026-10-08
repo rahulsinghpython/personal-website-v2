@@ -20,6 +20,8 @@ const each = (value: number): Record<PartId, number> => ({
 
 /** How far the Rings turn as they lock, in radians. */
 const RING_TURN = 1.4
+/** How far into the first scroll the opening line has finished crumbling, in beats. */
+const CRUMBLED = 0.6
 
 /**
  * Everything in the scene that the story sets. The timeline writes it and the frame loop reads
@@ -37,6 +39,8 @@ export const story = {
    * does not set: it is ambient motion (D26), added to by the frame loop.
    */
   drift: 0,
+  /** How far the opening line has crumbled into the dust, from 0 to 1 (see ./ink.ts). */
+  crumble: 0,
   camera: { ...POSES.found },
 }
 
@@ -59,13 +63,20 @@ function build() {
     to: number,
     start: number,
     end: number,
+    ease?: string,
   ) =>
     timeline.fromTo(
       target,
       { [key]: from },
-      { [key]: to, duration: end - start, immediateRender: false },
+      { [key]: to, duration: end - start, immediateRender: false, ...(ease && { ease }) },
       start,
     )
+
+  // Found: the first scroll crumbles the opening line into the dust. It goes evenly with the
+  // scroll, since each grain eases its own flight, and slowly, so there is time to see where the
+  // grains go: the last of them leave just before the line reaches the top of the window, and
+  // are still on their way while the dust gathers.
+  span(story, 'crumble', 0, 1, at('found'), at('found') + CRUMBLED, 'none')
 
   // Signal: the dust was an object all along. Every part gathers, the oldest work a little first.
   PART_ORDER.forEach((part, index) => {
@@ -114,6 +125,7 @@ export function seekStill(progress: number) {
   seek(Math.round(progress * LAST) / LAST)
   for (const part of PART_ORDER) story.gather[part] = story.lock[part] = story.wake[part] = 1
   story.turn = 0
+  story.crumble = 0
 }
 
 /** Copies the story into the points material. Called every frame, so it makes nothing new. */
