@@ -19,7 +19,7 @@ The only source of facts about Rahul for this site. When code needs a fact, it c
 
 ## Career
 
-Four eras, in the order the Machine assembles. Each maps to a part; see [EXPERIENCE](EXPERIENCE.md#the-machine). Roles and dates are confirmed. Uniad and Cognizant are both current and run at the same time.
+Four eras, in the order the story tells them. Each is one job beat in the city; see [EXPERIENCE](EXPERIENCE.md#where-each-job-is). Roles and dates are confirmed. Uniad and Cognizant are both current and run at the same time.
 
 ### 1. S2T (Software & Simulation Technologies) → Core
 
@@ -44,7 +44,7 @@ Four eras, in the order the Machine assembles. Each maps to a part; see [EXPERIE
   - Presented the technology to clients, investors and stakeholders.
 - **Number that may be stated:** none.
 
-This era is the conceptual centre of the site. The Machine is drawn as a point cloud because of this work.
+This era is the conceptual centre of the site. The city is drawn as a laser scan because of this work.
 
 ### 3. Uniad → Rings
 
@@ -132,7 +132,7 @@ Each era beat has a readout line built from the era's data (years, company, full
 
 **Added back on 2026-10-07, with the scene:** the Scanner statement's second sentence, `YOU'VE BEEN LOOKING AT ONE.` It is the third reveal in [EXPERIENCE](EXPERIENCE.md#the-reveal-budget). It is only true while the visitor is looking at a point cloud. The Index does not carry the statements, but the story page still shows the line when the scene cannot start (no JavaScript, no WebGL). Revisit it with the no-WebGL fallback in Phase 5.
 
-**Leans on the Machine:** `FIVE YEARS. ONE MACHINE.` reads as a figure of speech on the plain site. Revisit if it confuses anyone before the scene ships.
+**Leans on the Machine:** `FIVE YEARS. ONE MACHINE.` was written for the Machine, which the city replaced on 2026-10-19 ([DECISIONS D38](DECISIONS.md)). It has to be rewritten before the city ships; `src/content/beats.ts` still carries it.
 
 ## Confirmed with Rahul
 

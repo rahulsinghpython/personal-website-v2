@@ -1,18 +1,18 @@
 # personal-website-v2
 
-Rahul Singh's personal site. It is not a portfolio template. It is one dark 3D world built around one object, **the Machine**, which the visitor slowly realises is Rahul's whole career.
+Rahul Singh's personal site. It is not a portfolio template. It is one dark 3D world, **a laser scan of a city at night around Marina Bay**, where the things that light up turn out to be Rahul's whole career.
 
-**Status: the plain site exists (content layer, the Index, prerendered HTML). The Machine is mounted on the home page, assembled by scrolling; its motion is settled. Phase 3 is finished; Phase 4, the interactions, has begun with the pointer torch.** [docs/ROADMAP.md](docs/ROADMAP.md) is the authority on what is built and what is next.
+**Status: the plain site exists (content layer, the Index, prerendered HTML). The home page still draws the Machine, the single object the site was built around until 2026-10-19, when Rahul replaced it with the city ([DECISIONS D38](docs/DECISIONS.md)). The city is chosen from sketches and not built yet; Phase 4's interactions wait for it.** [docs/ROADMAP.md](docs/ROADMAP.md) is the authority on what is built and what is next.
 
 ## Read before you build
 
 | Doc | Read it when |
 | --- | --- |
 | [docs/VISION.md](docs/VISION.md) | Always, first. Why the site exists and the principles everything else follows. |
-| [docs/EXPERIENCE.md](docs/EXPERIENCE.md) | Touching anything the visitor sees or does: the Machine, the scroll beats, interactions. |
+| [docs/EXPERIENCE.md](docs/EXPERIENCE.md) | Touching anything the visitor sees or does: the city, the scroll beats, interactions. |
 | [docs/DESIGN-PROCESS.md](docs/DESIGN-PROCESS.md) | Deciding how anything looks or moves. How options get made and how Rahul picks. |
 | [docs/CONTENT.md](docs/CONTENT.md) | Writing any copy or stating any fact about Rahul. |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Writing code: stack, layers, state, how the Machine is rendered. |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Writing code: stack, layers, state, how the scene is rendered. |
 | [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | Adding anything that costs bytes or frames. |
 | [docs/DECISIONS.md](docs/DECISIONS.md) | Before proposing a different approach. It may already have been weighed. |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Picking up work: phases, status, open questions for Rahul. |
@@ -21,11 +21,11 @@ Rahul Singh's personal site. It is not a portfolio template. It is one dark 3D w
 
 Each one is explained in the doc it links to. If a task seems to need breaking one, stop and raise it with Rahul.
 
-1. **One object.** Everything hangs off the Machine. No second hero, no card grids, no section that could be lifted from a template. ([VISION](docs/VISION.md))
+1. **One world, not a layout.** Everything happens in the city. No card grids, no second hero, no section that could be lifted from a template. It was "one object" until Rahul found that too strict a rule ([DECISIONS D38](docs/DECISIONS.md)). ([VISION](docs/VISION.md))
 2. **The visitor causes the change.** The story advances only when the visitor scrolls; nothing assembles, wakes or moves the camera on its own. Small ambient motion that adds to a part's meaning is allowed, within the limits in [DECISIONS D26](docs/DECISIONS.md). ([EXPERIENCE](docs/EXPERIENCE.md#interaction-rules))
 3. **Content is HTML first.** Every fact is real text in the DOM and readable with JavaScript off. The canvas is decoration on top. ([ARCHITECTURE](docs/ARCHITECTURE.md#two-layers))
 4. **The budget is a contract.** A feature that breaks [PERFORMANCE](docs/PERFORMANCE.md) is not done.
-5. **Procedural, not modelled.** The Machine is generated in code. No dependency on a 3D artist or a Blender file. ([DECISIONS D4](docs/DECISIONS.md))
+5. **Procedural, not modelled.** The city and its landmarks are generated in code. No dependency on a 3D artist or a Blender file. ([DECISIONS D4](docs/DECISIONS.md))
 6. **Never invent facts.** Employers, dates, numbers and project names come from [CONTENT](docs/CONTENT.md) only. If it is not there, ask.
 7. **Take the philosophy of Lando's site, not its look.** No neon lime, no helmet, no racing motifs.
 
@@ -33,10 +33,11 @@ Each one is explained in the doc it links to. If a task seems to need breaking o
 
 Use these words the same way in code, commits and conversation.
 
-- **The Machine**: the single 3D object at the centre of the site.
-- **Part**: one of the Machine's four subsystems. Each part stands for one kind of work Rahul has done, in the order he came to it: **Core**, **Scanner**, **Rings**, **Lens**. The company is small print ([DECISIONS D24](docs/DECISIONS.md)).
-- **Dust**: the Machine's points while scattered and unreadable (the opening state).
-- **Dormant / awake**: a part that is assembled but unlit / a part that is powered on.
+- **The city**: the laser-scanned city around Marina Bay that the site happens in ([DECISIONS D38](docs/DECISIONS.md)).
+- **Subject**: what one job's beat is about in the city: the river and streets (Core), the scanned roof (Scanner), the HDB windows (Rings), the CBD tower (Lens). The company is small print ([DECISIONS D24](docs/DECISIONS.md)).
+- **The Machine**, **part**: the single object the site was built around until D38, and its four subsystems. The code in `src/experience/machine/` is still the Machine until the city replaces it. The four job beats keep the parts' names as ids.
+- **Dust**: the points while scattered and unreadable (the opening state).
+- **Cold / lit**: the city at rest / what Rahul's work touches, in the accent. They replace dormant and awake.
 - **Beat**: one step of the scroll story (Found, Signal, Core, Scanner, Rings, Lens, Whole, Contact).
 - **Progress**: the single number from 0 to 1 that says how far through the story the visitor is. The whole scene is a function of it.
 - **The Index**: the plain, fast, text version of the same content. Also the fallback.

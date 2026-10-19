@@ -2,6 +2,8 @@
 
 How the site is built. The content layer, the Index and prerendering exist. The scene layer is mounted on the home page in a first version: the Machine as points, driven by scroll (see [ROADMAP](ROADMAP.md) for what Phase 3 still owes). Where a section below describes something not built yet, it says so. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
 
+**The Machine is being replaced by a city ([DECISIONS D38](DECISIONS.md)).** Where this doc says "the Machine" it describes the code as it is today. The city is built into the same structure: geometry generated in code, sampled to one cloud of points, moved in the vertex shader, driven by one timeline set from progress. Its ambient motion is the traffic, the river and the train, which move from the Core beat on, not only from the Rings beat as the beads did.
+
 ## Stack
 
 | Layer | Choice | Installed | Why |

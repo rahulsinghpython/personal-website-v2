@@ -1,0 +1,1485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Development only. The sketches Rahul chose the city from (docs/DECISIONS.md, D38). Rough 2D
+     canvas drawings for comparing ideas, not the scene. A copy of a page first shown as a private
+     artifact; it is kept as made, so it does not follow the repo's code style. -->
+<title>After the Dust</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;700&display=swap">
+<style>
+  /* Layout: a dark workbench. Each direction is a wide live sketch with its scrubber, the words beside it. */
+  :root {
+    --void: #0b0b0c;
+    --surface: #121214;
+    --line: #26262b;
+    --cold: #e8e5df;
+    --dim: #918c84;
+    --amber: #ffa726;
+    --display: 'Schibsted Grotesk', ui-sans-serif, system-ui, 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  body {
+    background: var(--void);
+    color: var(--cold);
+    font-family: var(--display);
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-block: 56px 96px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    display: grid;
+    gap: 88px;
+  }
+  .eyebrow, .chips button, dt, .where, .note, .handle {
+    font-family: var(--mono);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .eyebrow { font-size: 11px; color: var(--dim); margin: 0; }
+
+  header.intro { display: grid; gap: 18px; max-width: 46rem; }
+  header.intro h1 {
+    font-size: clamp(40px, 7vw, 76px);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    margin: 0;
+    text-wrap: balance;
+  }
+  header.intro h1 span { color: var(--amber); }
+  header.intro p { margin: 0; color: var(--dim); max-width: 38rem; font-size: 17px; }
+  header.intro p strong { color: var(--cold); font-weight: 500; }
+
+  .concept {
+    display: grid;
+    grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+    gap: 36px;
+    align-items: start;
+  }
+  .stage { display: grid; gap: 14px; min-width: 0; }
+  .stage canvas {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 11;
+    max-width: 100%;
+    background: var(--void);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    touch-action: pan-y;
+  }
+  .scrub { display: grid; gap: 10px; }
+  .scrub-row { display: flex; align-items: center; gap: 14px; }
+  .scrub input[type="range"] { flex: 1; min-width: 0; accent-color: var(--amber); height: 28px; }
+  .where { font-size: 11px; color: var(--cold); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 15rem; text-align: right; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips button {
+    font-size: 10.5px;
+    color: var(--dim);
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 7px 10px;
+    cursor: pointer;
+  }
+  .toggle { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--cold); background: var(--surface); border: 1px solid var(--line); border-radius: 2px; padding: 7px 10px; cursor: pointer; }
+  .toggle[aria-pressed="true"] { border-color: var(--dim); }
+  .toggle:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .chips button:hover { color: var(--cold); border-color: var(--dim); }
+  .chips button[aria-pressed="true"] { color: var(--amber); border-color: var(--amber); }
+  .chips button:focus-visible, .scrub input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+  .copy { display: grid; gap: 18px; min-width: 0; padding-top: 4px; }
+  .title-row { display: flex; align-items: baseline; gap: 14px; }
+  .handle { font-size: 13px; color: var(--amber); }
+  .copy h2 { margin: 0; font-size: 38px; line-height: 1; letter-spacing: -0.02em; font-weight: 700; }
+  .idea { margin: 0; font-size: 18px; line-height: 1.45; text-wrap: pretty; }
+  dl { margin: 0; display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 9px 14px; border-top: 1px solid var(--line); padding-top: 16px; }
+  dt { font-size: 10.5px; color: var(--dim); padding-top: 3px; }
+  dd { margin: 0; font-size: 15px; color: var(--cold); }
+  .verdict { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 16px; }
+  .verdict p { margin: 0; font-size: 15px; color: var(--dim); }
+  .verdict b { color: var(--cold); font-weight: 500; }
+
+  .round { border-top: 1px solid var(--line); padding-top: 28px; margin-bottom: -48px; }
+  .more { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; border-top: 1px solid var(--line); padding-top: 40px; }
+  .more h3 { margin: 6px 0 10px; font-size: 22px; letter-spacing: -0.01em; }
+  .more p { margin: 0; color: var(--dim); max-width: 34rem; }
+  .more p b { color: var(--cold); font-weight: 500; }
+
+  .close { display: grid; gap: 20px; border-top: 1px solid var(--line); padding-top: 40px; max-width: 46rem; }
+  .close ul { margin: 0; padding-left: 1.1em; color: var(--dim); display: grid; gap: 6px; }
+  .close ul b { color: var(--cold); font-weight: 500; }
+  .ask { font-size: clamp(24px, 3.4vw, 34px); line-height: 1.15; letter-spacing: -0.015em; margin: 0; text-wrap: balance; }
+  .ask span { color: var(--amber); }
+  .note { font-size: 10.5px; color: var(--dim); margin: 0; line-height: 1.7; }
+
+  @media (max-width: 860px) {
+    .concept { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+    .more { grid-template-columns: minmax(0, 1fr); }
+    .stage canvas { aspect-ratio: 1 / 1; }
+    .wrap { gap: 72px; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="intro">
+    <p class="eyebrow">personal-website-v2 / what the dust becomes</p>
+    <h1>After the <span>dust</span></h1>
+    <p>Your name crumbling into points stays in all four. What changes is <strong>what those points become next</strong>. Drag the bar under each picture to scroll its story, or tap a step. Each one opens on the moment that shows it best.</p>
+  </header>
+
+  <section class="concept" data-sketch="bay" data-panel="1" aria-labelledby="bay-title">
+    <div class="stage">
+      <canvas role="img" aria-label="Sketch of round 3: the points pour down as a river into Marina Bay, with the landmarks around the water and the city behind."></canvas>
+      <div class="scrub">
+        <div class="scrub-row">
+          <input type="range" id="scrub-bay" min="0" max="6" step="0.001" value="6" aria-label="Scroll the Bay sketch">
+          <span class="where" aria-live="polite"></span>
+        </div>
+        <div class="chips"></div>
+        <div><button type="button" class="toggle" id="bay-text" aria-pressed="true">Page text: shown</button></div>
+      </div>
+    </div>
+    <div class="copy">
+      <p class="eyebrow">Round 3</p>
+      <div class="title-row"><span class="handle">A+B</span><h2 id="bay-title">Bay</h2></div>
+      <p class="idea">The dust pours down as a river, the Singapore River, and runs into Marina Bay. The landmarks stand around the water in front of you. Your work happens in the city behind them.</p>
+      <dl>
+        <dt>Way in</dt><dd>The river of your name runs into the bay.</dd>
+        <dt>Pipes</dt><dd>The river and the streets carry requests as light.</dd>
+        <dt>Scan</dt><dd>One roof in the heartland is scanned into surface. With references, the Science Centre.</dd>
+        <dt>Schedule</dt><dd>HDB windows light up, block by block.</dd>
+        <dt>Model</dt><dd>A tower in the CBD turns it all into an answer.</dd>
+        <dt>Contact</dt><dd>The view across the bay to Marina Bay Sands, lit.</dd>
+        <dt>Camera</dt><dd>Calmer since your note: it keeps facing one way and glides from subject to subject.</dd>
+      </dl>
+      <div class="verdict">
+        <p><b>The words.</b> Each beat dims the city except its subject and pins a short tag to it, like the labels in a scanning tool. The full text sits at the edge on a dark band, so it is read before the city is. The toggle shows the scene without it.</p>
+        <p><b>Hidden here.</b> The Merlion spouting, a train on its viaduct, and a block numbered for the year you joined Uniad.</p>
+      </div>
+    </div>
+  </section>
+
+  <p class="eyebrow round">Round 1, for reference. Round 2, Home, grew into Bay above.</p>
+
+  <section class="concept" data-sketch="flow" aria-labelledby="flow-title">
+    <div class="stage">
+      <canvas role="img" aria-label="Sketch of direction A: points flowing down through four places."></canvas>
+      <div class="scrub">
+        <div class="scrub-row">
+          <input type="range" id="scrub-flow" min="0" max="6" step="0.001" value="2.55" aria-label="Scroll the Flow sketch">
+          <span class="where" aria-live="polite"></span>
+        </div>
+        <div class="chips"></div>
+      </div>
+    </div>
+    <div class="copy">
+      <div class="title-row"><span class="handle">A</span><h2 id="flow-title">Flow</h2></div>
+      <p class="idea">Your name breaks into data, and the page becomes the river it travels down. Each job is a place the data passes through, and each one changes it the way that job did.</p>
+      <dl>
+        <dt>Pipes</dt><dd>The stream splits into lanes and runs at 10,000 a second.</dd>
+        <dt>Scan</dt><dd>It lands on a roof as raw points and turns to surface where it is scanned.</dd>
+        <dt>Schedule</dt><dd>It settles into a calendar, one booking to a slot.</dd>
+        <dt>Model</dt><dd>It condenses into a sentence.</dd>
+      </dl>
+      <div class="verdict">
+        <p><b>Why it could be right.</b> It never stops moving with you, and nothing needs explaining.</p>
+        <p><b>The risk.</b> There is no single object to remember the site by.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="concept" data-sketch="city" aria-labelledby="city-title">
+    <div class="stage">
+      <canvas role="img" aria-label="Sketch of direction B: a city scanned in points, seen from above."></canvas>
+      <div class="scrub">
+        <div class="scrub-row">
+          <input type="range" id="scrub-city" min="0" max="6" step="0.001" value="4" aria-label="Scroll the City sketch">
+          <span class="where" aria-live="polite"></span>
+        </div>
+        <div class="chips"></div>
+      </div>
+    </div>
+    <div class="copy">
+      <div class="title-row"><span class="handle">B</span><h2 id="city-title">City</h2></div>
+      <p class="idea">The dust settles into a laser scan of a city at night, and you fly over it. Your work is what happens in the city.</p>
+      <dl>
+        <dt>Pipes</dt><dd>Requests run the streets as light.</dd>
+        <dt>Scan</dt><dd>One roof is scanned into a surface and gets its solar panels.</dd>
+        <dt>Schedule</dt><dd>Windows light up across the city. 10,000 people.</dd>
+        <dt>Model</dt><dd>One tower turns all that into an answer.</dd>
+      </dl>
+      <div class="verdict">
+        <p><b>Why it could be right.</b> It is a world, which is what makes Lando's site feel like a place.</p>
+        <p><b>The risk.</b> The biggest build of the four. It has to stay a made-up city, never a real building.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="concept" data-sketch="become" aria-labelledby="become-title">
+    <div class="stage">
+      <canvas role="img" aria-label="Sketch of direction C: one cloud of points reshaping into a different object for each job."></canvas>
+      <div class="scrub">
+        <div class="scrub-row">
+          <input type="range" id="scrub-become" min="0" max="6" step="0.001" value="3" aria-label="Scroll the Becoming sketch">
+          <span class="where" aria-live="polite"></span>
+        </div>
+        <div class="chips"></div>
+      </div>
+    </div>
+    <div class="copy">
+      <div class="title-row"><span class="handle">C</span><h2 id="become-title">Becoming</h2></div>
+      <p class="idea">The cloud is clay. In the middle of the screen the same points become each thing you built, one after another.</p>
+      <dl>
+        <dt>Pipes</dt><dd>A manifold with pulses running through it.</dd>
+        <dt>Scan</dt><dd>A house whose roof you sweep from points into surface.</dd>
+        <dt>Schedule</dt><dd>Beads drifting round until they hold even spacing.</dd>
+        <dt>Model</dt><dd>A speech bubble that fills with the answer.</dd>
+      </dl>
+      <div class="verdict">
+        <p><b>Why it could be right.</b> It is the opening you liked, carried through the whole page.</p>
+        <p><b>The risk.</b> Morphing particles is a well-known effect. It is yours only because of what the shapes are.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="concept" data-sketch="words" aria-labelledby="words-title">
+    <div class="stage">
+      <canvas role="img" aria-label="Sketch of direction D: the points form each line of text in turn."></canvas>
+      <div class="scrub">
+        <div class="scrub-row">
+          <input type="range" id="scrub-words" min="0" max="6" step="0.001" value="3" aria-label="Scroll the Words sketch">
+          <span class="where" aria-live="polite"></span>
+        </div>
+        <div class="chips"></div>
+      </div>
+    </div>
+    <div class="copy">
+      <div class="title-row"><span class="handle">D</span><h2 id="words-title">Words</h2></div>
+      <p class="idea">No object at all. The points are your own words, and each line is built from the grains of the one before.</p>
+      <dl>
+        <dt>Pipes</dt><dd>10,000 builds itself out of the grains.</dd>
+        <dt>Scan</dt><dd>The letters get depth, then turn solid where they are scanned.</dd>
+        <dt>Schedule</dt><dd>The lines settle into even rows.</dd>
+        <dt>Model</dt><dd>Noise resolves into "Data in. Decisions out."</dd>
+      </dl>
+      <div class="verdict">
+        <p><b>Why it could be right.</b> Quiet, fast, and nobody can mistake what it is about. A recruiter would love it.</p>
+        <p><b>The risk.</b> The least spectacle of the four.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="more" aria-label="Two wilder directions, not sketched">
+    <div>
+      <p class="eyebrow">Wild card, not sketched</p>
+      <h3>The scan of you</h3>
+      <p>You scan yourself with a phone that has LiDAR, and at the end the dust forms you. <b>Your own medium, used on you.</b> It needs one real scan, which bends the rule against model files.</p>
+    </div>
+    <div>
+      <p class="eyebrow">Wild card, not sketched</p>
+      <h3>A workshop</h3>
+      <p>Each job becomes a small thing the visitor does: route the traffic, sweep the scan, drop a booking into place, pick a question and watch the model answer from your real facts. <b>More play, more to build.</b> The Index still serves anyone in a hurry.</p>
+    </div>
+  </section>
+
+  <section class="close" aria-label="What stays and the question">
+    <p class="eyebrow">Kept in every direction</p>
+    <ul>
+      <li><b>The opening.</b> Your name crumbling into the dust.</li>
+      <li><b>Real text underneath.</b> Every fact readable with no 3D at all.</li>
+      <li><b>Moves when you scroll.</b> Nothing plays by itself.</li>
+      <li><b>Fast.</b> All four are points and lines, the same cost as now.</li>
+      <li><b>The Scanner sweep.</b> It fits all four. Points becoming surface under your hand is the one moment every version shares.</li>
+    </ul>
+    <p class="ask">Which one would you keep scrolling? <span>A letter, or a mix.</span></p>
+    <p class="note">These are rough 2D sketches of about 3,000 points each, made to compare ideas. The real thing would use the site's 3D renderer at full density.</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  const TAU = Math.PI * 2;
+  const DPR = Math.min(2, window.devicePixelRatio || 1);
+  const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const FONT = "'Schibsted Grotesk', system-ui, sans-serif";
+  const MONO = "'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace";
+  const VOID = '#0b0b0c';
+  const COLD = [232, 229, 223];
+  const AMBER = [255, 167, 38];
+  const PAL = Array.from({ length: 17 }, (_, k) => {
+    const t = k / 16;
+    return 'rgb(' + COLD.map((c, j) => Math.round(c + (AMBER[j] - c) * t)).join(',') + ')';
+  });
+  const STAGES = ['Name', 'Dust', 'Pipes', 'Scan', 'Schedule', 'Model', 'Contact'];
+  const WHERE = [
+    'Name', 'Dust', 'Pipes / S2T, 2021–2023', 'Scan / Etavolt, 2023–2024',
+    'Schedule / Uniad, 2024–now', 'Model / Cognizant, 2024–now', 'Contact',
+  ];
+
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const wrap = (x, a, b) => { const w = b - a; return a + ((((x - a) % w) + w) % w); };
+  const near = (p, s, w = 0.55) => 1 - smooth(Math.abs(p - s) / w);
+  /** How far a scan has swept, for a stage at local time u: half way at the beat, done just after. */
+  const wipe = (u) => smooth((u + 0.3) / 0.6);
+  const amber = (a) => 'rgba(255,167,38,' + clamp(a).toFixed(3) + ')';
+  const coldA = (a) => 'rgba(232,229,223,' + clamp(a).toFixed(3) + ')';
+
+  function rng(seed) {
+    let s = seed >>> 0;
+    return () => {
+      s = (s + 0x6d2b79f5) >>> 0;
+      let t = s;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /** Points on the ink of some lines of text, centred on (cx, cy), `width` units across. */
+  function textPoints(lines, n, R, { width = 2.6, cx = 0, cy = 0, cz = 0 } = {}) {
+    const PX = 120;
+    const c = document.createElement('canvas');
+    const g = c.getContext('2d', { willReadFrequently: true });
+    const setFont = (l) => {
+      g.font = '700 ' + Math.round(PX * l.s) + 'px ' + FONT;
+      if ('letterSpacing' in g) g.letterSpacing = '0.04em';
+    };
+    const widths = lines.map((l) => { setFont(l); return g.measureText(l.t).width; });
+    const maxW = Math.max(...widths);
+    const heights = lines.map((l) => PX * l.s * 1.2);
+    const total = heights.reduce((a, b) => a + b, 0);
+    c.width = Math.ceil(maxW + 24);
+    c.height = Math.ceil(total + 24);
+    g.fillStyle = '#fff';
+    g.textBaseline = 'top';
+    g.textAlign = 'center';
+    let y = 12;
+    const ends = [];
+    lines.forEach((l, k) => {
+      setFont(l);
+      g.fillText(l.t, c.width / 2, y + PX * l.s * 0.08);
+      y += heights[k];
+      ends.push(y);
+    });
+    const d = g.getImageData(0, 0, c.width, c.height).data;
+    const ink = [];
+    for (let i = 0; i < c.width * c.height; i++) if (d[i * 4 + 3] > 140) ink.push(i);
+    const s = width / maxW;
+    const pos = new Float32Array(n * 3);
+    const line = new Uint8Array(n);
+    for (let i = 0; i < n; i++) {
+      const px = ink.length ? ink[Math.floor(R() * ink.length)] : 0;
+      const x = (px % c.width) + R();
+      const yy = Math.floor(px / c.width) + R();
+      pos[i * 3] = cx + (x - c.width / 2) * s;
+      pos[i * 3 + 1] = cy - (yy - c.height / 2) * s;
+      pos[i * 3 + 2] = cz;
+      const k = ends.findIndex((e) => yy < e);
+      line[i] = k < 0 ? lines.length - 1 : k;
+    }
+    return { pos, line, xmin: cx - (maxW / 2) * s, xmax: cx + (maxW / 2) * s };
+  }
+
+  function ball(n, R, r, o = [0, 0, 0], squash = [1, 1, 1]) {
+    const pos = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const h = R() * 2 - 1, a = R() * TAU, rr = r * Math.cbrt(R());
+      const f = Math.sqrt(1 - h * h) * rr;
+      pos[i * 3] = o[0] + Math.cos(a) * f * squash[0];
+      pos[i * 3 + 1] = o[1] + h * rr * squash[1];
+      pos[i * 3 + 2] = o[2] + Math.sin(a) * f * squash[2];
+    }
+    return pos;
+  }
+
+  /** A gable-roofed house as a raw scan. `u` is how far along the ridge a roof point is, or -1. */
+  function house(n, R, o, k = 1) {
+    const L = 1.05 * k, D = 0.62 * k, RH = 0.5 * k, WH = 0.62 * k;
+    const pos = new Float32Array(n * 3);
+    const u = new Float32Array(n);
+    const noise = () => (R() + R() + R() - 1.5) * 0.022 * k;
+    for (let i = 0; i < n; i++) {
+      let x, y, z, uu = -1;
+      const r = R();
+      if (r < 0.62) {
+        const side = R() < 0.5 ? 1 : -1;
+        x = (R() * 2 - 1) * L;
+        const v = R();
+        y = RH * (1 - v) + noise();
+        z = side * D * v;
+        uu = (x + L) / (2 * L);
+      } else if (r < 0.9) {
+        if (R() < 0.68) {
+          x = (R() * 2 - 1) * L; y = -R() * WH; z = (R() < 0.5 ? 1 : -1) * D;
+        } else {
+          z = (R() * 2 - 1) * D;
+          const top = RH * (1 - Math.abs(z) / D);
+          y = -WH + R() * (WH + top); x = (R() < 0.5 ? 1 : -1) * L;
+        }
+        x += noise(); z += noise();
+      } else {
+        x = (R() * 2 - 1) * L * 1.4; y = -WH + R() * (WH + RH * 1.7); z = (R() * 2 - 1) * D * 1.5;
+      }
+      pos[i * 3] = o[0] + x; pos[i * 3 + 1] = o[1] + y; pos[i * 3 + 2] = o[2] + z;
+      u[i] = uu;
+    }
+    return {
+      pos, u,
+      P0: [o[0] - L, o[1] + RH, o[2]], Pu: [2 * L, 0, 0],
+      front: [0, -RH, D], back: [0, -RH, -D],
+    };
+  }
+
+  // ---------- drawing ----------
+
+  function makeView(cam, W, H, shift = 0) {
+    const yaw = (cam.yaw * Math.PI) / 180, pitch = (cam.pitch * Math.PI) / 180;
+    const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const f = (Math.min(W, H) * 0.5) / Math.tan((20 * Math.PI) / 180);
+    const cx = W * (0.5 + shift);
+    return {
+      f, W, H, cx, dist: cam.dist,
+      project(x, y, z, out) {
+        const X = x - cam.x, Y = y - cam.y, Z = z - cam.z;
+        const x1 = X * cy - Z * sy;
+        const z1 = X * sy + Z * cy;
+        const y2 = Y * cp - z1 * sp;
+        const z2 = Y * sp + z1 * cp;
+        const depth = cam.dist - z2;
+        if (depth < 0.08) return false;
+        out[0] = cx + (x1 * f) / depth;
+        out[1] = H / 2 - (y2 * f) / depth;
+        out[2] = depth;
+        return true;
+      },
+    };
+  }
+
+  const tmp = [0, 0, 0];
+  function poly(ctx, view, pts, style) {
+    ctx.beginPath();
+    for (let k = 0; k < pts.length; k++) {
+      if (!view.project(pts[k][0], pts[k][1], pts[k][2], tmp)) return;
+      if (k) ctx.lineTo(tmp[0], tmp[1]); else ctx.moveTo(tmp[0], tmp[1]);
+    }
+    ctx.closePath();
+    ctx.fillStyle = style;
+    ctx.fill();
+  }
+  function seg(ctx, view, a, b, style, w = 1) {
+    const s = [0, 0, 0];
+    if (!view.project(a[0], a[1], a[2], s) || !view.project(b[0], b[1], b[2], tmp)) return;
+    ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(tmp[0], tmp[1]);
+    ctx.strokeStyle = style; ctx.lineWidth = w * DPR; ctx.stroke();
+  }
+  const at = (P0, Pu, Pv, u, v) => [
+    P0[0] + Pu[0] * u + Pv[0] * v, P0[1] + Pu[1] * u + Pv[1] * v, P0[2] + Pu[2] * u + Pv[2] * v,
+  ];
+  /** A roof plane turned into surface as far as `q` along it, panels and all, with the scan line at its edge. */
+  function scanPlane(ctx, view, P0, Pu, Pv, q, alpha, { rows = 2, cols = 6, panels = true } = {}) {
+    if (q <= 0.002 || alpha <= 0.01) return;
+    poly(ctx, view, [at(P0, Pu, Pv, 0, 0), at(P0, Pu, Pv, q, 0), at(P0, Pu, Pv, q, 1), at(P0, Pu, Pv, 0, 1)], amber(0.1 * alpha));
+    if (panels) {
+      const gu = 0.012, gv = 0.06;
+      for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+        const u0 = c / cols + gu, u1 = Math.min((c + 1) / cols - gu, q);
+        if (u1 <= u0) continue;
+        const v0 = r / rows + gv, v1 = (r + 1) / rows - gv;
+        poly(ctx, view, [at(P0, Pu, Pv, u0, v0), at(P0, Pu, Pv, u1, v0), at(P0, Pu, Pv, u1, v1), at(P0, Pu, Pv, u0, v1)], amber(0.24 * alpha));
+      }
+    }
+    if (q < 0.999) seg(ctx, view, at(P0, Pu, Pv, q, -0.04), at(P0, Pu, Pv, q, 1.04), 'rgba(255,220,160,' + (0.95 * alpha).toFixed(3) + ')', 1.5);
+  }
+  function label(ctx, text, x, y, alpha, { size = 11, color = coldA, align = 'left', font = MONO, weight = 400 } = {}) {
+    if (alpha <= 0.01) return;
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.font = weight + ' ' + Math.round(size * DPR) + 'px ' + font;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = (0.08 * size * DPR).toFixed(1) + 'px';
+    ctx.textAlign = align;
+    ctx.fillStyle = color(alpha);
+    ctx.fillText(text, x, y);
+    ctx.restore();
+  }
+  function cornerLabel(ctx, view, text, alpha) {
+    label(ctx, text, 18 * DPR, view.H - 18 * DPR, alpha * 0.85, { color: amber });
+  }
+
+  function val(v, i, u, d) {
+    if (v === undefined) return d;
+    if (typeof v === 'number') return v;
+    if (typeof v === 'function') return v(i, u);
+    return v[i];
+  }
+  function target(st, i, u, p, out) {
+    if (st.move) { st.move(i, u, out, p); return; }
+    out[0] = st.pos[i * 3]; out[1] = st.pos[i * 3 + 1]; out[2] = st.pos[i * 3 + 2];
+  }
+
+  function createSketch(section, def) {
+    const canvas = section.querySelector('canvas');
+    const ctx = canvas.getContext('2d');
+    const input = section.querySelector('input[type="range"]');
+    const where = section.querySelector('.where');
+    const chipBox = section.querySelector('.chips');
+    const chips = STAGES.map((name, k) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = name;
+      b.addEventListener('click', () => go(k));
+      chipBox.appendChild(b);
+      return b;
+    });
+    let model = null, p = +input.value, W = 0, H = 0, queued = false, tweenId = 0;
+    const A = [0, 0, 0], B = [0, 0, 0], O = [0, 0, 0], S = [0, 0, 0];
+
+    function request() {
+      if (queued) return;
+      queued = true;
+      requestAnimationFrame(() => { queued = false; draw(); });
+    }
+    function setP(v) {
+      p = clamp(v, 0, 6);
+      input.value = String(p);
+      const k = Math.round(p);
+      where.textContent = WHERE[k];
+      chips.forEach((b, j) => b.setAttribute('aria-pressed', String(j === k)));
+      request();
+    }
+    function go(k) {
+      const from = p, id = ++tweenId;
+      if (REDUCED) { setP(k); return; }
+      const dur = 500 + Math.abs(k - from) * 420, t0 = performance.now();
+      const step = (now) => {
+        if (id !== tweenId) return;
+        const t = clamp((now - t0) / dur);
+        setP(lerp(from, k, t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2));
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+    input.addEventListener('input', () => { tweenId++; setP(+input.value); });
+    const toggle = section.querySelector('.toggle');
+    if (toggle) toggle.addEventListener('click', () => {
+      const on = section.dataset.panel !== '1';
+      section.dataset.panel = on ? '1' : '0';
+      toggle.setAttribute('aria-pressed', String(on));
+      toggle.textContent = on ? 'Page text: shown' : 'Page text: hidden';
+      request();
+    });
+
+    function resize() {
+      const r = canvas.getBoundingClientRect();
+      W = Math.max(1, Math.round(r.width * DPR));
+      H = Math.max(1, Math.round(r.height * DPR));
+      canvas.width = W; canvas.height = H;
+      request();
+    }
+    new ResizeObserver(resize).observe(canvas);
+
+    function build() {
+      const R = rng(def.seed);
+      const n = def.n;
+      const m = def.build(n, R);
+      const r = new Float32Array(n), j = new Float32Array(n), ph = new Float32Array(n);
+      for (let i = 0; i < n; i++) { r[i] = R(); j[i] = R(); ph[i] = R(); }
+      model = { ...m, n, r, j, ph };
+      request();
+    }
+
+    function draw() {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = VOID;
+      ctx.fillRect(0, 0, W, H);
+      if (!model || W < 2) return;
+      const { stages, cams, span, path, overlay, n, r, j, ph } = model;
+      const last = stages.length - 1;
+      const s0 = Math.min(last, Math.floor(p)), s1 = Math.min(last, s0 + 1);
+      const t = s0 === last ? 0 : p - s0;
+      const k = smooth(t), c0 = cams[s0], c1 = cams[s1];
+      const cam = {
+        x: lerp(c0.x, c1.x, k), y: lerp(c0.y, c1.y, k), z: lerp(c0.z, c1.z, k),
+        yaw: lerp(c0.yaw, c1.yaw, k), pitch: lerp(c0.pitch, c1.pitch, k), dist: lerp(c0.dist, c1.dist, k),
+      };
+      const view = makeView(cam, W, H, (def.shift || 0) * smooth(p - 1));
+      const st0 = stages[s0], st1 = stages[s1], u0 = p - s0, u1 = p - s1;
+      const unit = 0.012 * view.f;
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < n; i++) {
+        const e = smooth((t - r[i] * (1 - span)) / span);
+        target(st0, i, u0, p, A);
+        target(st1, i, u1, p, B);
+        if (path && e > 0 && e < 1) path(A, B, e, i, O, ph[i]);
+        else { O[0] = lerp(A[0], B[0], e); O[1] = lerp(A[1], B[1], e); O[2] = lerp(A[2], B[2], e); }
+        if (!view.project(O[0], O[1], O[2], S)) continue;
+        const warm = lerp(val(st0.warm, i, u0, 0), val(st1.warm, i, u1, 0), e);
+        const bright = lerp(val(st0.bright, i, u0, 1), val(st1.bright, i, u1, 1), e);
+        const size = lerp(val(st0.size, i, u0, 1), val(st1.size, i, u1, 1), e);
+        let px = (unit * size * (0.7 + 0.6 * j[i])) / S[2];
+        let a = bright * 0.62;
+        if (px < 1) { a *= px * px; px = 1; }
+        if (px > 3.2 * DPR) { a *= 0.6; px = 3.2 * DPR; }
+        a *= clamp(1.25 - (S[2] - cam.dist) * 0.2, 0.3, 1.3);
+        if (a < 0.01) continue;
+        ctx.globalAlpha = clamp(a);
+        ctx.fillStyle = PAL[Math.round(clamp(warm) * 16)];
+        ctx.fillRect(S[0] - px / 2, S[1] - px / 2, px, px);
+      }
+      ctx.globalAlpha = 1;
+      if (overlay) overlay(ctx, view, p, section);
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    setP(p);
+    return { build };
+  }
+
+  const bowPath = (amount, depth = 0) => (A, B, e, i, O, ph) => {
+    O[0] = lerp(A[0], B[0], e); O[1] = lerp(A[1], B[1], e); O[2] = lerp(A[2], B[2], e);
+    const bend = Math.sin(Math.PI * e) * (ph - 0.5) * amount;
+    const dx = B[0] - A[0], dy = B[1] - A[1];
+    O[0] += -dy * bend; O[1] += dx * bend;
+    O[2] += Math.sin(Math.PI * e) * (ph - 0.5) * depth;
+  };
+  const textStage = (t, warm = 1) => ({ pos: t.pos, warm, size: 0.85 });
+
+  // ---------- A. Flow ----------
+  const flow = {
+    seed: 11, n: 3200,
+    build(n, R) {
+      const Y = (k) => -k * 3;
+      const name = textPoints([{ t: "YOU'VE FOUND RAHUL.", s: 1 }], n, R, { width: 2.6, cy: Y(0) });
+      const dust = ball(n, R, 1.7, [0, Y(1), 0], [1, 0.8, 0.5]);
+
+      const lane = new Float32Array(n), base = new Float32Array(n), jx = new Float32Array(n), jz = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        lane[i] = -1 + (i % 6) * 0.4; base[i] = R() * 2.6;
+        jx[i] = (R() - 0.5) * 0.05; jz[i] = (R() - 0.5) * 0.05;
+      }
+      const pipes = {
+        move(i, u, out) {
+          out[0] = lane[i] + jx[i];
+          out[1] = Y(2) + 1.3 - wrap(base[i] + u * 1.8, 0, 2.6);
+          out[2] = jz[i];
+        },
+        warm: 1, bright: 0.95, size: 0.85,
+      };
+
+      const h = house(n, R, [0, Y(3), 0], 1);
+      const scan = {
+        pos: h.pos,
+        warm: (i) => (h.u[i] >= 0 ? 0.12 : 0.04),
+        bright: (i, u) => (h.u[i] >= 0 ? (h.u[i] < wipe(u) ? 0.18 : 1.15) : 0.6),
+      };
+
+      const cal = new Float32Array(n * 3);
+      const booked = Array.from({ length: 35 }, () => R() < 0.6);
+      for (let i = 0; i < n; i++) {
+        const c = i % 35, q = Math.floor(i / 35);
+        const lx = q % 10, lz = Math.floor(q / 10) % 9;
+        cal[i * 3] = (c % 7 - 3) * 0.34 + (lx / 9 - 0.5) * 0.24;
+        cal[i * 3 + 1] = Y(4);
+        cal[i * 3 + 2] = (Math.floor(c / 7) - 2) * 0.28 + (lz / 8 - 0.5) * 0.18;
+      }
+      const schedule = {
+        pos: cal,
+        warm: (i) => (booked[i % 35] ? 1 : 0),
+        bright: (i) => (booked[i % 35] ? 1.05 : 0.3),
+        size: 0.8,
+      };
+
+      const model = textPoints([{ t: 'DATA IN.', s: 1 }, { t: 'DECISIONS OUT.', s: 1 }], n, R, { width: 2.2, cy: Y(5) });
+      const end = textPoints([{ t: 'YOU FOUND ME.', s: 0.55 }, { t: 'SAY SOMETHING.', s: 1 }], n, R, { width: 2.4, cy: Y(6) });
+
+      return {
+        span: 0.3,
+        stages: [
+          textStage(name, 0), { pos: dust, warm: 0, bright: 0.7 }, pipes, scan, schedule,
+          textStage(model, 1), { pos: end.pos, warm: (i) => (end.line[i] === 1 ? 1 : 0.1), size: 0.85 },
+        ],
+        cams: [
+          { x: 0, y: Y(0), z: 0, yaw: 0, pitch: 0, dist: 3.7 },
+          { x: 0, y: Y(1), z: 0, yaw: 0, pitch: 8, dist: 4.4 },
+          { x: 0, y: Y(2), z: 0, yaw: 0, pitch: 4, dist: 3.9 },
+          { x: 0, y: Y(3) + 0.05, z: 0, yaw: 28, pitch: 28, dist: 3.8 },
+          { x: 0, y: Y(4), z: 0, yaw: 0, pitch: 60, dist: 3.4 },
+          { x: 0, y: Y(5), z: 0, yaw: 0, pitch: 0, dist: 3.5 },
+          { x: 0, y: Y(6), z: 0, yaw: 0, pitch: 0, dist: 3.7 },
+        ],
+        path(A, B, e, i, O, ph) {
+          O[0] = lerp(A[0], B[0], e); O[1] = lerp(A[1], B[1], e); O[2] = lerp(A[2], B[2], e);
+          const bulge = Math.sin(Math.PI * e);
+          O[0] += Math.sin(O[1] * 1.9 + ph * TAU) * 0.5 * bulge;
+          O[2] += Math.cos(O[1] * 1.3 + ph * TAU) * 0.3 * bulge;
+        },
+        overlay(ctx, view, p) {
+          const a2 = near(p, 2);
+          if (a2 > 0) {
+            for (let l = 0; l < 6; l++) for (const side of [-0.07, 0.07]) {
+              const x = -1 + l * 0.4 + side;
+              seg(ctx, view, [x, Y(2) - 1.3, 0], [x, Y(2) + 1.3, 0], coldA(0.16 * a2));
+            }
+            cornerLabel(ctx, view, '10,000 REQUESTS A SECOND', a2);
+          }
+          const a3 = near(p, 3, 0.7);
+          if (a3 > 0) {
+            const q = wipe(p - 3);
+            scanPlane(ctx, view, h.P0, h.Pu, h.back, q, a3, { panels: false });
+            scanPlane(ctx, view, h.P0, h.Pu, h.front, q, a3, { rows: 2, cols: 6 });
+            cornerLabel(ctx, view, 'LASER SCAN TO 3D MODEL / SOLAR', a3);
+          }
+          const a4 = near(p, 4);
+          if (a4 > 0) {
+            for (let c = 0; c <= 7; c++) seg(ctx, view, [(c - 3.5) * 0.34, Y(4), -0.7], [(c - 3.5) * 0.34, Y(4), 0.7], coldA(0.14 * a4));
+            for (let rr = 0; rr <= 5; rr++) seg(ctx, view, [-1.19, Y(4), (rr - 2.5) * 0.28], [1.19, Y(4), (rr - 2.5) * 0.28], coldA(0.14 * a4));
+            cornerLabel(ctx, view, '10,000 PEOPLE / ONE SCHEDULE', a4);
+          }
+        },
+      };
+    },
+  };
+
+  // ---------- B. City ----------
+  const city = {
+    seed: 23, n: 3600,
+    build(n, R) {
+      const name = textPoints([{ t: "YOU'VE FOUND RAHUL.", s: 1 }], n, R, { width: 2.6, cy: 1.4 });
+      const dust = ball(n, R, 2.6, [0, 0.5, 0], [1, 0.7, 1]);
+      const P = 0.62;
+      let blocks = [];
+      for (let gi = -3; gi <= 3; gi++) for (let gj = -3; gj <= 3; gj++) {
+        if (R() < 0.1) continue;
+        blocks.push({ x: gi * P, z: gj * P, w: 0.26 + R() * 0.16, d: 0.26 + R() * 0.16, h: 0.14 + Math.pow(R(), 2.4) * 1.05 });
+      }
+      const tower = { x: P, z: -P, w: 0.3, d: 0.3, h: 1.9 };
+      const roof = { x: -P, z: 2 * P, w: 0.48, d: 0.44, h: 0.2 };
+      blocks = blocks.filter((b) => !(Math.abs(b.x - tower.x) < 0.01 && Math.abs(b.z - tower.z) < 0.01) && !(Math.abs(b.x - roof.x) < 0.01 && Math.abs(b.z - roof.z) < 0.01));
+      blocks.push(tower, roof);
+      const TI = blocks.length - 2, RI = blocks.length - 1;
+      const weights = blocks.map((b, k) => ((b.w + b.d) * 2 * b.h + b.w * b.d * 1.2) * (k === RI ? 5 : 1));
+      const total = weights.reduce((a, b) => a + b, 0);
+
+      const pos = new Float32Array(n * 3);
+      const kind = new Uint8Array(n), bid = new Int16Array(n);
+      const hash = new Float32Array(n), uu = new Float32Array(n);
+      const tAxis = new Uint8Array(n), tLine = new Float32Array(n), tBase = new Float32Array(n), tSpeed = new Float32Array(n);
+      const nt = Math.floor(n * 0.16);
+      for (let i = 0; i < n; i++) {
+        hash[i] = R();
+        uu[i] = -1;
+        if (i < nt) {
+          kind[i] = 0; bid[i] = -1;
+          tAxis[i] = R() < 0.5 ? 0 : 1;
+          tLine[i] = (Math.floor(R() * 8) - 3.5) * P;
+          tBase[i] = R() * 4.4 - 2.2;
+          tSpeed[i] = (0.6 + R() * 0.7) * (R() < 0.5 ? 1 : -1);
+          continue;
+        }
+        let pick = R() * total, k = 0;
+        while (k < blocks.length - 1 && pick > weights[k]) { pick -= weights[k]; k++; }
+        const b = blocks[k];
+        bid[i] = k;
+        let x, y, z;
+        const r = R();
+        if (r < (k === RI ? 0.7 : 0.18)) {
+          kind[i] = 1;
+          x = b.x + (R() - 0.5) * b.w; z = b.z + (R() - 0.5) * b.d; y = b.h;
+          if (k === RI) uu[i] = (x - (b.x - b.w / 2)) / b.w;
+        } else if (r < 0.78) {
+          kind[i] = 2;
+          const face = Math.floor(R() * 4);
+          const len = face < 2 ? b.w : b.d;
+          const cols = Math.max(2, Math.round(len / 0.055)), rows = Math.max(1, Math.round(b.h / 0.07));
+          const a = (Math.floor(R() * cols) + 0.5) / cols, v = (Math.floor(R() * rows) + 0.5) / rows;
+          y = v * b.h;
+          if (face === 0) { x = b.x - b.w / 2 + a * b.w; z = b.z + b.d / 2; }
+          else if (face === 1) { x = b.x - b.w / 2 + a * b.w; z = b.z - b.d / 2; }
+          else if (face === 2) { x = b.x + b.w / 2; z = b.z - b.d / 2 + a * b.d; }
+          else { x = b.x - b.w / 2; z = b.z - b.d / 2 + a * b.d; }
+        } else {
+          kind[i] = 3;
+          const sx = R() < 0.5 ? -1 : 1, sz = R() < 0.5 ? -1 : 1;
+          if (R() < 0.6) { x = b.x + (sx * b.w) / 2; z = b.z + (sz * b.d) / 2; y = R() * b.h; }
+          else if (R() < 0.5) { x = b.x + (R() - 0.5) * b.w; z = b.z + (sz * b.d) / 2; y = b.h; }
+          else { x = b.x + (sx * b.w) / 2; z = b.z + (R() - 0.5) * b.d; y = b.h; }
+        }
+        pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
+      }
+      const move = (i, u, out, p) => {
+        if (kind[i] === 0) {
+          const s = wrap(tBase[i] + p * tSpeed[i], -2.2, 2.2);
+          if (tAxis[i] === 0) { out[0] = s; out[1] = 0.01; out[2] = tLine[i]; }
+          else { out[0] = tLine[i]; out[1] = 0.01; out[2] = s; }
+          return;
+        }
+        out[0] = pos[i * 3]; out[1] = pos[i * 3 + 1]; out[2] = pos[i * 3 + 2];
+      };
+      const isRoof = (i) => bid[i] === RI && kind[i] === 1;
+      const lit = (i, share) => kind[i] === 2 && hash[i] < share;
+
+      const pipes = {
+        move,
+        warm: (i) => (kind[i] === 0 ? 1 : 0),
+        bright: (i) => (kind[i] === 0 ? 1.5 : 0.55),
+        size: (i) => (kind[i] === 0 ? 1.1 : 0.8),
+      };
+      const scan = {
+        move,
+        warm: (i) => (kind[i] === 0 ? 0.6 : isRoof(i) ? 0.12 : 0),
+        bright: (i, u) => (kind[i] === 0 ? 0.45 : isRoof(i) ? (uu[i] < wipe(u) ? 0.2 : 1.4) : bid[i] === RI ? 1 : 0.42),
+        size: 0.8,
+      };
+      const schedule = {
+        move,
+        warm: (i, u) => (lit(i, 0.55 * smooth(u + 0.6)) ? 1 : kind[i] === 0 ? 0.5 : 0),
+        bright: (i, u) => (lit(i, 0.55 * smooth(u + 0.6)) ? 1.3 : kind[i] === 0 ? 0.35 : 0.38),
+        size: 0.8,
+      };
+      const lens = {
+        move,
+        warm: (i) => (bid[i] === TI ? 1 : lit(i, 0.55) ? 0.7 : 0),
+        bright: (i) => (bid[i] === TI ? 1.6 : lit(i, 0.55) ? 0.6 : 0.3),
+        size: 0.8,
+      };
+      const end = {
+        move,
+        warm: (i) => (bid[i] === TI || lit(i, 0.55) || kind[i] === 0 ? 1 : 0),
+        bright: (i) => (bid[i] === TI || lit(i, 0.55) ? 1 : kind[i] === 0 ? 0.8 : 0.4),
+        size: 0.8,
+      };
+      const R0 = [roof.x - roof.w / 2, roof.h + 0.002, roof.z - roof.d / 2];
+      return {
+        span: 0.5,
+        stages: [textStage(name, 0), { pos: dust, warm: 0, bright: 0.6 }, pipes, scan, schedule, lens, end],
+        cams: [
+          { x: 0, y: 1.4, z: 0, yaw: 0, pitch: 0, dist: 3.7 },
+          { x: 0, y: 0.5, z: 0, yaw: 15, pitch: 12, dist: 5.6 },
+          { x: 0, y: 0, z: 0, yaw: 35, pitch: 40, dist: 5.6 },
+          { x: roof.x * 0.6, y: 0.2, z: roof.z * 0.7, yaw: 25, pitch: 40, dist: 2.9 },
+          { x: 0, y: 0.35, z: 0, yaw: -25, pitch: 20, dist: 4.9 },
+          { x: tower.x, y: 1.55, z: tower.z, yaw: 15, pitch: 8, dist: 2.7 },
+          { x: 0, y: 0.3, z: 0, yaw: 40, pitch: 55, dist: 6.6 },
+        ],
+        path: bowPath(0.25, 0.4),
+        overlay(ctx, view, p) {
+          cornerLabel(ctx, view, '10,000 REQUESTS A SECOND', near(p, 2));
+          if (p > 2.45) {
+            const q = wipe(p - 3);
+            const a = clamp((p - 2.45) / 0.35) * (p > 3.6 ? 0.65 : 1);
+            scanPlane(ctx, view, R0, [roof.w, 0, 0], [0, 0, roof.d], q, a, { rows: 3, cols: 4 });
+          }
+          cornerLabel(ctx, view, 'LASER SCAN TO 3D MODEL / SOLAR', near(p, 3));
+          cornerLabel(ctx, view, '10,000 PEOPLE / ONE SCHEDULE', near(p, 4));
+          const a5 = near(p, 5);
+          if (a5 > 0) {
+            seg(ctx, view, [tower.x, tower.h, tower.z], [tower.x, tower.h + 0.55, tower.z], amber(0.9 * a5), 1.5);
+            const s = [0, 0, 0];
+            if (view.project(tower.x, tower.h + 0.62, tower.z, s)) label(ctx, 'DATA IN. DECISIONS OUT.', s[0], s[1], a5, { color: amber, align: 'center', size: 12 });
+          }
+          const a6 = clamp((p - 5.4) / 0.6);
+          label(ctx, 'SAY SOMETHING.', view.W / 2, view.H * 0.17, a6, { size: 26, font: FONT, weight: 700, align: 'center' });
+        },
+      };
+    },
+  };
+
+  // ---------- C. Becoming ----------
+  const become = {
+    seed: 37, n: 3200,
+    build(n, R) {
+      const name = textPoints([{ t: "YOU'VE FOUND RAHUL.", s: 1 }], n, R, { width: 2.6 });
+      const dust = ball(n, R, 2.1, [0, 0, 0], [1, 0.8, 0.8]);
+
+      const segs = [
+        [[-1.55, 0.55, 0.25], [1.2, 0.55, 0.25]],
+        [[-1.2, -0.55, -0.25], [1.55, -0.55, -0.25]],
+      ];
+      for (const x of [-1, -0.5, 0, 0.5, 1]) segs.push([[x, 0.55, 0.25], [x, -0.55, -0.25]]);
+      const lens = segs.map(([a, b]) => Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]));
+      const sum = lens.reduce((a, b) => a + b, 0);
+      const pipe = new Float32Array(n * 3), phase = new Float32Array(n);
+      for (let i = 0; i < n; i++) {
+        let pick = R() * sum, k = 0;
+        while (k < segs.length - 1 && pick > lens[k]) { pick -= lens[k]; k++; }
+        const [a, b] = segs[k];
+        const t = R();
+        const d = [(b[0] - a[0]) / lens[k], (b[1] - a[1]) / lens[k], (b[2] - a[2]) / lens[k]];
+        const up = Math.abs(d[1]) > 0.9 ? [1, 0, 0] : [0, 1, 0];
+        let e1 = [d[1] * up[2] - d[2] * up[1], d[2] * up[0] - d[0] * up[2], d[0] * up[1] - d[1] * up[0]];
+        const l1 = Math.hypot(...e1); e1 = e1.map((v) => v / l1);
+        const e2 = [d[1] * e1[2] - d[2] * e1[1], d[2] * e1[0] - d[0] * e1[2], d[0] * e1[1] - d[1] * e1[0]];
+        const ang = R() * TAU, rad = 0.05;
+        for (let c = 0; c < 3; c++) pipe[i * 3 + c] = a[c] + (b[c] - a[c]) * t + (e1[c] * Math.cos(ang) + e2[c] * Math.sin(ang)) * rad;
+        const x = pipe[i * 3], y = pipe[i * 3 + 1];
+        phase[i] = ((x + 1.6) / 3.2) * 0.6 + ((0.55 - y) / 1.1) * 0.4;
+      }
+      const pulse = (i, u) => wrap(phase[i] * 2 - u * 1.6, 0, 1) < 0.16;
+      const pipes = {
+        pos: pipe,
+        warm: (i, u) => (pulse(i, u) ? 1 : 0.15),
+        bright: (i, u) => (pulse(i, u) ? 1.5 : 0.65),
+        size: 0.85,
+      };
+
+      const h = house(n, R, [0, -0.05, 0], 1);
+      const scan = {
+        pos: h.pos,
+        warm: (i) => (h.u[i] >= 0 ? 0.12 : 0.04),
+        bright: (i, u) => (h.u[i] >= 0 ? (h.u[i] < wipe(u) ? 0.18 : 1.15) : 0.6),
+      };
+
+      const radii = [0.6, 0.98, 1.36], tilts = [0.28, -0.16, 0.1], counts = [5, 8, 11];
+      const ringK = new Uint8Array(n), isBead = new Uint8Array(n), angle0 = new Float32Array(n), even = new Float32Array(n);
+      const off = new Float32Array(n * 3);
+      const beadJitter = counts.map((c) => Array.from({ length: c }, () => (R() - 0.5) * 1.6));
+      for (let i = 0; i < n; i++) {
+        const k = i % 3;
+        ringK[i] = k;
+        if (R() < 0.55) {
+          isBead[i] = 1;
+          const b = Math.floor(R() * counts[k]);
+          even[i] = (b / counts[k]) * TAU;
+          angle0[i] = even[i] + beadJitter[k][b];
+          const s = ball(1, R, 0.05);
+          off.set(s, i * 3);
+        } else {
+          angle0[i] = even[i] = R() * TAU;
+          off[i * 3 + 1] = (R() - 0.5) * 0.012;
+        }
+      }
+      const rings = {
+        move(i, u, out, p) {
+          const k = ringK[i];
+          const a = lerp(angle0[i], even[i], isBead[i] ? smooth(u + 0.75) : 1) + p * 0.3 * (k % 2 ? 1 : -1);
+          const rr = radii[k], x = rr * Math.cos(a), z = rr * Math.sin(a), tl = tilts[k];
+          out[0] = x + off[i * 3];
+          out[1] = -z * Math.sin(tl) + off[i * 3 + 1];
+          out[2] = z * Math.cos(tl) + off[i * 3 + 2];
+        },
+        warm: (i) => (isBead[i] ? 1 : 0.3),
+        bright: (i) => (isBead[i] ? 1.1 : 0.55),
+        size: 0.85,
+      };
+
+      const outline = [];
+      const bw = 1.2, bh = 0.62, cr = 0.24, cyb = 0.12;
+      const corner = (cx, cy, a0) => { for (let s = 0; s <= 10; s++) { const a = a0 + (s / 10) * (Math.PI / 2); outline.push([cx + Math.cos(a) * cr, cy + Math.sin(a) * cr]); } };
+      corner(bw - cr, bh - cr + cyb, 0);
+      corner(-bw + cr, bh - cr + cyb, Math.PI / 2);
+      corner(-bw + cr, -bh + cr + cyb, Math.PI);
+      outline.push([-0.75, -bh + cyb], [-0.98, -bh + cyb - 0.34], [-0.45, -bh + cyb]);
+      corner(bw - cr, -bh + cr + cyb, 1.5 * Math.PI);
+      outline.push(outline[0]);
+      const segLen = outline.slice(1).map((q, k) => Math.hypot(q[0] - outline[k][0], q[1] - outline[k][1]));
+      const outSum = segLen.reduce((a, b) => a + b, 0);
+      const words = textPoints([{ t: 'DATA IN,', s: 1 }, { t: 'DECISIONS OUT.', s: 1 }], n, R, { width: 1.75, cy: cyb });
+      const bubble = new Float32Array(n * 3), isText = new Uint8Array(n);
+      for (let i = 0; i < n; i++) {
+        if (R() < 0.42) {
+          let pick = R() * outSum, k = 0;
+          while (k < segLen.length - 1 && pick > segLen[k]) { pick -= segLen[k]; k++; }
+          const t = pick / segLen[k];
+          bubble[i * 3] = lerp(outline[k][0], outline[k + 1][0], t);
+          bubble[i * 3 + 1] = lerp(outline[k][1], outline[k + 1][1], t);
+          bubble[i * 3 + 2] = (R() - 0.5) * 0.02;
+        } else {
+          isText[i] = 1;
+          bubble.set(words.pos.subarray(i * 3, i * 3 + 3), i * 3);
+        }
+      }
+      const model = { pos: bubble, warm: (i) => (isText[i] ? 1 : 0.25), bright: (i) => (isText[i] ? 1 : 0.8), size: 0.85 };
+      const end = textPoints([{ t: 'YOU FOUND ME.', s: 0.55 }, { t: 'SAY SOMETHING.', s: 1 }], n, R, { width: 2.4 });
+
+      return {
+        span: 0.45,
+        stages: [
+          textStage(name, 0), { pos: dust, warm: 0, bright: 0.7 }, pipes, scan, rings, model,
+          { pos: end.pos, warm: (i) => (end.line[i] === 1 ? 1 : 0.1), size: 0.85 },
+        ],
+        cams: [
+          { x: 0, y: 0, z: 0, yaw: 0, pitch: 0, dist: 3.7 },
+          { x: 0, y: 0, z: 0, yaw: 10, pitch: 10, dist: 4.7 },
+          { x: 0, y: 0, z: 0, yaw: 32, pitch: 20, dist: 4.0 },
+          { x: 0, y: 0.05, z: 0, yaw: 30, pitch: 26, dist: 3.8 },
+          { x: 0, y: 0, z: 0, yaw: 15, pitch: 36, dist: 4.1 },
+          { x: 0, y: 0, z: 0, yaw: 0, pitch: 4, dist: 3.5 },
+          { x: 0, y: 0, z: 0, yaw: 0, pitch: 0, dist: 3.7 },
+        ],
+        path: bowPath(0.45, 0.5),
+        overlay(ctx, view, p) {
+          cornerLabel(ctx, view, '10,000 REQUESTS A SECOND', near(p, 2));
+          const a3 = near(p, 3, 0.7);
+          if (a3 > 0) {
+            const q = wipe(p - 3);
+            scanPlane(ctx, view, h.P0, h.Pu, h.back, q, a3, { panels: false });
+            scanPlane(ctx, view, h.P0, h.Pu, h.front, q, a3, { rows: 2, cols: 6 });
+            cornerLabel(ctx, view, 'LASER SCAN TO 3D MODEL / SOLAR', a3);
+          }
+          cornerLabel(ctx, view, '10,000 PEOPLE / ONE SCHEDULE', near(p, 4));
+          cornerLabel(ctx, view, "LANGUAGE MODELS FOR SINGAPORE'S GOVERNMENT", near(p, 5));
+        },
+      };
+    },
+  };
+
+  // ---------- D. Words ----------
+  const words = {
+    seed: 53, n: 3400,
+    build(n, R) {
+      const name = textPoints([{ t: "YOU'VE FOUND RAHUL.", s: 1 }], n, R, { width: 2.6 });
+      const dust = new Float32Array(n * 3);
+      for (let i = 0; i < n; i++) {
+        dust[i * 3] = (R() * 2 - 1) * 1.8;
+        dust[i * 3 + 1] = (R() * 2 - 1) * 1.05;
+        dust[i * 3 + 2] = (R() * 2 - 1) * 0.2;
+      }
+      const pipes = textPoints([{ t: 'IT STARTED WITH PIPES.', s: 0.42 }, { t: '10,000', s: 1.7 }, { t: 'REQUESTS A SECOND', s: 0.42 }], n, R, { width: 2.2 });
+      const scanText = textPoints([{ t: 'I WROTE SOFTWARE THAT TURNS', s: 0.42 }, { t: 'LASER SCANS', s: 1.15 }, { t: 'INTO 3D MODELS.', s: 0.62 }], n, R, { width: 2.5 });
+      const back = new Uint8Array(n), su = new Float32Array(n);
+      const scanPos = new Float32Array(scanText.pos);
+      for (let i = 0; i < n; i++) {
+        if (i % 3 === 0) { back[i] = 1; scanPos[i * 3 + 2] = -0.16; }
+        su[i] = (scanPos[i * 3] - scanText.xmin) / (scanText.xmax - scanText.xmin);
+      }
+      const scan = {
+        pos: scanPos,
+        warm: (i, u) => (!back[i] && su[i] < wipe(u) ? 0.95 : 0.1),
+        bright: (i, u) => (back[i] ? 0.45 : su[i] < wipe(u) ? 1.25 : 0.85),
+        size: (i, u) => (!back[i] && su[i] < wipe(u) ? 1.7 : 0.85),
+      };
+      const sched = textPoints([{ t: '10,000 PEOPLE.', s: 1.1 }, { t: 'ONE SCHEDULE THAT HOLDS.', s: 0.5 }], n, R, { width: 2.4 });
+      const model = textPoints([{ t: 'DATA IN.', s: 1 }, { t: 'DECISIONS OUT.', s: 1 }], n, R, { width: 2.2 });
+      const end = textPoints([{ t: 'YOU FOUND ME.', s: 0.55 }, { t: 'SAY SOMETHING.', s: 1 }], n, R, { width: 2.4 });
+      const front = { x: 0, y: 0, z: 0, yaw: 0, pitch: 0, dist: 3.6 };
+      return {
+        span: 0.45,
+        stages: [
+          textStage(name, 0), { pos: dust, warm: 0, bright: 0.6 },
+          { pos: pipes.pos, warm: (i) => (pipes.line[i] === 1 ? 1 : 0.1), size: 0.85 },
+          scan,
+          { pos: sched.pos, warm: (i) => (sched.line[i] === 0 ? 1 : 0.1), size: 0.85 },
+          textStage(model, 1),
+          { pos: end.pos, warm: (i) => (end.line[i] === 1 ? 1 : 0.1), size: 0.85 },
+        ],
+        cams: [front, { ...front, dist: 3.9 }, front, { x: 0, y: 0, z: 0, yaw: 26, pitch: 10, dist: 3.7 }, front, front, front],
+        path: bowPath(0.7, 0.3),
+        overlay(ctx, view, p) {
+          cornerLabel(ctx, view, '2021–2023 / S2T', near(p, 2));
+          cornerLabel(ctx, view, '2023–2024 / ETAVOLT', near(p, 3));
+          cornerLabel(ctx, view, '2024–NOW / UNIAD', near(p, 4));
+          cornerLabel(ctx, view, '2024–NOW / COGNIZANT', near(p, 5));
+        },
+      };
+    },
+  };
+
+  // ---------- Round 3: the bay ----------
+  const PANEL_COPY = {
+    2: ['2021 — 2023 / S2T / DATA ENGINEER, JR. TEAM LEAD', 'IT STARTED WITH PIPES. 10,000 REQUESTS A SECOND.'],
+    3: ['2023 — 2024 / ETAVOLT / SOFTWARE ENGINEER', "I WROTE SOFTWARE THAT TURNS LASER SCANS INTO 3D MODELS. YOU'VE BEEN LOOKING AT ONE."],
+    4: ['2024 — NOW / UNIAD / LEAD SOFTWARE ENGINEER', '10,000 PEOPLE. ONE SCHEDULE THAT HOLDS.'],
+    5: ['2024 — NOW / COGNIZANT / SOFTWARE ENGINEER', "LANGUAGE MODELS FOR SINGAPORE'S GOVERNMENT. DATA IN, DECISIONS OUT."],
+  };
+
+  /** A tag pinned to a point in the city: a ring, a leader line and two lines of readout. */
+  function tag(ctx, view, anchor, lines, alpha) {
+    if (alpha <= 0.01) return;
+    const s = [0, 0, 0];
+    if (!view.project(anchor[0], anchor[1], anchor[2], s)) return;
+    const d = DPR;
+    const side = s[0] > view.W * 0.68 ? -1 : 1;
+    const ex = s[0] + side * 34 * d, ey = s[1] - 46 * d;
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.strokeStyle = amber(0.85 * alpha);
+    ctx.lineWidth = d;
+    ctx.beginPath(); ctx.arc(s[0], s[1], 3.5 * d, 0, TAU); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(s[0], s[1]); ctx.lineTo(ex, ey); ctx.lineTo(ex + side * 14 * d, ey); ctx.stroke();
+    ctx.restore();
+    const tx = ex + side * 20 * d, align = side > 0 ? 'left' : 'right';
+    label(ctx, lines[0], tx, ey - 3 * d, alpha, { size: 10, color: amber, align });
+    label(ctx, lines[1], tx, ey + 12 * d, alpha, { size: 10, align });
+  }
+
+  /** A stand-in for the page's own text: a dark band at the left edge with the beat's copy. */
+  function panel(ctx, view, p) {
+    const k = Math.round(p);
+    if (k < 2 || k > 5) return;
+    const a = near(p, k, 0.6);
+    if (a <= 0.01) return;
+    const W = view.W, H = view.H, d = DPR;
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    const g = ctx.createLinearGradient(0, 0, W * 0.5, 0);
+    g.addColorStop(0, 'rgba(11,11,12,' + (0.94 * a).toFixed(3) + ')');
+    g.addColorStop(0.65, 'rgba(11,11,12,' + (0.7 * a).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(11,11,12,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W * 0.5, H);
+    ctx.font = '500 ' + Math.round(14 * d) + 'px ' + FONT;
+    if ('letterSpacing' in ctx) ctx.letterSpacing = (1.1 * d).toFixed(1) + 'px';
+    const maxW = W * 0.3;
+    const lines = [];
+    let line = '';
+    for (const word of PANEL_COPY[k][1].split(' ')) {
+      const next = line ? line + ' ' + word : word;
+      if (ctx.measureText(next).width > maxW && line) { lines.push(line); line = word; } else line = next;
+    }
+    lines.push(line);
+    ctx.restore();
+    const x = 22 * d;
+    let y = H - 22 * d - 3 * 14 * d - lines.length * 19 * d - 30 * d;
+    label(ctx, PANEL_COPY[k][0], x, y, a * 0.75, { size: 9 });
+    y += 26 * d;
+    for (const l of lines) { label(ctx, l, x, y, a, { size: 14, font: FONT, weight: 500 }); y += 19 * d; }
+    y += 8 * d;
+    ctx.save();
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = coldA(0.16 * a);
+    [0.92, 0.78, 0.6].forEach((f, j) => ctx.fillRect(x, y + j * 14 * d, maxW * f, 5 * d));
+    ctx.restore();
+  }
+
+  const bay = {
+    seed: 89, n: 16000, shift: 0.1,
+    build(n, R) {
+      const name = textPoints([{ t: "YOU'VE FOUND RAHUL.", s: 1 }], n, R, { width: 2.6, cy: 4.4, cz: 0.6 });
+      const dust = ball(n, R, 1.6, [-0.9, 2.8, 1.0], [1, 0.75, 0.7]);
+      const BAY = { x: 0, z: -0.2, r: 1.1 };
+      const RIVER = [[-3.2, 2.4], [-2.35, 1.75], [-1.8, 1.05], [-1.25, 0.5], [-0.85, 0.15]];
+      const rl = RIVER.slice(1).map((q, k) => Math.hypot(q[0] - RIVER[k][0], q[1] - RIVER[k][1]));
+      const rsum = rl.reduce((a, b) => a + b, 0);
+      const rq = [0, 0, 0, 0];
+      const riverAt = (s, out) => {
+        let dd = clamp(s) * rsum, k = 0;
+        while (k < rl.length - 1 && dd > rl[k]) { dd -= rl[k]; k++; }
+        const a = RIVER[k], b = RIVER[k + 1], t = clamp(dd / rl[k]);
+        out[0] = lerp(a[0], b[0], t); out[1] = lerp(a[1], b[1], t);
+        out[2] = (b[0] - a[0]) / rl[k]; out[3] = (b[1] - a[1]) / rl[k];
+      };
+      const segDist = (x, z, a, b) => {
+        const dx = b[0] - a[0], dz = b[1] - a[1];
+        const t = clamp(((x - a[0]) * dx + (z - a[1]) * dz) / (dx * dx + dz * dz));
+        return Math.hypot(x - a[0] - dx * t, z - a[1] - dz * t);
+      };
+      const fromRiver = (x, z) => Math.min(...RIVER.slice(1).map((b, k) => segDist(x, z, RIVER[k], b)));
+      const fromBay = (x, z) => Math.hypot(x - BAY.x, z - BAY.z);
+
+      // The CBD on the river's south bank, with the tallest tower for the Lens.
+      const blocks = [];
+      for (let gx = 0; gx < 5; gx++) for (let gz = 0; gz < 5; gz++) {
+        const x = -2.35 + gx * 0.34, z = -1.5 + gz * 0.34;
+        if (fromRiver(x, z) < 0.28 || fromBay(x, z) < BAY.r + 0.2 || R() < 0.12) continue;
+        const s = 0.15 + R() * 0.08;
+        blocks.push({ x, z, w: s, d: s, h: 0.5 + Math.pow(R(), 1.5) * 0.85, cbd: true });
+      }
+      let ti = 0, best = 9;
+      blocks.forEach((b, k) => { const dd = Math.hypot(b.x + 1.55, b.z + 0.8); if (dd < best) { best = dd; ti = k; } });
+      Object.assign(blocks[ti], { w: 0.22, d: 0.22, h: 1.6 });
+      const tower = blocks[ti];
+      const roof = { x: 0.05, z: 2.35, w: 0.42, d: 0.36, h: 0.12 };
+      const RIDGE = 0.1;
+      const kept = (x, z) =>
+        !(fromBay(x, z) < BAY.r + 0.45 || fromRiver(x, z) < 0.35 ||
+          (x > -2.6 && x < -0.95 && z > -1.7 && z < 0.3) ||
+          (x > -0.7 && x < 2.3 && z > -3.0 && z < -0.75) ||
+          (x > 0.5 && x < 2.4 && z > -0.9 && z < 1.35) ||
+          Math.hypot(x - roof.x, z - roof.z) < 0.4);
+      // The heartland: HDB slabs and point blocks all round.
+      for (let gx = -6; gx <= 6; gx++) for (let gz = -6; gz <= 6; gz++) {
+        const x = gx * 0.55, z = gz * 0.55;
+        if (!kept(x, z) || R() < 0.12) continue;
+        if (R() < 0.7) {
+          const along = R() < 0.5;
+          blocks.push({ x, z, w: along ? 0.42 : 0.12, d: along ? 0.12 : 0.42, h: 0.3 + R() * 0.38, hdb: true });
+        } else {
+          const s = 0.16 + R() * 0.08;
+          blocks.push({ x, z, w: s, d: s, h: 0.25 + R() * 0.3, hdb: true });
+        }
+      }
+      let bk = 0; best = 9;
+      blocks.forEach((b, k) => { if (!b.hdb) return; const dd = Math.hypot(b.x - 1.1, b.z - 2.0); if (dd < best) { best = dd; bk = k; } });
+      const egg = blocks[bk];
+      const weights = blocks.map((b, k) => ((b.w + b.d) * 2 * b.h + b.w * b.d) * (k === ti ? 4 : 1));
+      const total = weights.reduce((a, b) => a + b, 0);
+
+      const MBS = { x0: 0.15, z: -1.6, gap: 0.3, h: 1.05 };
+      const LOTUS = { x: -0.45, z: -1.05 };
+      const TREES = [[1.25, -2.25, 0.62], [1.52, -2.05, 0.78], [1.1, -2.55, 0.5], [1.72, -2.45, 0.7], [1.42, -2.75, 0.66], [1.95, -2.15, 0.48]];
+      const FLYER = { x: 1.85, y: 0.5, z: -0.3, r: 0.44, turn: 0.95 };
+      const DOMES = [[1.0, 0.72, 0.22], [1.38, 0.98, 0.17]];
+      const MER = { x: -0.78, z: 0.42 };
+      const MOUTH = [-0.745, 0.2, 0.405];
+      const SPOUT = [0.78, -0.62];
+      const MRT = { r: 2.78, a0: 0.15 * Math.PI, a1: 0.9 * Math.PI, y: 0.14 };
+      const ROADS = [
+        [[-3.3, 1.65], [3.3, 1.65]], [[-3.3, 2.2], [3.3, 2.2]], [[-3.3, 2.75], [3.3, 2.75]], [[-3.3, -3.05], [3.3, -3.05]],
+        [[-2.75, -3.3], [-2.75, 3.3]], [[2.75, -3.3], [2.75, 3.3]], [[2.2, -0.6], [2.2, 3.3]],
+        [[-2.45, -1.2], [-1.1, -1.2]], [[-2.45, -0.5], [-1.15, -0.5]], [[-1.85, -1.6], [-1.85, 0.1]],
+      ];
+
+      const pos = new Float32Array(n * 3);
+      const kind = new Uint8Array(n), bid = new Int16Array(n).fill(-1);
+      const hash = new Float32Array(n), uu = new Float32Array(n).fill(-1);
+      const base = new Float32Array(n), aux = new Float32Array(n), road = new Uint8Array(n);
+      const lattice = (len, cell) => { const c = Math.max(2, Math.round(len / cell)); return (Math.floor(R() * c) + 0.5) / c; };
+      const cut = [];
+      [0.08, 0.07, 0.34, 0.03, 0.04].forEach((f, k) => cut.push((k ? cut[k - 1] : 0) + f * n));
+      for (let i = 0; i < n; i++) {
+        hash[i] = R();
+        let k = 3, x = 0, y = 0, z = 0;
+        if (i < cut[0]) {
+          k = 0; road[i] = Math.floor(R() * ROADS.length); base[i] = R();
+          aux[i] = (0.12 + R() * 0.18) * (R() < 0.5 ? 1 : -1);
+        } else if (i < cut[1]) {
+          k = 6;
+          if (R() < 0.5) { uu[i] = 1; base[i] = R(); aux[i] = (R() - 0.5) * 0.14; }
+          else { uu[i] = 0; base[i] = R() * TAU; aux[i] = BAY.r * Math.sqrt(R()); }
+        } else if (i < cut[2]) {
+          k = 4;
+          const which = R();
+          if (which < 0.32) {
+            if (R() < 0.8) {
+              const tx = MBS.x0 + Math.floor(R() * 3) * MBS.gap;
+              y = lattice(MBS.h, 0.04) * MBS.h;
+              const sd = R() < 0.5 ? 1 : -1;
+              if (R() < 0.8) { x = tx + sd * (0.045 + (1 - y / MBS.h) * 0.035); z = MBS.z + (lattice(0.32, 0.035) - 0.5) * 0.32; }
+              else { z = MBS.z + sd * 0.16; x = tx + (R() - 0.5) * 0.09; }
+            } else {
+              x = MBS.x0 - 0.32 + R() * (2 * MBS.gap + 0.5); y = MBS.h + R() * 0.035; z = MBS.z + (R() - 0.5) * 0.12;
+            }
+          } else if (which < 0.44) {
+            const a = (-0.5 + Math.floor(R() * 9) / 8) * 1.9, t = R();
+            const r = t * 0.32, w = Math.sin(t * Math.PI) * 0.045;
+            const lat = R() < 0.7 ? (R() < 0.5 ? -w : w) : (R() * 2 - 1) * w;
+            x = LOTUS.x + Math.sin(a) * r + Math.cos(a) * lat;
+            z = LOTUS.z + Math.cos(a) * r - Math.sin(a) * lat;
+            y = 0.06 + Math.sin(t * Math.PI) * 0.1 + t * 0.08;
+          } else if (which < 0.58) {
+            const [tx, tz, th] = TREES[Math.floor(R() * TREES.length)];
+            if (R() < 0.3) {
+              const v = R() * (th - 0.2), a = R() * TAU, rr = 0.035 - v * 0.02;
+              x = tx + Math.cos(a) * rr; y = v; z = tz + Math.sin(a) * rr;
+            } else {
+              const ringy = R() < 0.55;
+              const v = ringy ? Math.floor(R() * 5) / 4 : R();
+              const a = ringy ? R() * TAU : (Math.floor(R() * 12) / 12) * TAU;
+              const rr = 0.03 + v * 0.15;
+              x = tx + Math.cos(a) * rr; y = th - 0.2 + v * 0.2; z = tz + Math.sin(a) * rr;
+            }
+          } else if (which < 0.7) {
+            const part = R();
+            let lx, ly, lz = 0;
+            if (part < 0.7) { const a = R() * TAU, rr = FLYER.r * (R() < 0.5 ? 1 : 0.95); lx = Math.cos(a) * rr; ly = Math.sin(a) * rr; }
+            else if (part < 0.85) { const a = (Math.floor(R() * 16) / 16) * TAU, rr = R() * FLYER.r; lx = Math.cos(a) * rr; ly = Math.sin(a) * rr; }
+            else { const sd = R() < 0.5 ? 1 : -1, v = R(); lx = 0; ly = -v * FLYER.y; lz = sd * v * 0.18; }
+            x = FLYER.x + lx * Math.cos(FLYER.turn) + lz * Math.sin(FLYER.turn);
+            z = FLYER.z - lx * Math.sin(FLYER.turn) + lz * Math.cos(FLYER.turn);
+            y = FLYER.y + ly;
+          } else if (which < 0.84) {
+            const [dx, dz, dr] = DOMES[R() < 0.6 ? 0 : 1];
+            const th = ((Math.floor(R() * 16) + 0.5) / 16) * TAU, ph = ((Math.floor(R() * 6) + 0.5) / 6) * (Math.PI / 2);
+            const rr = dr * (R() < 0.3 ? 1.1 : 1);
+            x = dx + Math.cos(ph) * Math.cos(th) * rr; z = dz + Math.cos(ph) * Math.sin(th) * rr; y = Math.sin(ph) * rr * 0.8;
+          } else if (R() < 0.4) {
+            const v = R() * 0.22, a = R() * TAU, rr = v > 0.16 ? 0.05 : 0.032;
+            x = MER.x + Math.cos(a) * rr; y = v; z = MER.z + Math.sin(a) * rr;
+          } else {
+            k = 8; base[i] = R(); aux[i] = (R() - 0.5) * 0.02;
+          }
+        } else if (i < cut[3]) {
+          const a = MRT.a0 + R() * (MRT.a1 - MRT.a0);
+          if (R() < 0.6) {
+            k = 9; x = Math.cos(a) * MRT.r; z = Math.sin(a) * MRT.r;
+            y = R() < 0.25 ? R() * MRT.y : MRT.y;
+            if (y < MRT.y) { const pa = Math.round(a / 0.12) * 0.12; x = Math.cos(pa) * MRT.r; z = Math.sin(pa) * MRT.r; }
+          } else { k = 7; base[i] = R() * 0.2; }
+        } else if (i < cut[4]) {
+          k = 5;
+          const sd = R() < 0.5 ? 1 : -1, v = R();
+          x = roof.x + (R() - 0.5) * roof.w; y = roof.h + RIDGE * (1 - v); z = roof.z + sd * v * (roof.d / 2);
+          uu[i] = (x - (roof.x - roof.w / 2)) / roof.w;
+        } else {
+          let pick = R() * total, b = 0;
+          while (b < blocks.length - 1 && pick > weights[b]) { pick -= weights[b]; b++; }
+          const B = blocks[b];
+          bid[i] = b;
+          const r = R();
+          if (r < 0.12) { k = 1; x = B.x + (R() - 0.5) * B.w; z = B.z + (R() - 0.5) * B.d; y = B.h; }
+          else if (r < 0.82) {
+            k = 2;
+            const face = Math.floor(R() * 4), len = face < 2 ? B.w : B.d;
+            const a = lattice(len, 0.045), v = lattice(B.h, 0.055);
+            y = v * B.h;
+            if (face === 0) { x = B.x - B.w / 2 + a * B.w; z = B.z + B.d / 2; }
+            else if (face === 1) { x = B.x - B.w / 2 + a * B.w; z = B.z - B.d / 2; }
+            else if (face === 2) { x = B.x + B.w / 2; z = B.z - B.d / 2 + a * B.d; }
+            else { x = B.x - B.w / 2; z = B.z - B.d / 2 + a * B.d; }
+          } else {
+            const sx = R() < 0.5 ? -1 : 1, sz = R() < 0.5 ? -1 : 1;
+            x = B.x + (sx * B.w) / 2; z = B.z + (sz * B.d) / 2; y = R() * B.h;
+          }
+        }
+        kind[i] = k;
+        pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
+      }
+
+      // What moves with the scroll: traffic, the river into the bay, the Merlion's water, the train.
+      const move = (i, u, out, p) => {
+        const k = kind[i];
+        if (k === 0) {
+          const ab = ROADS[road[i]], s = wrap(base[i] + p * aux[i], 0, 1), lane = (hash[i] - 0.5) * 0.05;
+          out[0] = lerp(ab[0][0], ab[1][0], s) + lane; out[1] = 0.01; out[2] = lerp(ab[0][1], ab[1][1], s) + lane;
+        } else if (k === 6) {
+          if (uu[i] > 0.5) {
+            riverAt(wrap(base[i] + p * 0.12, 0, 1), rq);
+            out[0] = rq[0] - rq[3] * aux[i]; out[1] = 0; out[2] = rq[1] + rq[2] * aux[i];
+          } else {
+            const a = base[i] + p * 0.05;
+            out[0] = BAY.x + Math.cos(a) * aux[i]; out[1] = 0; out[2] = BAY.z + Math.sin(a) * aux[i];
+          }
+        } else if (k === 8) {
+          const s = wrap(base[i] + p * 0.9, 0, 1);
+          out[0] = MOUTH[0] + SPOUT[0] * s * 0.5;
+          out[1] = Math.max(0, MOUTH[1] + 0.1 * s - 0.45 * s * s) + aux[i];
+          out[2] = MOUTH[2] + SPOUT[1] * s * 0.5;
+        } else if (k === 7) {
+          const span = MRT.a1 - MRT.a0;
+          const a = MRT.a0 + wrap(p * 0.28 * span - base[i], 0, span);
+          const rr = MRT.r + (hash[i] - 0.5) * 0.03;
+          out[0] = Math.cos(a) * rr; out[1] = MRT.y + 0.03 + (hash[i] - 0.5) * 0.02; out[2] = Math.sin(a) * rr;
+        } else {
+          out[0] = pos[i * 3]; out[1] = pos[i * 3 + 1]; out[2] = pos[i * 3 + 2];
+        }
+      };
+
+      const cbd = (i) => bid[i] >= 0 && blocks[bid[i]].cbd === true;
+      const hdb = (i) => bid[i] >= 0 && blocks[bid[i]].hdb === true;
+      const river = (i) => kind[i] === 6 && uu[i] > 0.5;
+      const lit = (i, share) => kind[i] === 2 && hdb(i) && hash[i] < share;
+      const plain = (i) => {
+        switch (kind[i]) {
+          case 0: return 0.8;
+          case 4: return 0.85;
+          case 5: return 0.9;
+          case 6: return uu[i] > 0.5 ? 0.45 : 0.22;
+          case 7: return 1.2;
+          case 8: return 0.9;
+          case 9: return 0.3;
+          default: return cbd(i) ? 0.62 : 0.55;
+        }
+      };
+      const DIM = 0.55;
+      const stage = (warm, bright) => ({ move, warm, bright, size: 0.62 });
+      const pipes = stage(
+        (i) => (kind[i] === 0 || river(i) ? 1 : kind[i] === 7 ? 0.5 : 0),
+        (i) => (kind[i] === 0 ? 1.5 : river(i) ? 1.05 : cbd(i) ? 0.55 : plain(i) * DIM),
+      );
+      const scan = stage(
+        (i) => (kind[i] === 5 ? 0.12 : 0),
+        (i, u) => (kind[i] === 5 ? (uu[i] < wipe(u) ? 0.2 : 1.4) : plain(i) * DIM),
+      );
+      const schedule = stage(
+        (i, u) => (lit(i, 0.55 * smooth(u + 0.6)) ? 1 : kind[i] === 7 ? 0.5 : 0),
+        (i, u) => (lit(i, 0.55 * smooth(u + 0.6)) ? 1.3 : hdb(i) ? 0.45 : plain(i) * DIM),
+      );
+      const lens = stage(
+        (i) => (bid[i] === ti ? 1 : 0),
+        (i) => (bid[i] === ti ? 1.7 : cbd(i) ? 0.4 : plain(i) * DIM),
+      );
+      const end = stage(
+        (i) => (kind[i] === 4 || kind[i] === 8 ? 0.8 : lit(i, 0.55) || bid[i] === ti || kind[i] === 0 || river(i) ? 1 : 0),
+        (i) => (kind[i] === 4 ? 1.25 : lit(i, 0.55) ? 1 : plain(i)),
+      );
+      const ridge = [roof.x - roof.w / 2, roof.h + RIDGE, roof.z];
+      return {
+        span: 0.22,
+        stages: [textStage(name, 0), { pos: dust, warm: 0, bright: 0.7 }, pipes, scan, schedule, lens, end],
+        cams: [
+          // A calm camera: it always faces the same way, within 15 degrees, and glides from
+          // subject to subject like a slow drone. It never swings round the city.
+          { x: 0, y: 4.4, z: 0.6, yaw: -12, pitch: 0, dist: 3.7 },
+          { x: -0.9, y: 2.8, z: 1.0, yaw: -14, pitch: 10, dist: 4.4 },
+          { x: -1.6, y: 0.4, z: -0.5, yaw: -18, pitch: 22, dist: 3.8 },
+          { x: roof.x, y: 0.15, z: roof.z, yaw: -15, pitch: 30, dist: 2.6 },
+          { x: 0.9, y: 0.3, z: 1.9, yaw: -15, pitch: 22, dist: 3.4 },
+          { x: tower.x, y: 1.2, z: tower.z, yaw: -20, pitch: 10, dist: 3.0 },
+          { x: 0.45, y: 0.5, z: -1.6, yaw: -25, pitch: 7, dist: 3.3 },
+        ],
+        path(A, B, e, i, O, ph) {
+          O[0] = lerp(A[0], B[0], e); O[1] = lerp(A[1], B[1], e); O[2] = lerp(A[2], B[2], e);
+          const bulge = Math.sin(Math.PI * e);
+          const fall = clamp(Math.abs(B[1] - A[1]) / 2);
+          const pull = Math.pow(bulge, 0.6) * fall;
+          const cx = -1.0 + Math.sin(O[1] * 1.5) * 0.5 + (ph - 0.5) * 0.16;
+          const cz = 1.0 + Math.cos(O[1] * 1.1) * 0.3 + (((ph * 7.3) % 1) - 0.5) * 0.1;
+          O[0] = lerp(O[0], cx, pull);
+          O[2] = lerp(O[2], cz, pull);
+          const bend = bulge * (ph - 0.5) * 0.25 * (1 - fall);
+          O[0] += -(B[1] - A[1]) * bend; O[1] += (B[0] - A[0]) * bend;
+        },
+        overlay(ctx, view, p, section) {
+          if (p > 2.45) {
+            const q = wipe(p - 3);
+            const a = clamp((p - 2.45) / 0.35) * (p > 3.6 ? 0.6 : 1);
+            scanPlane(ctx, view, ridge, [roof.w, 0, 0], [0, -RIDGE, roof.d / 2], q, a, { rows: 2, cols: 4 });
+            scanPlane(ctx, view, ridge, [roof.w, 0, 0], [0, -RIDGE, -roof.d / 2], q, a, { panels: false });
+          }
+          tag(ctx, view, [-1.85, 0.02, -0.85], ['2021–2023 / S2T', '10,000 REQUESTS A SECOND'], near(p, 2));
+          tag(ctx, view, [roof.x, roof.h + RIDGE, roof.z], ['2023–2024 / ETAVOLT', 'LASER SCANS INTO 3D MODELS'], near(p, 3));
+          tag(ctx, view, [egg.x, egg.h, egg.z], ['2024–NOW / UNIAD', '10,000 PEOPLE. ONE SCHEDULE.'], near(p, 4));
+          const a4 = near(p, 4);
+          const s = [0, 0, 0];
+          if (a4 > 0 && view.project(egg.x, egg.h * 0.5, egg.z + egg.d / 2 + 0.01, s)) label(ctx, 'BLK 2024', s[0], s[1], a4 * 0.9, { size: 8, align: 'center' });
+          tag(ctx, view, [tower.x, tower.h, tower.z], ['2024–NOW / COGNIZANT', 'DATA IN. DECISIONS OUT.'], near(p, 5));
+          if (section.dataset.panel === '1') panel(ctx, view, p);
+          const a6 = clamp((p - 5.4) / 0.6);
+          label(ctx, 'SAY SOMETHING.', view.cx, view.H * 0.15, a6, { size: 26, font: FONT, weight: 700, align: 'center' });
+          cornerLabel(ctx, view, 'RAHUL SINGH / SINGAPORE', a6);
+        },
+      };
+    },
+  };
+
+  const defs = { bay, flow, city, become, words };
+  const sketches = [...document.querySelectorAll('[data-sketch]')].map((section) => ({
+    section, sketch: createSketch(section, defs[section.dataset.sketch]),
+  }));
+
+  const fontsReady = Promise.race([
+    Promise.all([
+      document.fonts.load("700 120px 'Schibsted Grotesk'"),
+      document.fonts.load("400 11px 'JetBrains Mono'"),
+    ]).catch(() => null),
+    new Promise((resolve) => setTimeout(resolve, 2500)),
+  ]);
+  fontsReady.then(() => {
+    const seen = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        seen.unobserve(entry.target);
+        const found = sketches.find((s) => s.section === entry.target);
+        if (found) found.sketch.build();
+      }
+    }, { rootMargin: '400px 0px' });
+    sketches.forEach((s) => seen.observe(s.section));
+  });
+})();
+</script>
+</body>
+</html>

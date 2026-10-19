@@ -43,7 +43,7 @@ These are targets set before any code exists. Measure a baseline at the end of t
 | --- | --- |
 | Frame rate while scrolling, laptop with integrated graphics | 60 fps |
 | Frame rate while scrolling, low tier | ≥ 30 fps, steady |
-| Frames rendered at rest | 0 on the low tier, with reduced motion, with the tab hidden or the canvas off screen. Elsewhere only ambient motion, capped at 30 frames a second ([DECISIONS D26](DECISIONS.md), [D31](DECISIONS.md)), and only from the Rings beat on, when there are beads to move |
+| Frames rendered at rest | 0 on the low tier, with reduced motion, with the tab hidden or the canvas off screen. Elsewhere only ambient motion, capped at 30 frames a second ([DECISIONS D26](DECISIONS.md), [D31](DECISIONS.md)), and only from the beat where something first moves: the Rings for the Machine, the Core for the city ([D38](DECISIONS.md)) |
 | Draw calls | ≤ 30 |
 | Long tasks (> 50 ms) after load | None during scroll |
 | Allocations inside the frame loop | None |
@@ -65,6 +65,14 @@ The site picks a tier at startup from device signals, and steps down a tier if m
 | Post-processing | Only if a decision allows it | No | No |
 
 Stepping down must never change the story, only the density. The point counts are starting guesses. The greybox phase measured only the development machine, so they are set when the site is tested on real devices, in Phase 5 ([DECISIONS D28](DECISIONS.md)). The look chosen in round 4 draws three quarters of each count. The high count was raised from 150,000 on 2026-10-08, from one tablet judged by eye ([DECISIONS D33](DECISIONS.md)); the mid and low counts are untouched.
+
+### The city
+
+The city replaces the Machine ([DECISIONS D38](DECISIONS.md)), and three things about it cost more.
+
+- **It fills the window on every beat.** The Machine filled part of it. Filling the window is what dropped frames on Rahul's tablet when the dust did it ([DECISIONS D33](DECISIONS.md)). The tier counts above were set for the Machine; the city's are measured again on that tablet before they are set.
+- **The canvas rests less.** The traffic, the river and the train move from the Core beat on, so on the high and mid tiers the canvas draws up to 30 frames a second while the city is on screen, for most of the page. Moving the points costs little; drawing the frame is the cost, and on a phone it is battery.
+- **More pieces.** Landmarks and many buildings are more geometry to sample than one rig. Time the sampling on a slow CPU early, and move it to build time or a worker if it passes 50 ms.
 
 ## Rules
 

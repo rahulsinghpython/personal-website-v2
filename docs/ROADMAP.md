@@ -8,9 +8,10 @@ The authority on what is built and what comes next. Update the status table when
 | --- | --- | --- |
 | 0 | Direction | Done 2026-10-05. Docs written; concept, stack and principles accepted by Rahul. |
 | 1 | Foundations | In progress since 2026-10-05. Built on 2026-10-05: facts confirmed by Rahul, content modules, content layer, the Index at `/plain`, prerendering. Readable with scripts blocked; Lighthouse mobile performance 100 on both pages, measured on a local production build. Left: deploy to Vercel (Rahul will say when), then re-measure on the deployed preview. |
-| 2 | Greybox | Done 2026-10-07, begun 2026-10-05. Built: the bundle-size check and CI ([D19](DECISIONS.md)); the workbench, showing placeholder shapes ([D20](DECISIONS.md), [D21](DECISIONS.md)). Round 1 finished on 2026-10-06: nine references liked, outcome in [REFERENCES](REFERENCES.md), look drawn from computing hardware ([D22](DECISIONS.md)). Round 2 finished on 2026-10-06: Rahul signed off the silhouette, a hanging tiered rig with a small cube in gimbals on top ([D23](DECISIONS.md), [EXPERIENCE](EXPERIENCE.md#the-shape)). Round 3: each part now stands for a kind of work, with the company as small print ([D24](DECISIONS.md)); Round 3 finished on 2026-10-06: version 2 of all four parts ([D25](DECISIONS.md)). Small ambient motion is now allowed ([D26](DECISIONS.md)). Round 4 finished on 2026-10-07: the Machine as points, in a look between two of the three shown ([D27](DECISIONS.md), [D28](DECISIONS.md)). The scene chunk was measured with a throwaway build: 243.8 kB against a budget of 300 kB, raised to 400 kB the same day ([D29](DECISIONS.md), [PERFORMANCE](PERFORMANCE.md#the-bundle-check)). **Finished on 2026-10-07, with one criterion put off by Rahul:** frame rate was measured on the development machine only; the mid and low tiers move to Phase 5 ([D28](DECISIONS.md)). |
+| 2 | Greybox | Done 2026-10-07, begun 2026-10-05. Built: the bundle-size check and CI ([D19](DECISIONS.md)); the workbench, showing placeholder shapes ([D20](DECISIONS.md), [D21](DECISIONS.md)). Round 1 finished on 2026-10-06: nine references liked, outcome in [REFERENCES](REFERENCES.md), look drawn from computing hardware ([D22](DECISIONS.md)). Round 2 finished on 2026-10-06: Rahul signed off the silhouette, a hanging tiered rig with a small cube in gimbals on top ([D23](DECISIONS.md)). Round 3: each part now stands for a kind of work, with the company as small print ([D24](DECISIONS.md)); Round 3 finished on 2026-10-06: version 2 of all four parts ([D25](DECISIONS.md)). Small ambient motion is now allowed ([D26](DECISIONS.md)). Round 4 finished on 2026-10-07: the Machine as points, in a look between two of the three shown ([D27](DECISIONS.md), [D28](DECISIONS.md)). The scene chunk was measured with a throwaway build: 243.8 kB against a budget of 300 kB, raised to 400 kB the same day ([D29](DECISIONS.md), [PERFORMANCE](PERFORMANCE.md#the-bundle-check)). **Finished on 2026-10-07, with one criterion put off by Rahul:** frame rate was measured on the development machine only; the mid and low tiers move to Phase 5 ([D28](DECISIONS.md)). |
 | 3 | Choreography | Done 2026-10-08, begun 2026-10-07. Built: the scene mounted on the home page through one lazy import; progress read from scroll and eased; rendering on demand; dust to dormant to awake in the vertex shader, per part; a camera pose per beat; the beads drifting once the Rings are awake; the workbench's story scrubber. GSAP's core only ([D30](DECISIONS.md)). Round 6 finished on 2026-10-08: Rahul scrolled it on his tablet, picked the second of two camera paths and kept the assembly as built ([D31](DECISIONS.md), [D35](DECISIONS.md)). The first-time-viewer test is Rahul's report of one showing. **Finished with device frame rates still unmeasured,** as Phase 2 left them. |
-| 4 | Interactions | In progress since 2026-10-08. Built, first version: the pointer torch ([D36](DECISIONS.md)). Left: Rahul trying it; the Scanner sweep; the Whole beat's drag, click and project panels. |
+| 3b | The city | Direction accepted 2026-10-19 ([D38](DECISIONS.md)): the Machine gives way to a laser-scanned city round Marina Bay. Chosen from sketches (`workbench/city-sketches.html`). Nothing of the city is built; the home page still draws the Machine. |
+| 4 | Interactions | Begun 2026-10-08, paused 2026-10-19 until the city exists ([D38](DECISIONS.md)). Built, first version: the pointer torch ([D36](DECISIONS.md)), which lights dust and so carries over. Left: the Scanner sweep, now on the scanned roof; easter eggs; the Whole beat's interactions and project panels. |
 | 5 | Finish | Not started |
 | 6 | Later | Not scheduled |
 
@@ -67,13 +68,29 @@ Make scrolling build it.
 
 **How it ended:** the viewer test is met on Rahul's word, above. Frames at rest were measured on 2026-10-07 ([PERFORMANCE](PERFORMANCE.md#measured-on-the-site-on-the-development-machine)): none before the Rings wake, and only the beads after; the render loop has not changed since. The runtime budgets were not met and not failed: frame cost was measured on the development machine only, and not again after the high tier was raised to four times the points ([D33](DECISIONS.md)), where the one check is Rahul's tablet, by eye. Device measurement is a Phase 5 item ([D28](DECISIONS.md)).
 
+## Phase 3b. The city
+
+Replace the Machine with the city ([D38](DECISIONS.md), [EXPERIENCE](EXPERIENCE.md#the-city)). The same process as Phase 2: rounds on the workbench, Rahul picks by looking.
+
+- Done 2026-10-19: the direction, from four sketched directions and two rounds on the one picked.
+- References: Singapore round the bay, the heartland, and real laser scans of cities, shown as pictures. The Science Centre's shape is taken from the mesh image in the old site's assets (Etavolt). Its look is not: Rahul, on 2026-10-20, "I think my mesh looks quite bad, we can do a better one now". How the scanned surface is drawn is a round of its own, and it should still read as rebuilt from a scan, points closing into faces, not as a polished render.
+- The layout as a greybox on the workbench: the water, the landmarks, the CBD, the heartland.
+- The landmarks, each recognisable at the size the camera sees it.
+- The city as points: density, size, how cold the city is against what is lit. Measured on Rahul's tablet, since a city fills the window on every beat.
+- The choreography: the dust pouring into the river, a calm camera, each job lighting up. Rahul scrolls it.
+- How the words sit over the city: the spotlight, tags and dark band proposed in D38, or what Rahul picks instead.
+- Replace the Machine on the home page. Remove its code once the city is drawn there.
+
+**Done when:** the home page draws the city; Rahul has scrolled it on his tablet; frames at rest and frame cost are measured there.
+
 ## Phase 4. Interactions
 
-The first-release interactions from [EXPERIENCE](EXPERIENCE.md#interactions-by-part).
+The first-release interactions from [EXPERIENCE](EXPERIENCE.md#interactions).
 
 - Built, first version, not yet tried by Rahul: pointer torch on the dust ([D36](DECISIONS.md)).
-- Scanner sweep: points become surface under the beam.
-- Whole beat: drag to rotate, click a part to open it, project panels.
+- Scanner sweep: points on the scanned roof become surface under the beam. Worked out for the Machine's solar panels on 2026-10-08 and not built; it moves to the roof (D38).
+- Easter eggs: the Merlion, the train and `BLK 2024` from the sketch, and whichever of the others Rahul picks ([EXPERIENCE](EXPERIENCE.md#easter-eggs)).
+- Whole beat: what the visitor can do now there is no object to turn; click a subject to open it; project panels.
 
 **Done when:** each works with mouse and touch, each has a keyboard-reachable equivalent for any content it reveals, and none is required to get the story.
 
@@ -117,5 +134,7 @@ Content: roles and dates, the opening name, the numbers, what can be named, pers
 
 Practical:
 
-5. **Reference devices:** which phone and which laptop should the budgets be tested on? Put off by Rahul on 2026-10-07 ([D28](DECISIONS.md)); needed by Phase 5.
-6. **Domain:** what will the site live at?
+5. **The Science Centre:** answered on 2026-10-20. Rahul could not find the project's own files, but the old site has the mesh as an image, `src/assets/carousel/etavolt/mesh_contruction_science_centre.jpg`, cleared in [CONTENT](CONTENT.md#projects). That is enough to draw it from.
+6. **Easter eggs:** which, beyond the three in the sketch? Rahul has suggested otters and cats.
+7. **Reference devices:** which phone and which laptop should the budgets be tested on? Put off by Rahul on 2026-10-07 ([D28](DECISIONS.md)); needed by Phase 5.
+8. **Domain:** what will the site live at?

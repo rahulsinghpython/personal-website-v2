@@ -2,66 +2,71 @@
 
 What the visitor sees and does. Read [VISION](VISION.md) first.
 
-**Status of this doc:** the structure (one object, four parts, eight beats, the interaction rules) is the agreed direction. The Machine's silhouette and the detail of each part were settled on 2026-10-06 and redrawn on 2026-10-07 after outside feedback; how its points are drawn was settled on 2026-10-07. Colour, type, motion and the wording of the copy are still open and get settled by prototyping. The last section says which is which.
+**Status of this doc:** rewritten on 2026-10-19, when Rahul replaced the Machine with a city ([DECISIONS D38](DECISIONS.md)). The direction is agreed: a laser scan of a city at night round Marina Bay, reached by the dust pouring down out of the opening line, with each job something happening in the city. It was chosen from rough sketches, kept in `workbench/city-sketches.html`; the one called Bay is the direction. The city's layout, its landmarks, the look, the camera's poses and the copy are settled in rounds on the workbench. The last section says which is which. The Machine this replaces is described in D23 to D35 and in this file at `27a83cb`.
 
-## The Machine
+## The city
 
-A strange instrument floating in darkness. It is not a robot, has no face, and its purpose is not obvious. It is drawn mostly as **points**, like a LiDAR scan, with thin lines and a few solid surfaces appearing as parts wake up.
+A city at night, drawn as a laser scan: points, a few lines, and surfaces only where Rahul's work has rebuilt something. It is Singapore, built round Marina Bay, because that is where Rahul is from.
 
-### The shape
+### The layout
 
-Picked by Rahul on 2026-10-07, on the workbench, as the third of three ([DECISIONS D32](DECISIONS.md)). It replaces the shape signed off the day before ([D23](DECISIONS.md), [D25](DECISIONS.md)), keeping its rig and its outline. It looks like computing hardware, not like an observatory instrument ([D22](DECISIONS.md)). Five words for the feeling: futuristic, nested, wired, kinetic, dense.
+As in the sketch. The detail is a round on the workbench.
 
-It is a tall rig that hangs. Every part is on the rig's axis and drawn in the rig's vocabulary: plates, posts, lines and cans. Nothing sticks out to one side and nothing stands on top as a second shape.
+- **The water.** The Singapore River runs into Marina Bay. The river is how the visitor arrives: the dust pours down into it.
+- **The landmarks, round the water and in front,** so the city reads as Singapore from the first view: Marina Bay Sands across the bay, the ArtScience Museum in front of it, the Supertrees behind it, the Flyer and the Esplanade on the north shore, the Merlion at the river mouth. Drawn in code and kept recognisable, not traced.
+- **The CBD,** towers on the river's south bank.
+- **The heartland,** HDB slabs and point blocks all round. This is where the windows are.
+- **The MRT,** a train on a viaduct through the heartland.
 
-- **The rig (Core).** A stack of round plates that narrow as they descend, joined by posts. The top plate is solid; the others are open in the middle, and a bundle of straight lines drops through all of them. It hangs from a short mount at the top. The look is borrowed from the inside of a quantum computer; the Machine does not claim Rahul worked on one.
-- **The roof (Scanner).** The top plate is a roof. Four solar panels stand on it in a ring, tilted outward, each drawn as a grid of cells. A scanning puck sits on the mount above them and sweeps a fan of beams down one panel. The 3D scanning was for solar: roofs rebuilt in 3D and panels placed on them ([CONTENT](CONTENT.md)).
-- **The orbits (Rings).** The three lowest plates each carry a thin ring on three spokes, with a row of beads on it, more beads the wider the ring. The rings get wider as the plates get narrower, so the outline is a diamond. The spokes line up into three ribs and are drawn faintly. The beads are the things being scheduled: they drift round their rings and settle into even spacing ([DECISIONS D25](DECISIONS.md), [D26](DECISIONS.md)).
-- **The stage (Lens).** Under the last plate, where the chip sits in a real rig: a cube of eight cubes, drawn by its edges, on a small plate hung from three thin posts. Every line of the bundle runs into its roof and one tip leaves below. Data in, an answer out.
+Rahul's work is never pinned to a real building, with one wanted exception: the Science Centre, whose mesh Rahul really built ([CONTENT](CONTENT.md)), as the building that is scanned. The reference is the mesh image in the old site's assets (Etavolt), found on 2026-10-20. It stands in the heartland: the real one is in Jurong, far from the bay, and the city is Singapore drawn small. The Lens tower must never look like a ministry building.
 
-Because the Scanner is at the top, the Rings in the middle and the Lens at the bottom, the parts wake from the top of the Machine to the bottom, and after the Core the camera only travels down.
+### Cold and lit
 
-As points (round 4) it is one cloud sampled from these surfaces. The thinner a piece is, the more closely its points are packed, so the lines, rings and beams do not vanish behind the plates; and a point is sized as part of the object, so the Machine is the same picture on a phone as on a monitor ([D27](DECISIONS.md)). The look Rahul chose on 2026-10-07 sits between an even scan and a drawing led by its lines: the plates are a thin scatter and the lines, rings and beams are the brightest things in it ([D28](DECISIONS.md)).
+Colour carries state, as before ([DECISIONS D11](DECISIONS.md)). The city at rest is cold off-white and dim. What Rahul's work touches is lit in the warm accent, and stays lit for the rest of the story. Surfaces appear only where something was scanned. A visitor should be able to tell how far through the story they are from what is lit.
 
-The code is `src/experience/machine/machine.ts`, and every number in it is a slider on the workbench.
+### Where each job is
 
-It has four parts. Each part stands for **a kind of work** Rahul has done, and is one connected piece of the shape. The company and the years are small print beside it, not the point ([DECISIONS D24](DECISIONS.md)).
+Each job is a kind of work, with the company as small print ([DECISIONS D24](DECISIONS.md)), in the order Rahul came to it.
 
-| Part | The work | Which piece of the Machine | Small print |
+| Beat | The work | What happens in the city | Small print |
 | --- | --- | --- | --- |
-| **Core** | Data engineering: pipelines, microservices, throughput | The rig: the tiers and the lines running down through them | S2T, 2021 to 2023 |
-| **Scanner** | Turning LiDAR point clouds into 3D models | The roof: the puck, its beams and the solar panels | Etavolt, 2023 to 2024 |
-| **Rings** | Scheduling, bookings, calendars: many moving things kept in order | The orbit rings | Uniad, 2024 onward |
-| **Lens** | LLM analytics: turning raw data into something a person can read | The stage: the cube under the last plate, and the tip | Cognizant, 2024 onward |
+| **Core** | Data engineering: pipelines, microservices, throughput | Requests run along the river and the streets as light | S2T, 2021 to 2023 |
+| **Scanner** | Turning LiDAR point clouds into 3D models | One roof is scanned from points into surface and gets its solar panels | Etavolt, 2023 to 2024 |
+| **Rings** | Scheduling, bookings, calendars | Windows light up across the HDB blocks, block by block | Uniad, 2024 onward |
+| **Lens** | LLM analytics: raw data into something a person can read | One tower in the CBD lights up and turns it all into an answer | Cognizant, 2024 onward |
 
-The names are handles for us and never shown to a visitor; the Lens is no longer shaped like a lens. Parts still assemble **in the order Rahul came to the work**, so the Machine is built the way the career was.
+The beats keep the ids of the Machine's parts. No visitor sees them.
 
-### Three states
+### The words over the city
 
-Every point, and so every part, is in one of three states.
+A city is busier than one object was, and it would win against the text. Proposed ([DECISIONS D38](DECISIONS.md)) and shown in the sketch: during each job's beat the city dims except its subject, and a short tag is pinned to the subject, like the labels in a scanning tool, with the years, the company and one line. The beat's full text sits at the left edge on a dark band, so it is read before the city is. All of it is real text in the page (rule 3); the tag is the canvas repeating it.
 
-1. **Dust.** Scattered, dim, unreadable. Looks like noise or stars.
-2. **Dormant.** In position. The shape is readable but cold and unlit.
-3. **Awake.** Powered on. Warm accent colour, lines drawn, surfaces filled. The lines are built ([DECISIONS D34](DECISIONS.md)); the surfaces are not.
+### Easter eggs
 
-Colour carries state, not decoration: cold white means dormant, the warm accent means awake. A visitor should be able to tell how far through the story they are from colour alone.
+Small things a visitor finds. Rahul wants them. Each is found, never forced; none advances the story; none states a fact that is not in [CONTENT](CONTENT.md).
+
+- In the sketch: the Merlion spouting; a train on its viaduct; a block numbered `BLK 2024`, the year Rahul joined Uniad.
+- Rahul's to consider: otters, cats, "and various other things".
+- The chat's to consider: a cat on a void deck that looks up when the pointer passes; a plane leaving Changi at the Core beat, for the international business trips; the Supertrees lighting up when clicked; other block numbers that are Rahul's years.
 
 ## The beats
 
-The page is one long scroll. The canvas is fixed behind it and the Machine responds to how far the visitor has scrolled.
+The page is one long scroll. The canvas is fixed behind it and the city responds to how far the visitor has scrolled.
 
 | # | Beat | What the visitor sees | What they learn |
 | --- | --- | --- | --- |
 | 0 | **Found** | Black. Small type in the middle of the window, a size up from the other statements: `YOU'VE FOUND RAHUL.` Faint dust in the dark. Moving the pointer lights the dust near it. | Something is here. Nothing is explained. |
-| 1 | **Signal** | First scroll. The opening line crumbles into bright grains that scatter across the window and then travel into the silhouette with the dust (proposed, [DECISIONS D37](DECISIONS.md)). The dust pulls inward and a silhouette forms. Dormant, unlabelled. | The dust was an object all along. |
-| 2 | **Core** | Camera moves in. The Core locks together and wakes. First label appears: the work, with the years and the company in small print. | The object has parts, and a part is a kind of work. |
-| 3 | **Scanner** | The Scanner assembles as raw points. The visitor sweeps across it and surface appears where they sweep. | Rahul built this kind of software. They have been looking at it the whole time. |
-| 4 | **Rings** | Rings form around the Core, turn, and lock. | Scale and orchestration: 10,000+ users. |
-| 5 | **Lens** | A scatter of points is pulled through the Lens and resolves into something legible. | LLM products for Singapore's government. |
-| 6 | **Whole** | Camera pulls back. All four parts awake and working together, each labelled. The visitor can now rotate the Machine and click any part. | Five years, one machine. |
-| 7 | **Contact** | The Machine stays. Short line and three links. | How to get in touch. |
+| 1 | **Signal** | First scroll. The opening line crumbles into bright grains ([DECISIONS D37](DECISIONS.md)), and the dust pours down as a river into a city in the dark. | The dust was a place all along. |
+| 2 | **Core** | The camera glides to the CBD. Requests run along the river and the streets as light. The first tag: the work, with the years and the company in small print. | Things in the city light up, and each one is a kind of work. |
+| 3 | **Scanner** | A roof stands as raw points. The visitor sweeps across it and surface appears where they sweep. | Rahul built this kind of software. They have been looking at a scan the whole time. |
+| 4 | **Rings** | Windows light up across the HDB blocks. | Scale and orchestration: 10,000+ users. |
+| 5 | **Lens** | A tower in the CBD lights up and answers. | LLM products for Singapore's government. |
+| 6 | **Whole** | The camera rises over the bay. Everything Rahul's work touched is lit. | Five years, one city. |
+| 7 | **Contact** | The view across the bay to Marina Bay Sands, lit. Short line and three links. | How to get in touch. |
 
-**How the beats are built.** Settled by Rahul scrolling it on 2026-10-08 ([DECISIONS D31](DECISIONS.md), [D35](DECISIONS.md)). At Signal all four parts gather from dust into a loose silhouette: the outline of the whole Machine can be read, but soft, as a haze. Then each part's beat closes that part up exactly and wakes it as it closes: each point turns to the accent as it lands, so the haze condenses into lit lines. A part that has not had its beat is still haze beside the sharp, lit ones. The Rings turn as they lock, and once awake their beads drift. The camera has one pose per beat and travels between them, always from above the Machine, and ends closer than it began. A beat's picture is finished a little before its text has fully arrived, and holds a little after.
+**How the beats are built.** Not settled. The Machine's choreography ([DECISIONS D31](DECISIONS.md), [D35](DECISIONS.md)) carries over only in principle: one camera pose per beat; a beat's picture is finished a little before its text has fully arrived and holds a little after; scrolling back undoes it exactly.
+
+**The camera is calm** ([DECISIONS D38](DECISIONS.md)). Rahul found the sketch's camera moved too much for some people. It faces one way, within about 15 degrees, and glides from subject to subject like a slow drone. It never swings round the city. With reduced motion it cuts between beats.
 
 ### The reveal budget
 
@@ -69,8 +74,8 @@ The "oh, it's a whole career" moment must land by beat 2 or 3, about twenty seco
 
 There are three small discoveries, each one a reward for scrolling:
 
-1. Beat 1: the dust is an object.
-2. Beat 2: the object's parts are kinds of work.
+1. Beat 1: the dust is a place.
+2. Beat 2: what lights up in it is a kind of work.
 3. Beat 3: the way it is drawn is itself Rahul's work.
 
 Beat 6 is the payoff, not a new reveal.
@@ -79,30 +84,29 @@ Beat 6 is the payoff, not a new reveal.
 
 These are the rules that make principle 3 in [VISION](VISION.md) real.
 
-1. **The visitor causes the change.** The story advances only on input: scroll, pointer move, click or tap, and drag. Nothing assembles, wakes or moves the camera on its own.
-2. **Small ambient motion is allowed; decoration is not.** After input stops, the big motion eases to rest within about 1.5 seconds. What may keep moving is small, slow, and part of a part's meaning: the beads drifting round the Rings. It pauses when the tab is hidden, the canvas is off screen or the system asks for reduced motion, and it is off on the low tier ([DECISIONS D26](DECISIONS.md)). No idle spin of the whole Machine, no breathing, no floating particles.
-3. **Scroll is never hijacked.** The page scrolls natively. The Machine eases toward the scroll position, which gives smoothness without taking control from the visitor.
-4. **Scrolling back undoes it.** The scene is a pure function of progress. Scroll up and the Machine disassembles exactly as it assembled.
-5. **Every interaction means something.** If an interaction does not teach the visitor about that part's work, cut it.
+1. **The visitor causes the change.** The story advances only on input: scroll, pointer move, click or tap, and drag. Nothing lights, assembles or moves the camera on its own.
+2. **Small ambient motion is allowed; decoration is not.** After input stops, the big motion eases to rest within about 1.5 seconds. What may keep moving is small, slow, and part of the city's meaning: the traffic, the river, the train ([DECISIONS D26](DECISIONS.md), [D38](DECISIONS.md)). It pauses when the tab is hidden, the canvas is off screen or the system asks for reduced motion, and it is off on the low tier. No idle camera drift, no breathing, no floating particles.
+3. **Scroll is never hijacked.** The page scrolls natively. The scene eases toward the scroll position, which gives smoothness without taking control from the visitor.
+4. **Scrolling back undoes it.** The story is a pure function of progress. Scroll up and the city goes dark and back into dust exactly as it came.
+5. **Every interaction means something.** If an interaction does not teach the visitor about a job, cut it. Easter eggs are the exception: they say something about the place, and they are small.
 6. **Never required.** Every interaction is a bonus. A visitor who only scrolls still gets the full story.
 
-### Interactions by part
+### Interactions
 
-Only the first two are in scope for the first release. The rest are later phases; see [ROADMAP](ROADMAP.md).
+Only the first release's are in scope now; see [ROADMAP](ROADMAP.md).
 
 | Where | Input | Result | Release |
 | --- | --- | --- | --- |
 | Found | Pointer move | Dust near the pointer brightens, like a torch, and more of it shows. Built ([DECISIONS D36](DECISIONS.md)) | First |
-| Scanner | Pointer sweep, or drag on touch | Points under the beam become surface | First |
-| Whole | Drag | Rotate the Machine | First |
-| Whole | Click a part | Camera goes to the part; its detail opens | First |
-| Core | Scroll or drag | Pulses run through the conduits | Later |
-| Rings | Drag | Rings turn and snap into alignment | Later |
-| Lens | Scroll | Scatter resolves into a readable shape | Later |
+| Scanner | Pointer sweep, or drag on touch | Points on the roof under the beam become surface | First |
+| Anywhere | Hover, click or tap | An easter egg, where there is one | First, which ones open |
+| Whole | Drag | Look round the bay, within limits. Open: the old interaction was turning the Machine | First |
+| Whole | Click a subject | The camera glides to it; its detail opens | First |
+| Core, Rings, Lens | Scroll or drag | Each job does a little more of its work | Later |
 
 ### Projects
 
-Projects live **inside** parts, as components of them, never as a separate grid. Clicking a part in the Whole beat opens it: the camera moves in, the part separates slightly to show what is inside, and an HTML panel gives the project's name, what it did and a link. Which projects exist is in [CONTENT](CONTENT.md).
+Projects live **inside** the city, at their subject, never as a separate grid. Clicking a subject in the Whole beat opens it: the camera glides in and an HTML panel gives the project's name, what it did and a link. Which projects exist is in [CONTENT](CONTENT.md).
 
 ## The Index
 
@@ -115,39 +119,46 @@ A plain text version of everything: name, one line, the four eras with roles and
 
 ## Other contexts
 
-**Touch and small screens.** Same story, same beats. The Machine sits in the upper part of the screen with text below. There is no pointer torch; the Scanner sweep becomes a drag. Fewer points (see tiers in [PERFORMANCE](PERFORMANCE.md)).
+**Touch and small screens.** Same story, same beats. The beat's subject sits in the upper part of the screen with text below. There is no pointer torch; the Scanner sweep becomes a drag. Fewer points (see tiers in [PERFORMANCE](PERFORMANCE.md)).
 
-**Reduced motion.** If the visitor's system asks for reduced motion, there is no assembly animation. The Machine is shown fully assembled and awake, the camera cuts between beats instead of travelling, and the content scrolls normally.
+**Reduced motion.** No pouring and no lighting up in sequence. The city is shown whole and lit, the camera cuts between beats instead of travelling, nothing moves on its own, and the content scrolls normally.
 
-**No WebGL, or it fails.** The content layer is already a complete page. A static image of the finished Machine stands in for the canvas.
+**No WebGL, or it fails.** The content layer is already a complete page. A static image of the lit city stands in for the canvas.
 
-**Keyboard and screen readers.** The canvas is hidden from assistive technology. All content and every link is reachable in the DOM in reading order. Anything a click on the Machine can open is also reachable from a normal link or button.
+**Keyboard and screen readers.** The canvas is hidden from assistive technology. All content and every link is reachable in the DOM in reading order. Anything a click in the city can open is also reachable from a normal link or button.
 
 ## The look
 
 Direction only. Exact tokens are chosen during the build.
 
 - **Background:** near-black, not pure black, so the dust has something to sit in.
-- **Points, dormant:** cold off-white, low brightness.
-- **Accent, awake:** one warm colour. Working choice is a solar amber, which fits "powering on" and the Etavolt solar work. One accent only.
-- **Type:** two families. A tight grotesque for statements, set small and in capitals. A monospace for instrument readouts: years, numbers, labels on parts.
-- **Text placement:** at the edges, never over the Machine. The object owns the centre. The one exception is the opening line, which stands in the middle because there is no Machine yet ([DECISIONS D37](DECISIONS.md)).
+- **Points, cold:** cold off-white, low brightness.
+- **Accent, lit:** one warm colour. Working choice is a solar amber, which fits "powering on" and the Etavolt solar work. One accent only.
+- **Type:** two families. A tight grotesque for statements, set small and in capitals. A monospace for instrument readouts: years, numbers, the tags in the city.
+- **Text placement:** at the edges, on a dark band, never over the beat's subject. The exceptions are the opening line, which stands in the middle because there is nothing yet ([DECISIONS D37](DECISIONS.md)), and the tags pinned in the city.
 - **Words:** few. See the voice rules in [CONTENT](CONTENT.md).
 
 ## Fixed versus open
 
 **Fixed.** Change only with a new entry in [DECISIONS](DECISIONS.md).
 
-- One object; four parts; the kind of work each part stands for; chronological assembly.
+- One world: a laser-scanned city at night round Marina Bay, with its landmarks in front.
+- The way in: the opening line crumbles into the dust, and the dust pours down as a river into the city.
+- The four jobs as things happening in the city, in the order of the career.
 - Drawn primarily as points.
 - The eight beats and their order.
+- A calm camera.
 - The interaction rules.
 - The Index exists and shares the content data.
 
 **Open.** Settle by prototyping, then write the answer back here.
 
-- How many points each tier draws. The silhouette, each part's detail and the look of the points are settled; see "The shape" above. The point counts wait for real devices ([DECISIONS D28](DECISIONS.md)).
-- The name "the Machine" as visitor-facing language. It is a working name for us; the site may never say it.
+- The city's layout and the detail of each landmark.
+- How the words sit over the city: the spotlight, tags and dark band are proposed, not picked.
+- Which easter eggs, beyond the three in the sketch.
+- How the scanned surface is drawn. It reads as rebuilt from a scan, points closing into faces, and is better than Rahul's old mesh, which he does not want copied (2026-10-20). The mesh image is a reference for the Science Centre's shape only.
+- What the visitor can do at the Whole beat.
+- How many points each tier draws. A city fills the window on every beat, so these start again from measurement.
 - The accent colour and the typefaces.
-- All copy. Drafts are in [CONTENT](CONTENT.md).
+- All copy. Drafts are in [CONTENT](CONTENT.md); the Whole beat's `FIVE YEARS. ONE MACHINE.` no longer fits.
 - How long each beat is in scroll distance.

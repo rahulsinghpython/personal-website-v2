@@ -2,7 +2,9 @@
 
 ## The idea in one sentence
 
-You arrive in the dark, find a strange object, and by the time you have scrolled for twenty seconds you understand that the object is Rahul's entire career, assembled in the order it happened.
+You arrive in the dark, Rahul's name crumbles into points, and the points pour down into a city scanned at night: Singapore, round Marina Bay. By the time you have scrolled for twenty seconds you understand that what lights up in it is Rahul's entire career, in the order it happened.
+
+Until 2026-10-19 the site was built round a single object, the Machine. Rahul replaced it with the city ([DECISIONS D38](DECISIONS.md)).
 
 ## Where this comes from
 
@@ -32,17 +34,17 @@ The site has to serve the first row without boring the other two, and delight th
 
 ## Principles
 
-**1. One object carries everything.**
-The Machine is the navigation, the timeline and the portfolio. Projects are not cards; they are parts of it. One object is memorable where a page of sections is not, and it keeps the scene cheap.
+**1. One world carries everything.**
+The city is the navigation, the timeline and the portfolio. Projects are not cards; they are things in it. One place is memorable where a page of sections is not. It is Singapore because that is where Rahul is from, and the landmarks say so before any text does.
 
 **2. Curiosity first, then payoff, quickly.**
-The opening explains nothing. The visitor should wonder what they are looking at. But the mystery is short: within about twenty seconds of scrolling they must understand that the object is a career. Mystery that lasts longer than that is just confusion.
+The opening explains nothing. The visitor should wonder what they are looking at. But the mystery is short: within about twenty seconds of scrolling they must understand that what lights up in the city is a career. Mystery that lasts longer than that is just confusion.
 
 **3. The visitor causes the change.**
-Scrolling assembles the Machine. Moving the pointer lights the dust. Sweeping across a part reconstructs it. When the visitor stops, the story stops. This makes every change feel earned. A little ambient motion is allowed where it means something ([DECISIONS D26](DECISIONS.md)); nothing in the story happens by itself.
+Scrolling brings the city down out of the dust and lights it, one job at a time. Moving the pointer lights the dust. Sweeping across a roof reconstructs it. When the visitor stops, the story stops. This makes every change feel earned. A little ambient motion is allowed where it means something ([DECISIONS D26](DECISIONS.md)); nothing in the story happens by itself.
 
 **4. The medium is the proof.**
-Rahul built software that turns LiDAR point clouds into 3D models. So the Machine is a point cloud that reconstructs itself in front of you. The site does not claim the skill; it demonstrates it. Wherever possible, a part shows its era's work by doing a small version of it.
+Rahul built software that turns LiDAR point clouds into 3D models. So the city is a point cloud, a laser scan, and part of it is reconstructed in front of you. The site does not claim the skill; it demonstrates it. Wherever possible, each job shows itself by doing a small version of its work in the city.
 
 **5. Useful before impressive.**
 Every fact is real text, readable with no JavaScript, no WebGL and no patience. The 3D is a layer on top of a site that already works. A plain view, the Index, is always one click away.
@@ -60,6 +62,7 @@ Near-black, one accent colour, two typefaces, few words. If something can be rem
 - Motion for decoration: floating blobs, auto-rotating models, parallax on everything, looping background animation.
 - Scroll-jacking. The page scrolls at the speed the visitor scrolls it.
 - A loading screen with a percentage counter. The first screen is text on black and needs no loading.
+- A postcard. The landmarks say where Rahul is from; they are not the subject, and the camera never swoops round the skyline.
 - Anything that needs a Blender artist to exist.
 - Sound, in the first version.
 

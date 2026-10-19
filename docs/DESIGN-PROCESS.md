@@ -87,6 +87,10 @@ The most important round. If the outline is not interesting, no amount of points
 
 Work in solid flat grey with no points, no colour and no motion, so nothing distracts from shape. The three options should be really different (for example: tall and stacked, wide and ringed, long and directional), not three tweaks of one idea.
 
+### The city's rounds
+
+When the Machine gave way to the city ([DECISIONS D38](DECISIONS.md)), the rounds started again from a round 0: whole directions, not shapes. Four were drawn as rough 2D sketches on one page, each with a bar that scrolls its story, so Rahul could compare stories rather than stills. That page is `workbench/city-sketches.html`. Use the same kind of page whenever the question is which story, not which shape. After that, the city goes through the usual rounds on the workbench: references, layout, landmarks, points, colour, motion ([ROADMAP](ROADMAP.md), Phase 3b).
+
 ## How shapes are made in code
 
 Almost every machined-looking object is a few simple operations repeated.
