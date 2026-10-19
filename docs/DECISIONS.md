@@ -455,3 +455,21 @@ Rahul, on 2026-10-19, with the Machine on the home page: "the more I look at the
 **What it costs.** The Machine's shape, parts and camera path are superseded. Its code stays on the home page until the city replaces it; nothing is deleted yet. The beats keep their ids (`core`, `scanner`, `rings`, `lens`) in code. A city fills the window on every beat, where the Machine filled part of it, and dust filling the window already dropped frames on Rahul's tablet (D33), so the point counts start again from measurement. The Scanner sweep, about to be built on the Machine's solar panels, is paused; it moves to the scanned roof.
 
 **Open.** References for the Science Centre. Which easter eggs, beyond the three. The city's layout and the detail of each landmark, in rounds on the workbench. What the visitor can do at the Whole beat, now that there is no object to turn. The Whole beat's copy, `FIVE YEARS. ONE MACHINE.`, which no longer fits.
+
+### D39. The city is built from the map up — Accepted, 2026-10-20
+
+The chat's proposal from the references round for the city ([REFERENCES](REFERENCES.md#the-city)), built as the fourth sketch in `workbench/city-sketches.html`. Rahul, having seen it: "I think its much better". He also agreed that the data source is named only as online map data.
+
+**Why.** No laser scan was picked, and Rahul explained why: the model he built at Etavolt came from LiDAR data taken from online map data, reconstructed by an algorithm into a rough mesh of the building, as a pre-sales visualisation for people interested in buying solar ([CONTENT](CONTENT.md)). So a lidar look (sensor rings, colour by height) would be a tech demo that is not his work. He also asked the chat to stop following his picks one by one and look at the whole.
+
+**The proposal.**
+
+- **The dust lands as a map.** At Signal the river of dust spreads out flat: the shore of the bay, the river's banks, the roads and every building's footprint, traced in thin lines like a plan.
+- **Then the city rises out of it.** Each building is extruded from its footprint, its roof going up and its walls stretching under it, a few at a time as the visitor scrolls. The city is made by Rahul's method before the site says so, and the Scanner beat says so: "you've been looking at one" stays true.
+- **Detail where it counts.** The seven landmarks Rahul liked and Pinnacle@Duxton are drawn with care. Every other building is a plain extruded block, which is what an extrusion from map data gives, so the quiet parts of the city are honest too.
+- **A city at night is its lights.** Points sit on edges and windows; faces are nearly empty; the water is black.
+- **Surface only where it is earned.** The Science Centre is the one building that becomes a real surface, at the Scanner beat, better than Rahul's old mesh.
+
+**Passed over:** drawing the city as a raw lidar scan, from any of the six scans in the references round.
+
+**Open.** How the map is drawn and how fast the city rises, settled on the workbench. The facts were checked on 2026-10-20: the data was LiDAR, taken from online map data, so "laser scans into 3D models" stays true and the copy does not change.

@@ -41,8 +41,11 @@ Four eras, in the order the story tells them. Each is one job beat in the city; 
   - Led full-stack development of a customer acquisition platform.
   - Shipped two development cycles of 3D modelling software that builds meshes from point cloud and LiDAR data, using React, Three.js and Python.
   - The 3D work was for solar: reconstructing roofs in 3D, analysing them, and optimising panel placement. One of the reconstructions was a mesh of the Science Centre.
+  - It was a pre-sales visualisation for people interested in buying solar: LiDAR data taken from online map data, reconstructed into a mesh that roughly resolves what the building looks like. Confirmed by Rahul on 2026-10-20. Name the source only as map data; see below.
   - Presented the technology to clients, investors and stakeholders.
 - **Number that may be stated:** none.
+
+**Naming the data source.** Say "map data", not the name of the map service it came from. Chat's advice on 2026-10-20, because the repo and the site are public; Rahul may override.
 
 This era is the conceptual centre of the site. The city is drawn as a laser scan because of this work.
 

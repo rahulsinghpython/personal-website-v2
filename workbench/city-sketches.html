@@ -139,6 +139,35 @@
     <p>Your name crumbling into points stays in all four. What changes is <strong>what those points become next</strong>. Drag the bar under each picture to scroll its story, or tap a step. Each one opens on the moment that shows it best.</p>
   </header>
 
+  <section class="concept" data-sketch="mapup" data-panel="0" aria-labelledby="mapup-title">
+    <div class="stage">
+      <canvas role="img" aria-label="Sketch of round 4: the dust lands as a flat map of the city, and the buildings rise out of their footprints."></canvas>
+      <div class="scrub">
+        <div class="scrub-row">
+          <input type="range" id="scrub-mapup" min="0" max="6" step="0.001" value="1.62" aria-label="Scroll the From the map sketch">
+          <span class="where" aria-live="polite"></span>
+        </div>
+        <div class="chips"></div>
+        <div><button type="button" class="toggle" id="mapup-text" aria-pressed="false">Page text: hidden</button></div>
+      </div>
+    </div>
+    <div class="copy">
+      <p class="eyebrow">Round 4 / how the city is drawn</p>
+      <div class="title-row"><span class="handle">A+B</span><h2 id="mapup-title">From the map</h2></div>
+      <p class="idea">Your model was map data, extruded by an algorithm. So the city is built the same way: the dust lands as a flat map, and every building rises out of its own footprint. The site is made by your method before it says so.</p>
+      <dl>
+        <dt>Signal</dt><dd>The dust lands as a map: the bay, the roads, every footprint. Drag from Dust to Pipes to watch it rise.</dd>
+        <dt>Core</dt><dd>The city stands. Requests run its streets.</dd>
+        <dt>Scanner</dt><dd>Sweep the Science Centre and its extrusion becomes a real surface. The reveal: you have been watching this all along.</dd>
+        <dt>The look</dt><dd>Edges and windows, faces almost empty, the water black. A city at night is its lights.</dd>
+      </dl>
+      <div class="verdict">
+        <p><b>Detail where it counts.</b> The seven landmarks you liked and Pinnacle@Duxton are drawn with care. Everything else stays simple blocks, which is exactly what a map extrusion gives.</p>
+        <p><b>Not a lidar look.</b> No rainbow height colours or sensor rings: those say "tech demo", and they are not how your model was made.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="concept" data-sketch="bay" data-panel="1" aria-labelledby="bay-title">
     <div class="stage">
       <canvas role="img" aria-label="Sketch of round 3: the points pour down as a river into Marina Bay, with the landmarks around the water and the city behind."></canvas>
@@ -152,7 +181,7 @@
       </div>
     </div>
     <div class="copy">
-      <p class="eyebrow">Round 3</p>
+      <p class="eyebrow">Round 3, for reference</p>
       <div class="title-row"><span class="handle">A+B</span><h2 id="bay-title">Bay</h2></div>
       <p class="idea">The dust pours down as a river, the Singapore River, and runs into Marina Bay. The landmarks stand around the water in front of you. Your work happens in the city behind them.</p>
       <dl>
@@ -624,7 +653,8 @@
         const e = smooth((t - r[i] * (1 - span)) / span);
         target(st0, i, u0, p, A);
         target(st1, i, u1, p, B);
-        if (path && e > 0 && e < 1) path(A, B, e, i, O, ph[i]);
+        if (model.transition && model.transition(s0, t, i, A, B, O, ph[i])) { /* handled */ }
+        else if (path && e > 0 && e < 1) path(A, B, e, i, O, ph[i]);
         else { O[0] = lerp(A[0], B[0], e); O[1] = lerp(A[1], B[1], e); O[2] = lerp(A[2], B[2], e); }
         if (!view.project(O[0], O[1], O[2], S)) continue;
         const warm = lerp(val(st0.warm, i, u0, 0), val(st1.warm, i, u1, 0), e);
@@ -1215,6 +1245,8 @@
       let bk = 0; best = 9;
       blocks.forEach((b, k) => { if (!b.hdb) return; const dd = Math.hypot(b.x - 1.1, b.z - 2.0); if (dd < best) { best = dd; bk = k; } });
       const egg = blocks[bk];
+      const R2 = rng(7);
+      const blockOrder = blocks.map(() => R2());
       const weights = blocks.map((b, k) => ((b.w + b.d) * 2 * b.h + b.w * b.d) * (k === ti ? 4 : 1));
       const total = weights.reduce((a, b) => a + b, 0);
 
@@ -1237,12 +1269,15 @@
       const kind = new Uint8Array(n), bid = new Int16Array(n).fill(-1);
       const hash = new Float32Array(n), uu = new Float32Array(n).fill(-1);
       const base = new Float32Array(n), aux = new Float32Array(n), road = new Uint8Array(n);
+      const lift = new Float32Array(n), bo = new Float32Array(n);
+      // How tall each landmark stands, and when it rises from the map.
+      const LIFT = [MBS.h + 0.04, 0.35, 0.8, 0.95, 0.22, 0.25], RISE = [0.1, 0.25, 0.45, 0.6, 0.35, 0.2];
       const lattice = (len, cell) => { const c = Math.max(2, Math.round(len / cell)); return (Math.floor(R() * c) + 0.5) / c; };
       const cut = [];
       [0.08, 0.07, 0.34, 0.03, 0.04].forEach((f, k) => cut.push((k ? cut[k - 1] : 0) + f * n));
       for (let i = 0; i < n; i++) {
         hash[i] = R();
-        let k = 3, x = 0, y = 0, z = 0;
+        let k = 3, x = 0, y = 0, z = 0, lmId = -1;
         if (i < cut[0]) {
           k = 0; road[i] = Math.floor(R() * ROADS.length); base[i] = R();
           aux[i] = (0.12 + R() * 0.18) * (R() < 0.5 ? 1 : -1);
@@ -1254,6 +1289,7 @@
           k = 4;
           const which = R();
           if (which < 0.32) {
+            lmId = 0;
             if (R() < 0.8) {
               const tx = MBS.x0 + Math.floor(R() * 3) * MBS.gap;
               y = lattice(MBS.h, 0.04) * MBS.h;
@@ -1264,6 +1300,7 @@
               x = MBS.x0 - 0.32 + R() * (2 * MBS.gap + 0.5); y = MBS.h + R() * 0.035; z = MBS.z + (R() - 0.5) * 0.12;
             }
           } else if (which < 0.44) {
+            lmId = 1;
             const a = (-0.5 + Math.floor(R() * 9) / 8) * 1.9, t = R();
             const r = t * 0.32, w = Math.sin(t * Math.PI) * 0.045;
             const lat = R() < 0.7 ? (R() < 0.5 ? -w : w) : (R() * 2 - 1) * w;
@@ -1271,6 +1308,7 @@
             z = LOTUS.z + Math.cos(a) * r - Math.sin(a) * lat;
             y = 0.06 + Math.sin(t * Math.PI) * 0.1 + t * 0.08;
           } else if (which < 0.58) {
+            lmId = 2;
             const [tx, tz, th] = TREES[Math.floor(R() * TREES.length)];
             if (R() < 0.3) {
               const v = R() * (th - 0.2), a = R() * TAU, rr = 0.035 - v * 0.02;
@@ -1283,6 +1321,7 @@
               x = tx + Math.cos(a) * rr; y = th - 0.2 + v * 0.2; z = tz + Math.sin(a) * rr;
             }
           } else if (which < 0.7) {
+            lmId = 3;
             const part = R();
             let lx, ly, lz = 0;
             if (part < 0.7) { const a = R() * TAU, rr = FLYER.r * (R() < 0.5 ? 1 : 0.95); lx = Math.cos(a) * rr; ly = Math.sin(a) * rr; }
@@ -1292,15 +1331,17 @@
             z = FLYER.z - lx * Math.sin(FLYER.turn) + lz * Math.cos(FLYER.turn);
             y = FLYER.y + ly;
           } else if (which < 0.84) {
+            lmId = 4;
             const [dx, dz, dr] = DOMES[R() < 0.6 ? 0 : 1];
             const th = ((Math.floor(R() * 16) + 0.5) / 16) * TAU, ph = ((Math.floor(R() * 6) + 0.5) / 6) * (Math.PI / 2);
             const rr = dr * (R() < 0.3 ? 1.1 : 1);
             x = dx + Math.cos(ph) * Math.cos(th) * rr; z = dz + Math.cos(ph) * Math.sin(th) * rr; y = Math.sin(ph) * rr * 0.8;
           } else if (R() < 0.4) {
+            lmId = 5;
             const v = R() * 0.22, a = R() * TAU, rr = v > 0.16 ? 0.05 : 0.032;
             x = MER.x + Math.cos(a) * rr; y = v; z = MER.z + Math.sin(a) * rr;
           } else {
-            k = 8; base[i] = R(); aux[i] = (R() - 0.5) * 0.02;
+            lmId = 5; k = 8; base[i] = R(); aux[i] = (R() - 0.5) * 0.02;
           }
         } else if (i < cut[3]) {
           const a = MRT.a0 + R() * (MRT.a1 - MRT.a0);
@@ -1335,6 +1376,10 @@
             x = B.x + (sx * B.w) / 2; z = B.z + (sz * B.d) / 2; y = R() * B.h;
           }
         }
+        if (lmId >= 0) { lift[i] = LIFT[lmId]; bo[i] = RISE[lmId]; }
+        else if (k === 5) { lift[i] = roof.h + RIDGE; bo[i] = 0.5; }
+        else if (bid[i] >= 0) { lift[i] = blocks[bid[i]].h; bo[i] = blockOrder[bid[i]]; }
+        else { lift[i] = 0.2; bo[i] = R2(); }
         kind[i] = k;
         pos[i * 3] = x; pos[i * 3 + 1] = y; pos[i * 3 + 2] = z;
       }
@@ -1407,7 +1452,7 @@
         (i) => (kind[i] === 4 ? 1.25 : lit(i, 0.55) ? 1 : plain(i)),
       );
       const ridge = [roof.x - roof.w / 2, roof.h + RIDGE, roof.z];
-      return {
+      const result = {
         span: 0.22,
         stages: [textStage(name, 0), { pos: dust, warm: 0, bright: 0.7 }, pipes, scan, schedule, lens, end],
         cams: [
@@ -1453,10 +1498,53 @@
           cornerLabel(ctx, view, 'RAHUL SINGH / SINGAPORE', a6);
         },
       };
+      if (this.extrude) {
+        // From the map up: the dust lands as a flat map of the city, and then each building rises
+        // out of its own footprint, its roof going up and its walls stretching under it.
+        const T = [0, 0, 0];
+        result.transition = (s0, t, i, A, B, O, ph) => {
+          if (s0 !== 1) return false;
+          const land = smooth((t - ph * 0.3) / 0.25);
+          const rise = smooth((t - 0.58 - bo[i] * 0.27) / 0.15);
+          T[0] = B[0]; T[1] = Math.min(B[1], rise * lift[i]); T[2] = B[2];
+          result.path(A, T, land, i, O, ph);
+          return true;
+        };
+        result.cams[1] = { x: -0.4, y: 0.7, z: 0.3, yaw: -14, pitch: 66, dist: 6.2 };
+        // While the city is flat it is drawn as the map it came from: the shore of the bay, the
+        // banks of the river, the roads and every footprint, in thin lines.
+        const plain = result.overlay;
+        result.overlay = (ctx, view, p, section) => {
+          const a = near(p, 1.5, 0.32);
+          if (a > 0.01) {
+            const st = coldA(0.32 * a);
+            for (let k = 0; k < 72; k++) {
+              const a0 = (k / 72) * TAU, a1 = ((k + 1) / 72) * TAU;
+              seg(ctx, view, [BAY.x + Math.cos(a0) * BAY.r, 0, BAY.z + Math.sin(a0) * BAY.r], [BAY.x + Math.cos(a1) * BAY.r, 0, BAY.z + Math.sin(a1) * BAY.r], st);
+            }
+            for (let k = 0; k < RIVER.length - 1; k++) for (const side of [-0.08, 0.08]) {
+              const [ax, az] = RIVER[k], [bx, bz] = RIVER[k + 1];
+              const l = Math.hypot(bx - ax, bz - az), nx = (-(bz - az) / l) * side, nz = ((bx - ax) / l) * side;
+              seg(ctx, view, [ax + nx, 0, az + nz], [bx + nx, 0, bz + nz], st);
+            }
+            for (const [ra, rb] of ROADS) seg(ctx, view, [ra[0], 0, ra[1]], [rb[0], 0, rb[1]], coldA(0.14 * a));
+            const fp = coldA(0.45 * a);
+            for (const bl of blocks) {
+              const x0 = bl.x - bl.w / 2, x1 = bl.x + bl.w / 2, z0 = bl.z - bl.d / 2, z1 = bl.z + bl.d / 2;
+              seg(ctx, view, [x0, 0, z0], [x1, 0, z0], fp); seg(ctx, view, [x1, 0, z0], [x1, 0, z1], fp);
+              seg(ctx, view, [x1, 0, z1], [x0, 0, z1], fp); seg(ctx, view, [x0, 0, z1], [x0, 0, z0], fp);
+            }
+          }
+          plain(ctx, view, p, section);
+        };
+      }
+      return result;
     },
   };
 
-  const defs = { bay, flow, city, become, words };
+  const mapup = { ...bay, extrude: true };
+
+  const defs = { mapup, bay, flow, city, become, words };
   const sketches = [...document.querySelectorAll('[data-sketch]')].map((section) => ({
     section, sketch: createSketch(section, defs[section.dataset.sketch]),
   }));

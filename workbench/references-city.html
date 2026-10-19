@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="data:," />
+    <title>References, the city</title>
+    <!-- The references round for the city (docs/DECISIONS.md, D38). Development only, like the
+     rest of workbench/. The pictures load from Wikimedia and are not in this repo; each
+     links to its page. Marks are copied out as text and recorded in docs/REFERENCES.md. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@400;500;700&display=swap"
+    />
+  </head>
+  <body>
+    <style>
+      /* Layout: a contact sheet. Four groups of cards, a fixed bar at the bottom for the picks. */
+      :root {
+        --void: #0b0b0c;
+        --surface: #121214;
+        --line: #26262b;
+        --cold: #e8e5df;
+        --dim: #918c84;
+        --amber: #ffa726;
+        --sans: 'Schibsted Grotesk', ui-sans-serif, system-ui, 'Helvetica Neue', Arial, sans-serif;
+        --mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--void);
+        color: var(--cold);
+        font-family: var(--sans);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding-block: 48px 140px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        display: grid;
+        gap: 56px;
+      }
+      .eyebrow,
+      .num,
+      button,
+      dt,
+      .bar {
+        font-family: var(--mono);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      .eyebrow {
+        margin: 0;
+        font-size: 11px;
+        color: var(--dim);
+      }
+      header {
+        display: grid;
+        gap: 14px;
+        max-width: 44rem;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(34px, 5vw, 56px);
+        line-height: 1;
+        letter-spacing: -0.02em;
+      }
+      header p {
+        margin: 0;
+        color: var(--dim);
+        font-size: 16px;
+      }
+      header p b {
+        color: var(--cold);
+        font-weight: 500;
+      }
+      section {
+        display: grid;
+        gap: 18px;
+      }
+      .group-head {
+        display: grid;
+        gap: 6px;
+        max-width: 44rem;
+        border-top: 1px solid var(--line);
+        padding-top: 18px;
+      }
+      h2 {
+        margin: 0;
+        font-size: 24px;
+        letter-spacing: -0.01em;
+      }
+      .group-head p {
+        margin: 0;
+        color: var(--dim);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr));
+        gap: 14px;
+      }
+      .card {
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        border-radius: 3px;
+        min-width: 0;
+      }
+      .card[data-mark='like'] {
+        border-color: var(--amber);
+      }
+      .card[data-mark='no'] {
+        opacity: 0.38;
+      }
+      .card img {
+        display: block;
+        width: 100%;
+        aspect-ratio: 4 / 3;
+        max-width: 100%;
+        object-fit: contain;
+        background: #050506;
+        border-radius: 3px 3px 0 0;
+      }
+      .body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+      }
+      .name {
+        font-weight: 500;
+      }
+      .num {
+        color: var(--amber);
+        font-size: 11px;
+        margin-right: 6px;
+      }
+      .look {
+        flex: 1;
+        margin: 0;
+        color: var(--dim);
+        font-size: 14px;
+      }
+      .source {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--dim);
+      }
+      .marks {
+        display: flex;
+        gap: 8px;
+      }
+      button,
+      input,
+      textarea {
+        font: inherit;
+        color: var(--cold);
+        background: var(--void);
+        border: 1px solid var(--line);
+        border-radius: 2px;
+      }
+      .marks button {
+        flex: 1;
+        padding: 8px;
+        font-size: 11px;
+        cursor: pointer;
+      }
+      .marks button[data-mark='like'][aria-pressed='true'] {
+        border-color: var(--amber);
+        background: var(--amber);
+        color: var(--void);
+      }
+      .marks button[data-mark='no'][aria-pressed='true'] {
+        border-color: var(--dim);
+        background: var(--dim);
+        color: var(--void);
+      }
+      input {
+        padding: 8px;
+        font-size: 14px;
+        font-family: var(--sans);
+        width: 100%;
+      }
+      :focus-visible {
+        outline: 2px solid var(--amber);
+        outline-offset: 2px;
+      }
+      .bar {
+        position: fixed;
+        inset: auto 0 0 0;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-block: 12px calc(12px + env(safe-area-inset-bottom, 0px));
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        border-top: 1px solid var(--line);
+        background: var(--void);
+        font-size: 11px;
+        color: var(--dim);
+      }
+      #picks {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      #copy {
+        flex: none;
+        padding: 9px 14px;
+        font-size: 11px;
+        cursor: pointer;
+        border-color: var(--amber);
+        color: var(--amber);
+      }
+      #fallback {
+        display: block;
+        width: 100%;
+        min-height: 7rem;
+        padding: 10px;
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+    </style>
+
+    <main class="wrap">
+      <header>
+        <p class="eyebrow">personal-website-v2 / the city / references</p>
+        <h1>References for the city</h1>
+        <p>
+          Mark what you like the look of and what you do not, and skip the rest.
+          <b>A few words on why help more than the mark.</b> The third group matters most: it
+          decides how the whole city is drawn. When you are done, copy your picks and paste them
+          into the chat.
+        </p>
+      </header>
+
+      <section aria-labelledby="g-bay">
+        <div class="group-head">
+          <h2 id="g-bay">Marina Bay</h2>
+          <p>
+            The landmarks round the water. Which views and shapes should the city be built to match?
+          </p>
+        </div>
+        <div class="grid" id="grid-bay"></div>
+      </section>
+
+      <section aria-labelledby="g-heartland">
+        <div class="group-head">
+          <h2 id="g-heartland">The heartland</h2>
+          <p>
+            Where the windows light up at the Uniad beat, and where the scanned building stands.
+          </p>
+        </div>
+        <div class="grid" id="grid-heartland"></div>
+      </section>
+
+      <section aria-labelledby="g-scan">
+        <div class="group-head">
+          <h2 id="g-scan">How a scan looks</h2>
+          <p>
+            Real laser scans and point clouds. The city is drawn in one of these manners, so this is
+            the group to be picky about.
+          </p>
+        </div>
+        <div class="grid" id="grid-scan"></div>
+      </section>
+
+      <section aria-labelledby="g-eggs">
+        <div class="group-head">
+          <h2 id="g-eggs">Easter eggs</h2>
+          <p>Things to hide for visitors to find. Like the ones you want in.</p>
+        </div>
+        <div class="grid" id="grid-eggs"></div>
+      </section>
+
+      <p class="eyebrow">
+        Pictures from Wikimedia Commons. Each links to its page, with its author and licence.
+      </p>
+      <textarea id="fallback" hidden aria-label="Your picks, to copy"></textarea>
+    </main>
+
+    <div class="bar">
+      <span id="picks">Nothing marked yet.</span>
+      <button id="copy" type="button">Copy my picks</button>
+    </div>
+
+    <script>
+      const REFERENCES = [
+        {
+          n: 1,
+          group: 'bay',
+          title: 'Marina Bay at dusk',
+          look: 'The view the story ends on: across the water to Marina Bay Sands, the CBD to one side.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b0/Singapore_Marina_Bay_Dusk_2018-02-27.jpg/500px-Singapore_Marina_Bay_Dusk_2018-02-27.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Singapore_Marina_Bay_Dusk_2018-02-27.jpg',
+        },
+        {
+          n: 2,
+          group: 'bay',
+          title: 'Marina Bay at night',
+          look: 'How dark the water is against the lit edges. The city is mostly its lights.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/Singapore_%28SG%29%2C_Marina_Bay%2C_Night_View_--_2019_--_4682.jpg/500px-Singapore_%28SG%29%2C_Marina_Bay%2C_Night_View_--_2019_--_4682.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Singapore_(SG),_Marina_Bay,_Night_View_--_2019_--_4682.jpg',
+        },
+        {
+          n: 3,
+          group: 'bay',
+          title: 'Marina Bay Sands',
+          look: 'Three towers and the ship on top. Recognisable from its outline alone.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Marina_Bay_Sands_%28I%29.jpg/500px-Marina_Bay_Sands_%28I%29.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Marina_Bay_Sands_(I).jpg',
+        },
+        {
+          n: 4,
+          group: 'bay',
+          title: 'ArtScience Museum',
+          look: "The open hand of petals at the water's edge.",
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/ArtScience_Museum%2C_Marina_Bay_Sands%2C_Singapore.jpg/500px-ArtScience_Museum%2C_Marina_Bay_Sands%2C_Singapore.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:ArtScience_Museum,_Marina_Bay_Sands,_Singapore.jpg',
+        },
+        {
+          n: 5,
+          group: 'bay',
+          title: 'Supertree Grove at night',
+          look: 'Lattice canopies on tall trunks. Already made of lines and points of light.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Supertree_Grove_at_night.jpg/500px-Supertree_Grove_at_night.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Supertree_Grove_at_night.jpg',
+        },
+        {
+          n: 6,
+          group: 'bay',
+          title: 'Esplanade',
+          look: 'The two spiked domes, the durian. A shape only Singapore has.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/The_Esplanade_%E2%80%93_Theatres_on_the_Bay.jpg/500px-The_Esplanade_%E2%80%93_Theatres_on_the_Bay.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:The_Esplanade_–_Theatres_on_the_Bay.jpg',
+        },
+        {
+          n: 7,
+          group: 'bay',
+          title: 'Singapore Flyer',
+          look: 'One ring with its capsules. Simple to draw, reads from far away.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Singapore_Flyer_20250903.jpg/500px-Singapore_Flyer_20250903.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Singapore_Flyer_20250903.jpg',
+        },
+        {
+          n: 8,
+          group: 'bay',
+          title: 'Merlion',
+          look: 'Small against the skyline, but the most Singapore thing of all. Its water arcs into the bay.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/Merlion_%28I%29.jpg/500px-Merlion_%28I%29.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Merlion_(I).jpg',
+        },
+        {
+          n: 9,
+          group: 'bay',
+          title: 'The CBD at dusk',
+          look: 'Where the Lens tower stands. Tall, dense, mostly glass.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/27/Skylines_of_the_Central_Business_District%2C_Singapore_at_dusk.jpg/500px-Skylines_of_the_Central_Business_District%2C_Singapore_at_dusk.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Skylines_of_the_Central_Business_District,_Singapore_at_dusk.jpg',
+        },
+        {
+          n: 10,
+          group: 'bay',
+          title: 'Singapore River',
+          look: 'The river the dust pours into, with shophouses on its banks.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/A_water_taxi_at_Singapore_River.jpg/500px-A_water_taxi_at_Singapore_River.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:A_water_taxi_at_Singapore_River.jpg',
+        },
+        {
+          n: 11,
+          group: 'heartland',
+          title: 'HDB blocks, Bishan',
+          look: 'Long slabs in rows, stepped heights. Windows in a strict grid.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Bishan_HDB.JPG/500px-Bishan_HDB.JPG',
+          source: 'https://commons.wikimedia.org/wiki/File:Bishan_HDB.JPG',
+        },
+        {
+          n: 12,
+          group: 'heartland',
+          title: 'HDB blocks at night',
+          look: 'Corridor lights running along every floor. This is what lighting up block by block could look like.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/HDB_blocks_at_Sin_Ming_Court%2C_Upper_Thomson%2C_Singapore%2C_at_night_-_2022-04-23.jpg/500px-HDB_blocks_at_Sin_Ming_Court%2C_Upper_Thomson%2C_Singapore%2C_at_night_-_2022-04-23.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:HDB_blocks_at_Sin_Ming_Court,_Upper_Thomson,_Singapore,_at_night_-_2022-04-23.jpg',
+        },
+        {
+          n: 13,
+          group: 'heartland',
+          title: 'Twilight over HDB flats',
+          look: 'Some windows lit, most dark. A neighbourhood at the end of the day.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/74/Evening_Twilight_Over_Maisonette_HDB_flats_-_20150327.jpg/500px-Evening_Twilight_Over_Maisonette_HDB_flats_-_20150327.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Evening_Twilight_Over_Maisonette_HDB_flats_-_20150327.jpg',
+        },
+        {
+          n: 14,
+          group: 'heartland',
+          title: 'Void deck',
+          look: 'The open ground floor under every block. Where the cats would be.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Void_deck_on_the_ground_floor_of_a_Housing_and_Development_Board_flat%2C_Singapore_-_20051007.jpg/500px-Void_deck_on_the_ground_floor_of_a_Housing_and_Development_Board_flat%2C_Singapore_-_20051007.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Void_deck_on_the_ground_floor_of_a_Housing_and_Development_Board_flat,_Singapore_-_20051007.jpg',
+        },
+        {
+          n: 15,
+          group: 'heartland',
+          title: 'Pinnacle@Duxton',
+          look: 'Public housing as a landmark: towers joined by sky bridges.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f3/Pinnacle%40Duxton%2C_Singapore_-_20100101.jpg/500px-Pinnacle%40Duxton%2C_Singapore_-_20100101.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Pinnacle@Duxton,_Singapore_-_20100101.jpg',
+        },
+        {
+          n: 16,
+          group: 'heartland',
+          title: 'Lau Pa Sat hawker centre',
+          look: 'An old market hall in the CBD. A detail worth hiding somewhere.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8b/Lau_Pa_Sat_Singapore_1.jpg/500px-Lau_Pa_Sat_Singapore_1.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Lau_Pa_Sat_Singapore_1.jpg',
+        },
+        {
+          n: 17,
+          group: 'heartland',
+          title: 'Science Centre Singapore',
+          look: 'The building you reconstructed, as it really is. The one the scan beat would rebuild.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Singapore_Science_Centre_-_20051007.jpg/500px-Singapore_Science_Centre_-_20051007.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Singapore_Science_Centre_-_20051007.jpg',
+        },
+        {
+          n: 18,
+          group: 'scan',
+          title: "A street, scanned by a car's lidar",
+          look: "Rings of points spreading out from one sensor. Raw, and obviously a machine's view.",
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Ouster_OS1-64_lidar_point_cloud_of_intersection_of_Folsom_and_Dore_St%2C_San_Francisco.png/500px-Ouster_OS1-64_lidar_point_cloud_of_intersection_of_Folsom_and_Dore_St%2C_San_Francisco.png',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Ouster_OS1-64_lidar_point_cloud_of_intersection_of_Folsom_and_Dore_St,_San_Francisco.png',
+        },
+        {
+          n: 19,
+          group: 'scan',
+          title: 'A city block from the air',
+          look: 'An aerial lidar scan of Paris round the national library. Buildings read by their roofs.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/BNF_Lidar_HD.png/500px-BNF_Lidar_HD.png',
+          source: 'https://commons.wikimedia.org/wiki/File:BNF_Lidar_HD.png',
+        },
+        {
+          n: 20,
+          group: 'scan',
+          title: 'A highway, aerial lidar',
+          look: 'Coloured by height. Roads and trees from the same points.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Austin_Texas_LiDAR_Point_Cloud_%28Highway_183%29.png/500px-Austin_Texas_LiDAR_Point_Cloud_%28Highway_183%29.png',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Austin_Texas_LiDAR_Point_Cloud_(Highway_183).png',
+        },
+        {
+          n: 21,
+          group: 'scan',
+          title: 'A building, scanned',
+          look: 'A facade from the ground: every window and ledge, made of nothing but points.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Point_cloud_data_of_the_David_W._Dyer_Federal_Building_and_United_States_Courthouse_in_Florida.jpg/500px-Point_cloud_data_of_the_David_W._Dyer_Federal_Building_and_United_States_Courthouse_in_Florida.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Point_cloud_data_of_the_David_W._Dyer_Federal_Building_and_United_States_Courthouse_in_Florida.jpg',
+        },
+        {
+          n: 22,
+          group: 'scan',
+          title: 'Berlin Hauptbahnhof, scanned',
+          look: "A station's glass roof as a scan. Structure shows through, like an x-ray.",
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/%22Punktewolke%22_Berlin_Vertikale_Vermessung_des_Hauptbahnhofs_%287499499824%29_%282%29.jpg/500px-%22Punktewolke%22_Berlin_Vertikale_Vermessung_des_Hauptbahnhofs_%287499499824%29_%282%29.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:"Punktewolke"_Berlin_Vertikale_Vermessung_des_Hauptbahnhofs_(7499499824)_(2).jpg',
+        },
+        {
+          n: 23,
+          group: 'scan',
+          title: 'A castle from photographs',
+          look: 'Points with the colours of the photos they came from. Warmer and softer than lidar.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Monmouth_castle_point_cloud%2C_created_with_Photosynth_01.jpg/500px-Monmouth_castle_point_cloud%2C_created_with_Photosynth_01.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Monmouth_castle_point_cloud,_created_with_Photosynth_01.jpg',
+        },
+        {
+          n: 24,
+          group: 'scan',
+          title: 'Points into a mesh',
+          look: 'The step your software did: scattered points becoming a surface.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Reconstruction_Arc3D.jpg/500px-Reconstruction_Arc3D.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Reconstruction_Arc3D.jpg',
+        },
+        {
+          n: 25,
+          group: 'eggs',
+          title: 'Otters, Jurong Lake',
+          look: "Singapore's otter families. A row of them crossing a path could be a find.",
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/45/Otters_in_Jurong_Lake_Gardens%2C_Singapore.jpg/500px-Otters_in_Jurong_Lake_Gardens%2C_Singapore.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Otters_in_Jurong_Lake_Gardens,_Singapore.jpg',
+        },
+        {
+          n: 26,
+          group: 'eggs',
+          title: 'Otters, Sungei Serangoon',
+          look: 'Otters in the water. They could surface in the river or the bay.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Smooth-coated_otters_%28Lutrogale_perspicillata%29%2C_Sungei_Serangoon%2C_Singapore_-_20130518.jpg/500px-Smooth-coated_otters_%28Lutrogale_perspicillata%29%2C_Sungei_Serangoon%2C_Singapore_-_20130518.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Smooth-coated_otters_(Lutrogale_perspicillata),_Sungei_Serangoon,_Singapore_-_20130518.jpg',
+        },
+        {
+          n: 27,
+          group: 'eggs',
+          title: 'A Singapore cat',
+          look: 'The community cats. One on a void deck that looks up as the pointer passes.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Cat_-_Singapore-20090109.jpg/500px-Cat_-_Singapore-20090109.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Cat_-_Singapore-20090109.jpg',
+        },
+        {
+          n: 28,
+          group: 'eggs',
+          title: 'Supertree light show',
+          look: 'Garden Rhapsody, the nightly show. Click the Supertrees and they could play a few seconds of it.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Garden_Rhapsody%2C_Supertree_Grove%2C_Gardens_by_the_Bay%2C_Singapore_-_20150530.webm/500px--Garden_Rhapsody%2C_Supertree_Grove%2C_Gardens_by_the_Bay%2C_Singapore_-_20150530.webm.jpg',
+          source:
+            'https://commons.wikimedia.org/wiki/File:Garden_Rhapsody,_Supertree_Grove,_Gardens_by_the_Bay,_Singapore_-_20150530.webm',
+        },
+        {
+          n: 29,
+          group: 'eggs',
+          title: 'Changi control tower',
+          look: 'At the edge of the city, with a plane leaving: the business trips of the S2T years.',
+          img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/ff/Changi_Airport_control_tower.jpg/500px-Changi_Airport_control_tower.jpg',
+          source: 'https://commons.wikimedia.org/wiki/File:Changi_Airport_control_tower.jpg',
+        },
+      ]
+
+      const KEY = 'references-city'
+      let marks = {}
+      try {
+        marks = JSON.parse(localStorage.getItem(KEY)) ?? {}
+      } catch {
+        // Marks just do not survive a reload.
+      }
+
+      function summary() {
+        const line = (mark, label) => {
+          const picked = REFERENCES.filter((ref) => marks[ref.n]?.mark === mark).map((ref) => {
+            const why = marks[ref.n].why?.trim()
+            return `${ref.n} ${ref.title}${why ? ` (${why})` : ''}`
+          })
+          return picked.length > 0 ? `${label}: ${picked.join('; ')}` : null
+        }
+        return [line('like', 'Like'), line('no', 'Not this')].filter(Boolean).join('\n')
+      }
+
+      function update() {
+        try {
+          localStorage.setItem(KEY, JSON.stringify(marks))
+        } catch {
+          // See above.
+        }
+        for (const card of document.querySelectorAll('.card')) {
+          const mark = marks[card.dataset.n]?.mark ?? ''
+          card.dataset.mark = mark
+          for (const button of card.querySelectorAll('.marks button'))
+            button.setAttribute('aria-pressed', String(button.dataset.mark === mark))
+        }
+        document.getElementById('picks').textContent =
+          summary().replace('\n', '  |  ') || 'Nothing marked yet.'
+      }
+
+      const escape = (text) =>
+        text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
+
+      for (const ref of REFERENCES) {
+        const card = document.createElement('article')
+        card.className = 'card'
+        card.dataset.n = ref.n
+        card.innerHTML = `
+      <img src="${ref.img}" alt="${escape(ref.title)}" loading="lazy" referrerpolicy="no-referrer" />
+      <div class="body">
+        <div class="name"><span class="num">${ref.n}</span>${escape(ref.title)}</div>
+        <p class="look">${escape(ref.look)}</p>
+        <a class="source" href="${ref.source}" target="_blank" rel="noreferrer">Source and licence</a>
+        <div class="marks">
+          <button type="button" data-mark="like">Like</button>
+          <button type="button" data-mark="no">Not this</button>
+        </div>
+        <input type="text" id="why-${ref.n}" placeholder="Why? (optional)" aria-label="Why, for ${escape(ref.title)}" />
+      </div>`
+        const input = card.querySelector('input')
+        input.value = marks[ref.n]?.why ?? ''
+        input.addEventListener('input', () => {
+          marks[ref.n] = { ...marks[ref.n], why: input.value }
+          update()
+        })
+        for (const button of card.querySelectorAll('.marks button'))
+          button.addEventListener('click', () => {
+            const mark = marks[ref.n]?.mark === button.dataset.mark ? '' : button.dataset.mark
+            marks[ref.n] = { ...marks[ref.n], mark }
+            update()
+          })
+        document.getElementById(`grid-${ref.group}`).append(card)
+      }
+
+      document.getElementById('copy').addEventListener('click', (event) => {
+        const text = summary() || 'Nothing marked.'
+        const button = event.currentTarget
+        const fallback = () => {
+          const area = document.getElementById('fallback')
+          area.hidden = false
+          area.value = text
+          area.focus()
+          area.select()
+          area.scrollIntoView({ block: 'center' })
+          button.textContent = 'Select and copy above'
+        }
+        try {
+          navigator.clipboard.writeText(text).then(() => (button.textContent = 'Copied'), fallback)
+        } catch {
+          fallback()
+        }
+        setTimeout(() => (button.textContent = 'Copy my picks'), 2500)
+      })
+
+      update()
+    </script>
+  </body>
+</html>

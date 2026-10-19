@@ -2,7 +2,7 @@
 
 What the visitor sees and does. Read [VISION](VISION.md) first.
 
-**Status of this doc:** rewritten on 2026-10-19, when Rahul replaced the Machine with a city ([DECISIONS D38](DECISIONS.md)). The direction is agreed: a laser scan of a city at night round Marina Bay, reached by the dust pouring down out of the opening line, with each job something happening in the city. It was chosen from rough sketches, kept in `workbench/city-sketches.html`; the one called Bay is the direction. The city's layout, its landmarks, the look, the camera's poses and the copy are settled in rounds on the workbench. The last section says which is which. The Machine this replaces is described in D23 to D35 and in this file at `27a83cb`.
+**Status of this doc:** rewritten on 2026-10-19, when Rahul replaced the Machine with a city ([DECISIONS D38](DECISIONS.md)), and on 2026-10-20 when the city came to be built from the map up ([D39](DECISIONS.md)). The direction is agreed: a laser scan of a city at night round Marina Bay, reached by the dust pouring down out of the opening line, with each job something happening in the city. It was chosen from rough sketches, kept in `workbench/city-sketches.html`; the one called From the map is the direction. The city's layout, its landmarks, the look, the camera's poses and the copy are settled in rounds on the workbench. The last section says which is which. The Machine this replaces is described in D23 to D35 and in this file at `27a83cb`.
 
 ## The city
 
@@ -15,10 +15,16 @@ As in the sketch. The detail is a round on the workbench.
 - **The water.** The Singapore River runs into Marina Bay. The river is how the visitor arrives: the dust pours down into it.
 - **The landmarks, round the water and in front,** so the city reads as Singapore from the first view: Marina Bay Sands across the bay, the ArtScience Museum in front of it, the Supertrees behind it, the Flyer and the Esplanade on the north shore, the Merlion at the river mouth. Drawn in code and kept recognisable, not traced.
 - **The CBD,** towers on the river's south bank.
-- **The heartland,** HDB slabs and point blocks all round. This is where the windows are.
+- **The heartland,** HDB slabs and point blocks all round, kept plain. This is where the windows are. Its one landmark is Pinnacle@Duxton, towers joined by sky bridges, drawn with care like the landmarks round the bay.
 - **The MRT,** a train on a viaduct through the heartland.
 
 Rahul's work is never pinned to a real building, with one wanted exception: the Science Centre, whose mesh Rahul really built ([CONTENT](CONTENT.md)), as the building that is scanned. The reference is the mesh image in the old site's assets (Etavolt), found on 2026-10-20. It stands in the heartland: the real one is in Jurong, far from the bay, and the city is Singapore drawn small. The Lens tower must never look like a ministry building.
+
+### From the map up
+
+Rahul's Etavolt work took LiDAR from online map data and rebuilt a rough mesh of each building ([CONTENT](CONTENT.md)). The city is built the same way ([DECISIONS D39](DECISIONS.md)). The river of dust lands flat as a map: the shore of the bay, the river's banks, the roads and every building's footprint, traced in thin lines like a plan. Then each building rises out of its footprint, its roof going up and its walls stretching under it, a few at a time as the visitor scrolls. So the visitor has watched Rahul's method build the city before the Scanner beat says so.
+
+Detail goes where it counts. The seven landmarks round the bay and Pinnacle@Duxton are drawn with care; every other building is a plain extruded block, which is what an extrusion from map data gives. A city at night is its lights: points sit on edges and windows, faces are nearly empty, the water is black. Nothing is coloured by height and there are no sensor rings: that is a lidar demo, not this work.
 
 ### Cold and lit
 
@@ -45,9 +51,9 @@ A city is busier than one object was, and it would win against the text. Propose
 
 Small things a visitor finds. Rahul wants them. Each is found, never forced; none advances the story; none states a fact that is not in [CONTENT](CONTENT.md).
 
-- In the sketch: the Merlion spouting; a train on its viaduct; a block numbered `BLK 2024`, the year Rahul joined Uniad.
-- Rahul's to consider: otters, cats, "and various other things".
-- The chat's to consider: a cat on a void deck that looks up when the pointer passes; a plane leaving Changi at the Core beat, for the international business trips; the Supertrees lighting up when clicked; other block numbers that are Rahul's years.
+- In the sketch, liked: the Merlion spouting; a train on its viaduct; a block numbered `BLK 2024`, the year Rahul joined Uniad.
+- Picked by Rahul in the references round (2026-10-20): otters, a family crossing a path or surfacing in the river; a cat on a void deck that looks up when the pointer passes; the Supertrees playing a few seconds of their light show when clicked; a plane leaving Changi at the Core beat, for the international business trips.
+- Still open: other block numbers that are Rahul's years, and anything else found while building.
 
 ## The beats
 
@@ -56,8 +62,8 @@ The page is one long scroll. The canvas is fixed behind it and the city responds
 | # | Beat | What the visitor sees | What they learn |
 | --- | --- | --- | --- |
 | 0 | **Found** | Black. Small type in the middle of the window, a size up from the other statements: `YOU'VE FOUND RAHUL.` Faint dust in the dark. Moving the pointer lights the dust near it. | Something is here. Nothing is explained. |
-| 1 | **Signal** | First scroll. The opening line crumbles into bright grains ([DECISIONS D37](DECISIONS.md)), and the dust pours down as a river into a city in the dark. | The dust was a place all along. |
-| 2 | **Core** | The camera glides to the CBD. Requests run along the river and the streets as light. The first tag: the work, with the years and the company in small print. | Things in the city light up, and each one is a kind of work. |
+| 1 | **Signal** | First scroll. The opening line crumbles into bright grains ([DECISIONS D37](DECISIONS.md)), and the dust pours down as a river and lands flat as a map: the bay, the river, the roads, every footprint. | The dust was a place all along. |
+| 2 | **Core** | The city rises out of the map, building by building, and the camera glides down to the CBD. Requests run along the river and the streets as light. The first tag: the work, with the years and the company in small print. | Things in the city light up, and each one is a kind of work. |
 | 3 | **Scanner** | A roof stands as raw points. The visitor sweeps across it and surface appears where they sweep. | Rahul built this kind of software. They have been looking at a scan the whole time. |
 | 4 | **Rings** | Windows light up across the HDB blocks. | Scale and orchestration: 10,000+ users. |
 | 5 | **Lens** | A tower in the CBD lights up and answers. | LLM products for Singapore's government. |
@@ -154,8 +160,9 @@ Direction only. Exact tokens are chosen during the build.
 **Open.** Settle by prototyping, then write the answer back here.
 
 - The city's layout and the detail of each landmark.
+- How the map is drawn, and how fast the city rises from it.
 - How the words sit over the city: the spotlight, tags and dark band are proposed, not picked.
-- Which easter eggs, beyond the three in the sketch.
+- Which easter eggs beyond the seven picked, and how each is found.
 - How the scanned surface is drawn. It reads as rebuilt from a scan, points closing into faces, and is better than Rahul's old mesh, which he does not want copied (2026-10-20). The mesh image is a reference for the Science Centre's shape only.
 - What the visitor can do at the Whole beat.
 - How many points each tier draws. A city fills the window on every beat, so these start again from measurement.

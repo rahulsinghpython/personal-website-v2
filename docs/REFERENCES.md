@@ -4,6 +4,69 @@ Round 1 of [DESIGN-PROCESS](DESIGN-PROCESS.md#round-1-references): real objects 
 
 **Status:** round 1 is finished. Rahul marked both batches on 2026-10-06: nine likes, no dislikes. The outcome is at the bottom and feeds the three silhouettes of round 2.
 
+## The city
+
+The references round for the city ([DECISIONS D38](DECISIONS.md)), begun on 2026-10-20. Same rules as round 1: links and notes here, pictures not committed.
+
+**Status:** marked by Rahul on 2026-10-20: twelve likes, no dislikes, no reasons given. The outcome is at the end of this section. The page is `workbench/references-city.html` (`pnpm dev`, then `/workbench/references-city.html`); the same page, with the pictures embedded so it opens on a tablet, was sent to him as a private artifact. The third group decides how the city is drawn.
+
+### Marina Bay
+
+| # | Reference | Look at | Mark | Why |
+| --- | --- | --- | --- | --- |
+| 1 | [Marina Bay at dusk](https://commons.wikimedia.org/wiki/File:Singapore_Marina_Bay_Dusk_2018-02-27.jpg) | The view the story ends on: across the water to Marina Bay Sands, the CBD to one side. | yes | |
+| 2 | [Marina Bay at night](https://commons.wikimedia.org/wiki/File:Singapore_%28SG%29,_Marina_Bay,_Night_View_--_2019_--_4682.jpg) | How dark the water is against the lit edges. The city is mostly its lights. | yes | |
+| 3 | [Marina Bay Sands](https://commons.wikimedia.org/wiki/File:Marina_Bay_Sands_%28I%29.jpg) | Three towers and the ship on top. Recognisable from its outline alone. | yes | |
+| 4 | [ArtScience Museum](https://commons.wikimedia.org/wiki/File:ArtScience_Museum,_Marina_Bay_Sands,_Singapore.jpg) | The open hand of petals at the water's edge. | yes | |
+| 5 | [Supertree Grove at night](https://commons.wikimedia.org/wiki/File:Supertree_Grove_at_night.jpg) | Lattice canopies on tall trunks. Already made of lines and points of light. | yes | |
+| 6 | [Esplanade](https://commons.wikimedia.org/wiki/File:The_Esplanade_%E2%80%93_Theatres_on_the_Bay.jpg) | The two spiked domes, the durian. A shape only Singapore has. | yes | |
+| 7 | [Singapore Flyer](https://commons.wikimedia.org/wiki/File:Singapore_Flyer_20250903.jpg) | One ring with its capsules. Simple to draw, reads from far away. | yes | |
+| 8 | [Merlion](https://commons.wikimedia.org/wiki/File:Merlion_%28I%29.jpg) | Small against the skyline, but the most Singapore thing of all. Its water arcs into the bay. | | |
+| 9 | [The CBD at dusk](https://commons.wikimedia.org/wiki/File:Skylines_of_the_Central_Business_District,_Singapore_at_dusk.jpg) | Where the Lens tower stands. Tall, dense, mostly glass. | | |
+| 10 | [Singapore River](https://commons.wikimedia.org/wiki/File:A_water_taxi_at_Singapore_River.jpg) | The river the dust pours into, with shophouses on its banks. | | |
+
+### The heartland
+
+| # | Reference | Look at | Mark | Why |
+| --- | --- | --- | --- | --- |
+| 11 | [HDB blocks, Bishan](https://commons.wikimedia.org/wiki/File:Bishan_HDB.JPG) | Long slabs in rows, stepped heights. Windows in a strict grid. | | |
+| 12 | [HDB blocks at night](https://commons.wikimedia.org/wiki/File:HDB_blocks_at_Sin_Ming_Court,_Upper_Thomson,_Singapore,_at_night_-_2022-04-23.jpg) | Corridor lights running along every floor. This is what lighting up block by block could look like. | | |
+| 13 | [Twilight over HDB flats](https://commons.wikimedia.org/wiki/File:Evening_Twilight_Over_Maisonette_HDB_flats_-_20150327.jpg) | Some windows lit, most dark. A neighbourhood at the end of the day. | | |
+| 14 | [Void deck](https://commons.wikimedia.org/wiki/File:Void_deck_on_the_ground_floor_of_a_Housing_and_Development_Board_flat,_Singapore_-_20051007.jpg) | The open ground floor under every block. Where the cats would be. | | |
+| 15 | [Pinnacle@Duxton](https://commons.wikimedia.org/wiki/File:Pinnacle@Duxton,_Singapore_-_20100101.jpg) | Public housing as a landmark: towers joined by sky bridges. | yes | |
+| 16 | [Lau Pa Sat hawker centre](https://commons.wikimedia.org/wiki/File:Lau_Pa_Sat_Singapore_1.jpg) | An old market hall in the CBD. A detail worth hiding somewhere. | | |
+| 17 | [Science Centre Singapore](https://commons.wikimedia.org/wiki/File:Singapore_Science_Centre_-_20051007.jpg) | The building you reconstructed, as it really is. The one the scan beat would rebuild. | | |
+
+### How a scan looks
+
+| # | Reference | Look at | Mark | Why |
+| --- | --- | --- | --- | --- |
+| 18 | [A street, scanned by a car's lidar](https://commons.wikimedia.org/wiki/File:Ouster_OS1-64_lidar_point_cloud_of_intersection_of_Folsom_and_Dore_St,_San_Francisco.png) | Rings of points spreading out from one sensor. Raw, and obviously a machine's view. | | |
+| 19 | [A city block from the air](https://commons.wikimedia.org/wiki/File:BNF_Lidar_HD.png) | An aerial lidar scan of Paris round the national library. Buildings read by their roofs. | | |
+| 20 | [A highway, aerial lidar](https://commons.wikimedia.org/wiki/File:Austin_Texas_LiDAR_Point_Cloud_%28Highway_183%29.png) | Coloured by height. Roads and trees from the same points. | | |
+| 21 | [A building, scanned](https://commons.wikimedia.org/wiki/File:Point_cloud_data_of_the_David_W._Dyer_Federal_Building_and_United_States_Courthouse_in_Florida.jpg) | A facade from the ground: every window and ledge, made of nothing but points. | | |
+| 22 | [Berlin Hauptbahnhof, scanned](https://commons.wikimedia.org/wiki/File:"Punktewolke"_Berlin_Vertikale_Vermessung_des_Hauptbahnhofs_%287499499824%29_%282%29.jpg) | A station's glass roof as a scan. Structure shows through, like an x-ray. | | |
+| 23 | [A castle from photographs](https://commons.wikimedia.org/wiki/File:Monmouth_castle_point_cloud,_created_with_Photosynth_01.jpg) | Points with the colours of the photos they came from. Warmer and softer than lidar. | | |
+| 24 | [Points into a mesh](https://commons.wikimedia.org/wiki/File:Reconstruction_Arc3D.jpg) | The step your software did: scattered points becoming a surface. | | |
+
+### Easter eggs
+
+| # | Reference | Look at | Mark | Why |
+| --- | --- | --- | --- | --- |
+| 25 | [Otters, Jurong Lake](https://commons.wikimedia.org/wiki/File:Otters_in_Jurong_Lake_Gardens,_Singapore.jpg) | Singapore's otter families. A row of them crossing a path could be a find. | yes | |
+| 26 | [Otters, Sungei Serangoon](https://commons.wikimedia.org/wiki/File:Smooth-coated_otters_%28Lutrogale_perspicillata%29,_Sungei_Serangoon,_Singapore_-_20130518.jpg) | Otters in the water. They could surface in the river or the bay. | | |
+| 27 | [A Singapore cat](https://commons.wikimedia.org/wiki/File:Cat_-_Singapore-20090109.jpg) | The community cats. One on a void deck that looks up as the pointer passes. | yes | |
+| 28 | [Supertree light show](https://commons.wikimedia.org/wiki/File:Garden_Rhapsody,_Supertree_Grove,_Gardens_by_the_Bay,_Singapore_-_20150530.webm) | Garden Rhapsody, the nightly show. Click the Supertrees and they could play a few seconds of it. | yes | |
+| 29 | [Changi control tower](https://commons.wikimedia.org/wiki/File:Changi_Airport_control_tower.jpg) | At the edge of the city, with a plane leaving: the business trips of the S2T years. | yes | |
+
+### Outcome
+
+- **The landmarks are settled.** All seven Marina Bay landmarks liked (1 to 7). The views felt like repeats to him: "Most of the Marina bay just feels like repeats." No more rounds on which landmarks; the work is drawing them well.
+- **The heartland is its landmark, not its texture.** Pinnacle@Duxton is the only like. Ordinary HDB blocks, the void deck and Lau Pa Sat were passed over, so ordinary blocks stay quiet massing.
+- **No scan was picked, and that is the answer.** Rahul: the model was built from map data and then extruded by an algorithm, so he was not sure which scan would make the most sense. In Etavolt's words, LiDAR data taken from online map data and reconstructed into a rough mesh of the building ([CONTENT](CONTENT.md#2-etavolt--scanner)). So the city is not drawn in a lidar manner at all (no sensor rings, no colour by height). The chat's proposal from this, built as the fourth sketch: the city is built the way his model was, from the map up ([DECISIONS D39](DECISIONS.md)).
+- **Easter eggs:** otters (25), a cat (27), the Supertree light show (28), the Changi control tower (29).
+- Rahul also asked the chat not to be held by his picks and to think about the bigger picture. D39 is that.
+
 ## How to mark
 
 The easy way: run `pnpm dev` and open `/workbench/references.html`. It shows every reference as a picture (loaded from Wikimedia, not stored here), with a Like and a Not this button on each and a button that copies your picks as text.
