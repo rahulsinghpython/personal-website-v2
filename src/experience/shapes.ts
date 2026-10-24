@@ -10,7 +10,7 @@ import {
   Vector3,
 } from 'three'
 
-// The few operations the Machine is made from (see "How shapes are made in code" in
+// The few operations the Machine and the city are made from (see "How shapes are made in code" in
 // docs/DESIGN-PROCESS.md). Everything is built around the Y axis and then turned or moved into
 // place with the geometry's own rotate and translate methods.
 

@@ -1,14 +1,8 @@
 import type { BufferGeometry } from 'three'
 import { cubeCity, cubeFrame } from './cube'
-import {
-  defineMachine,
-  param,
-  spinning,
-  weighted,
-  type MachineDef,
-  type MachineValues,
-} from './part'
-import { around, ball, box, band, drum, lathe, rad, ring, rod } from './shapes'
+import { param } from '../params'
+import { defineMachine, spinning, weighted, type MachineDef, type MachineValues } from './part'
+import { around, ball, box, band, drum, lathe, rad, ring, rod } from '../shapes'
 
 // The Machine, in the shape Rahul picked on 2026-10-07 (docs/DECISIONS.md, D32): a tiered rig
 // that hangs, with every part on its axis and drawn in its vocabulary of plates, posts, lines

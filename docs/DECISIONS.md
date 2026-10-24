@@ -473,3 +473,89 @@ The chat's proposal from the references round for the city ([REFERENCES](REFEREN
 **Passed over:** drawing the city as a raw lidar scan, from any of the six scans in the references round.
 
 **Open.** How the map is drawn and how fast the city rises, settled on the workbench. The facts were checked on 2026-10-20: the data was LiDAR, taken from online map data, so "laser scans into 3D models" stays true and the copy does not change.
+
+### D40. The city has its own code beside the Machine's; the sketched layout and its camera are kept — Accepted, 2026-10-20
+
+Rahul's direction at the start of the layout greybox (Phase 3b): a switch on the workbench between the Machine and the city, with the city's code in its own folder, rather than forcing the city into the Machine's four-part structure.
+
+**The structure.**
+
+- **`src/experience/city/`** holds the city: `plan.ts` (the flat map), `layouts.ts` (the layout as data: the bay, the river, the roads, the viaduct, the CBD's outline, open ground, and a place for every landmark), `landmarks.ts` (the eight landmarks as greybox massing), `city.ts` (the layout turned into blocks and shapes, each marked with when it rises) and `story.ts` (the city's story as a function of the beat). Nothing in it imports `machine/`. The city is tuned by four groups of numbers (water, CBD, heartland, landmarks), not by four parts.
+- **Shared pieces moved up a level** so the city does not depend on code that will be deleted: the shape operations are `src/experience/shapes.ts`, the parameter specs `src/experience/params.ts`. `applyCamera` takes a lens, so the city can frame wider than the Machine.
+- **The workbench's `world`** is `city` by default and `machine` with `?world=machine`. The Machine's links now need `world=machine`.
+
+**The layout: as sketched.** Two layouts were built for the round: A, the "From the map" sketch in 3D, and B, every piece where it really is on the map, the visitor looking south-east across the bay. The chat recommended B for its accuracy. Rahul picked A: "I want the sketched version and the way the camera is moving because no one really has time to analyse how accurate the model is to singapore map. We need to focus more on the experience." He allowed mixing in a little of B as long as the experience stays good, and repeated that accuracy is not the focus. What A kept from building B: the wider Marina Bay Sands and blocks kept off the roads, both shared code. Mirroring A to the real map was not done: the camera path is built round A's composition. B's code was removed before it was committed.
+
+**The story on the workbench.** The `story` view and the beat scrubber now work for the city, as the sketch moved:
+
+- The camera has the sketch's pose at each beat, eased over the whole beat as the sketch did. The sketch had seven stages; Whole is new, the camera rising over the bay before it comes down for the view across it. It faces one way within about 25 degrees: the sketch's own range, a little wider than EXPERIENCE's 15.
+- The lens is the sketch's: 40 degrees across the shorter side, against the Machine's 30, and the city slides right as the text band arrives at Signal.
+- The map lands in the first half of the way from Signal to Core, its lines showing while the city is flat. Then every building rises out of its footprint in its own turn, Marina Bay Sands first among the landmarks, done in the shader.
+- Two changes from the sketch, for the experience. Pinnacle@Duxton, which the sketch did not have, stands in the heartland beside BLK 2024, where the Rings beat sees both; first placed beside the CBD, it hid the CBD at Core. And the Science Centre stands on open ground, so the Scanner beat sees its roof clear.
+
+**Passed over:** B, above. Building the city as another `MachineDef` with four parts, which Rahul asked not to do. A separate workbench page for the city, which would duplicate the camera, readout and benchmark.
+
+**Open:** how the story feels, which is Rahul's, scrubbing it on the workbench and later scrolling it; the numbers in each group; the landmarks' detail, which is the next round; the poses, which are the sketch's as they stand.
+
+### D41. The landmarks: each one's outline, and the one feature that names it — Proposed, 2026-10-24
+
+The next step of Phase 3b: the landmarks, each recognisable at the size the camera sees it. After D40 the test is the story's camera, not a close-up: what a visitor takes in at a glance while scrolling (`docs/EXPERIENCE.md`; Rahul: the experience matters more than accuracy). Rahul has not seen it yet.
+
+**What changed,** judged first in close-ups and then in stills of every beat (`src/experience/city/landmarks.ts`):
+
+- **Marina Bay Sands:** broad towers, about half their spacing across, where they were posts; the ship has a pointed bow over the north tower. It read as a gate before.
+- **ArtScience Museum:** ten broad fingers rising from a round base and leaning out, the longest towards the water. It read as a dish of fan blades.
+- **Supertrees:** wide, shallow canopies opening near the top, where they were funnels, and the skyway between the two tallest.
+- **Esplanade:** the two domes, each criss-crossed by a lattice of ribs spiralling up from the base, the sunshades that make it the durian. Spikes were tried first; without them it was two blobs, but as points they read as fur, "like a bacteria" (D42). Moved onto the waterfront between the Merlion and the Flyer, at [1.15, 0.6], and turned so its two domes run along the shore, as the real ones do, not towards Pinnacle@Duxton, which it ran into at Whole.
+- **Merlion:** crouched, lower and longer than it is tall: a lion's head ringed by a flared mane sitting straight on a broad chest, with no neck, a fish's body tapering back and curling up into a forked tail, and the arc of water from its snout into the bay. Turned to face the bay. The water is what reads from afar. Redrawn twice the same day. The first version, an upright tube with a round head and the jet from its top, read as phallic to Rahul ("quite disrespectful"). The second, crouched, read as "a weird sea lion". It is now drawn as its side, since the visitor only ever sees it side on: a silhouette like a chess knight's, pushed into depth with rounded edges, with the wave it sits on, its chest, the open mouth under the snout, the mane in locks down the back and the fish's tail curling up into a fork behind. Never an upright column with a round head.
+- **Pinnacle@Duxton:** seven slim towers in a shallow bow, each clear of the next, with the two sky bridges. Lowered to 0.62 and set back behind BLK 2024: taller, nearer and more curved, it walled off the Rings beat, and it read as a round cage.
+- **The Flyer and the Science Centre** already read and are unchanged.
+
+**Still greybox.** This is massing for the solids on the workbench. How the landmarks look as points, and how far they are lit, are the points round.
+
+**Cost,** measured on the development machine in the Rings beat's view: 10 draw calls, 16,400 triangles, about 1 ms of GPU a frame, 20 ms to build in the development server, no frames at rest.
+
+**Open:** whether each reads to Rahul, who judges by looking. The Merlion is still the weakest up close, though at story distance only the crouched figure and its water show.
+
+### D42. The city as points, as the sketch drew it: windows in the dark — Accepted, 2026-10-24
+
+The points round of Phase 3b, brought forward. Rahul, looking at D41's landmarks as grey solids: "it kinda looks very low quality ... the demo one was much more higher quality". The demo is the sketch he picked, "From the map", and its quality was never in its shapes, which are rougher than D41's: it was 16,000 points placed by meaning, windows on a grid, edges, roofs and lights on the roads, in the dark, with the accent on what is lit. Judging landmark detail as grey solids was judging the wrong thing, so the city is now drawn as points on the workbench and every later look round is judged that way.
+
+**What is built** (`src/experience/city/points.ts`, on the workbench with `draw=points`):
+
+- **One cloud, one draw call.** Ordinary buildings, the landmarks, the Science Centre, the viaduct, the roads and the water are each placed their own way and drawn by one shader. Each point knows its group (cbd, lens, heartland, rings, landmarks, science, mrt, roads, river, bay), when its building rises, and, for the heartland, which window it is.
+- **Three looks, deliberately different,** side by side with `compare=1`:
+  - **A, windows:** the sketch. Points on each building's window grid, so a window's points land on one spot and read as one light, with corners and roofs; the walls between are dark. Marina Bay Sands and Pinnacle@Duxton, which are buildings full of rooms, get windows too. 90,000 points on the high tier.
+  - **B, scan:** points spread evenly over every surface, closing into faces. Reads as a laser scan; murkier. 240,000 points.
+  - **C, outlines:** every building as its edges, the map drawn upwards. Crisp, close to a CAD wireframe. 120,000 points.
+- **The map lands as points.** At Signal the city is flat, so its points lie on the footprints; with the map lines this is the plan the sketch drew.
+- **Cold and lit, by beat** (`CITY_LIGHTS` in `src/experience/city/story.ts`), as the sketch lit it: during each job's beat the city dims to 0.55 except its subject, which turns to the accent. Core lights the roads and the river, Scanner the Science Centre, Rings the heartland's windows block by block (whole blocks in B and C, which have no windows) and BLK 2024, Lens the tower. An earlier subject stays half lit while a later one has the beat, and everything Rahul's work touched is fully lit again at Whole and Contact.
+
+**Two changes from the sketch, proposed by the chat.**
+
+- **The landmarks stay cold at the end.** The sketch turned them amber at Contact. The accent means Rahul's work (D11, EXPERIENCE "Cold and lit"), and the landmarks are not his work, so they are brighter at Whole and Contact but white. With D41's broad towers, amber made Marina Bay Sands a solid orange slab.
+- **The river is sparse.** As a dense strip it read as an orange carpet at Core. It will carry the traffic's motion in the motion round.
+
+**Cost,** on the development machine at the Rings beat, high tier: one draw call; GPU per frame 0.21 ms median for A, 0.39 ms for B; sampling 61 ms for A and 112 ms for B in the development server. On the low tier's 20,000 points at phone size A still reads as the city. The tier counts are still set on real devices in Phase 5.
+
+**Picked: A.** Rahul: "Yes agree with A." He also agreed that the landmarks stay cold. B and C were removed from the code; as rows of numbers they were, in the order of the Points folder (count, size, brightness, boost, windows, walls, edges, roofs, outline, thin, blocks, landmarks, roads, water, mrt): B, scan: `240000, 0.0055, 0.5, 0.35, 0, 0.78, 0.06, 0.16, 0, 0.35, 0.6, 0.3, 0.04, 0.04, 0.02`; C, outlines: `120000, 0.0065, 0.7, 0.35, 0, 0, 1, 0, 0.85, 0.5, 0.5, 0.36, 0.06, 0.06, 0.02`.
+
+**Seen as points, three landmarks changed the same day** (D41 has the detail). The Esplanade's spikes read as fur, "like a bacteria", so its domes are ribbed instead. The Merlion, crouched, read as "a weird sea lion", so it is drawn as its side. And the Esplanade moved onto the waterfront between the Merlion and the Flyer, where the real one is: at Whole its spiky domes ran into Pinnacle@Duxton's curved row and the two read as one shape; now there is dark ground between them.
+
+**Open:** density, size and how cold the city is against what is lit, by eye on Rahul's tablet. The traffic, the river's flow and the train are motion, for the motion round; Rahul: "We can be creative with the river and traffic." At the Rings beat the Esplanade's domes stand in front of Pinnacle's left end; they are told apart, but it is the place to look if the Rings view feels busy.
+
+### D43. The traffic, the river and the train move, mostly with the scroll — Proposed, 2026-10-24
+
+The city's ambient life, which D38 kept from the sketch: the traffic, the river and the train. Rahul, on the river and the traffic: "We can be creative". Built on the workbench; not yet seen moving by Rahul.
+
+**What moves** (`src/experience/city/points.ts`, `FLOW` in `src/experience/city/story.ts`):
+
+- **Cars:** every road carries cars both ways, the left lane one way and the right the other, as in Singapore. A car is four points, a headlight and a trail fading behind it, so at story distance each reads as a short streak. Amber at Core, where they are the requests running through the city, and cold after.
+- **The river:** requests as packets of light, flowing downstream in five streams and fading out into the bay. A packet is five points, brightest at its head, and every stream has its own pace. A river of evenly scattered points read as an orange carpet; packets in streams read as data moving.
+- **The train:** three lit cars on the viaduct, which run its length and then wait out of sight. It lights at the Rings beat with BLK 2024, since Uniad's work is scheduling, and stays half lit after, as every subject does (D42). Proposed by the chat.
+
+**How it moves.** Mostly with the scroll: a car moves 0.5 city units a beat, the river 0.35 and the train 0.9, so the visitor drives the city and scrolling back runs it back (rule 2). A little on its own clock, the ambient motion D26 allows: 0.12, 0.05 and 0.25 units a second. The clock runs only once the city has risen on the way to Core, at most 30 frames a second, not while the tab is hidden, never on the low tier or with reduced motion, and it only adds up while it runs, so pausing never makes the traffic jump. The motion is in the vertex shader: each moving point carries where it starts and its speed, and the CPU sets how far a point at a speed of 1 has gone. On the workbench, `moves on its own` in the City folder turns the clock off (`motion=0`).
+
+**Cost:** nothing measurable on the GPU beyond D42's; frames at rest are in PERFORMANCE.
+
+**Open:** whether it feels right scrolled, which is Rahul's, on the workbench and then on his tablet. The speeds. At the Rings beat the Esplanade's domes still peek over Pinnacle@Duxton's left end from behind it.

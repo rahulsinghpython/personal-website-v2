@@ -37,18 +37,23 @@ export const POSES: Record<BeatId, Pose> = {
   contact: { x: 0, y: -0.3, z: 0, azimuth: 30, elevation: 10, distance: 10.6 },
 }
 
-/** Degrees, across the window's shorter side. */
-const FOV = 30
-
 /**
- * How far off centre the Machine is drawn, as a share of the window. The text sits at the left
- * edge of a wide window and at the bottom of a tall one, so the Machine moves right or up.
+ * How the picture is framed. `fov` is in degrees, across the window's shorter side. `right` and
+ * `up` are how far off centre the subject is drawn, as a share of the window: the text sits at the
+ * left edge of a wide window and at the bottom of a tall one, so the subject moves right or up.
  */
-const SHIFT_RIGHT = 0.14
-const SHIFT_UP = 0.2
+export type Lens = { fov: number; right: number; up: number }
+
+export const MACHINE_LENS: Lens = { fov: 30, right: 0.14, up: 0.2 }
 
 /** Points the camera as `pose` says, in a window of this size in CSS pixels. */
-export function applyCamera(camera: PerspectiveCamera, pose: Pose, width: number, height: number) {
+export function applyCamera(
+  camera: PerspectiveCamera,
+  pose: Pose,
+  width: number,
+  height: number,
+  lens: Lens = MACHINE_LENS,
+) {
   const azimuth = MathUtils.degToRad(pose.azimuth)
   const elevation = MathUtils.degToRad(pose.elevation)
   const flat = Math.cos(elevation) * pose.distance
@@ -59,22 +64,33 @@ export function applyCamera(camera: PerspectiveCamera, pose: Pose, width: number
   )
   camera.lookAt(pose.x, pose.y, pose.z)
 
-  // The lens only changes with the window, so it is left alone on every other frame.
-  const framed = camera.userData as { width?: number; height?: number }
-  if (framed.width === width && framed.height === height) return
+  // The lens changes with the window, and with the story only for the city, so it is left alone
+  // on every frame where neither has changed. Kept as plain numbers: nothing new is made per frame.
+  const framed = camera.userData as Partial<Lens & { width: number; height: number }>
+  if (
+    framed.width === width &&
+    framed.height === height &&
+    framed.fov === lens.fov &&
+    framed.right === lens.right &&
+    framed.up === lens.up
+  )
+    return
   framed.width = width
   framed.height = height
+  framed.fov = lens.fov
+  framed.right = lens.right
+  framed.up = lens.up
   const wide = width >= height
   // The field of view is fixed across the shorter side, so a phone held upright shows as much
   // of the Machine as a monitor does instead of cropping it.
-  const half = Math.tan(MathUtils.degToRad(FOV / 2))
+  const half = Math.tan(MathUtils.degToRad(lens.fov / 2))
   camera.fov = MathUtils.radToDeg(2 * Math.atan(wide ? half : (half * height) / width))
   // Sliding the view moves the Machine on screen without changing the angle it is seen from.
   camera.setViewOffset(
     width,
     height,
-    wide ? -SHIFT_RIGHT * width : 0,
-    wide ? 0 : SHIFT_UP * height,
+    wide ? -lens.right * width : 0,
+    wide ? 0 : lens.up * height,
     width,
     height,
   )

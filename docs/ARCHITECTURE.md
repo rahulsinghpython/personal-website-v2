@@ -2,7 +2,7 @@
 
 How the site is built. The content layer, the Index and prerendering exist. The scene layer is mounted on the home page in a first version: the Machine as points, driven by scroll (see [ROADMAP](ROADMAP.md) for what Phase 3 still owes). Where a section below describes something not built yet, it says so. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
 
-**The Machine is being replaced by a city ([DECISIONS D38](DECISIONS.md)).** Where this doc says "the Machine" it describes the code as it is today. The city is built into the same structure: geometry generated in code, sampled to one cloud of points, moved in the vertex shader, driven by one timeline set from progress. Its ambient motion is the traffic, the river and the train, which move from the Core beat on, not only from the Rings beat as the beads did.
+**The Machine is being replaced by a city ([DECISIONS D38](DECISIONS.md)).** Where this doc says "the Machine" it describes the code as it is today. The city's code is in `src/experience/city/` and is drawn on the workbench only, as a layout greybox ([D40](DECISIONS.md)). The city is built into the same structure: geometry generated in code, sampled to one cloud of points, moved in the vertex shader, driven by one timeline set from progress. Its ambient motion is the traffic, the river and the train, which move from the Core beat on, not only from the Rings beat as the beads did.
 
 ## Stack
 
@@ -131,9 +131,16 @@ src/
                    Scene.tsx is the one place the page reaches the scene, by a dynamic import.
   index-view/      the Index (plain version), served at /plain
   experience/      everything inside the canvas
+    shapes.ts      the few operations the Machine and the city are made from: lathe, ring, rod, repeat
+    params.ts      a number a shape depends on, with the range the workbench can tune it over
+    city/          the city (D38 to D40). Nothing in it imports machine/
+      plan.ts      the flat map: points, outlines, distances
+      layouts.ts   the layout as data: water, roads, viaduct, CBD, open ground, landmarks
+      landmarks.ts the eight landmarks as greybox massing
+      city.ts      a layout turned into blocks, then into shapes and map lines, each marked with when it rises
+      story.ts     the city's story as a function of the beat: the sketch's camera, the map landing, the rise
     machine/       part definitions, point sampling, shaders
       part.ts      what a part is: parameters in, geometry out
-      shapes.ts    the few operations parts are made from: lathe, ring, rod, pipe, repeat
       points.ts    the Machine as a point cloud: surface sampling, the points material, the chosen look
       machine.ts   the Machine: the signed-off silhouette and the picked detail of each part
       cube.ts      the cube of cubes with a city on its roof, which the Lens carries
@@ -162,18 +169,20 @@ The design tool described in [DESIGN-PROCESS](DESIGN-PROCESS.md#the-workbench). 
 
 **It cannot ship.** `vite build` builds only the root `index.html`, and nothing in `src/` imports `workbench/`, so it is never part of the production module graph. It has no `prerender` script and no page links to it, so it is never rendered at build time either. Two checks back this up: the lint rule above, and `scripts/check-size.mjs`, which fails the build on any HTML page other than `/` and `/plain` and on any file no budget covers.
 
-**The split.** The Machine's own code (each part as a function of its parameters) is in `src/experience/machine/` and will ship with the scene. The workbench only imports it and adds the tools around it:
+**The split.** The Machine's own code (each part as a function of its parameters) is in `src/experience/machine/`, and the city's in `src/experience/city/`; the city's will ship with the scene. The workbench only imports them and adds the tools around it:
 
 | File | What it is |
 | --- | --- |
-| `store.ts` | The workbench's state in zustand: variant, tier, view, every parameter value. Mirrored to the URL. |
+| `store.ts` | The workbench's state in zustand: the world (city or Machine), the Machine's variant, tier, view, every parameter value. Mirrored to the URL. |
+| `city.ts` | The city's state: its numbers, what is shown, how far it has risen outside the story. Mirrored to the URL. |
+| `CityScene.tsx` | The city greybox in a viewport: ground, water, map lines and the solid pieces, which rise in the shader. In the `story` view it places the camera from `src/experience/city/story.ts`. |
 | `cloud.ts` | How the points are drawn: the sliders' values, starting from the chosen look. Mirrored to the URL. |
-| `camera.ts` | One camera pose shared by every viewport. A mutable value, because it changes every frame while orbiting. |
-| `Viewport.tsx` | One canvas showing one variant, rendering on demand. With the story on, it puts the timeline at the scrubber's beat; in the `story` view the camera is the visitor's. |
-| `Panel.tsx` | The Tweakpane panel: a tab per variant, a folder per part, a slider per parameter, and the readout. |
+| `camera.ts` | One camera pose shared by every viewport, and each world's preset views. A mutable value, because it changes every frame while orbiting. |
+| `Viewport.tsx` | One canvas showing one option, rendering on demand, and the Machine's contents. With the story on, it puts the timeline at the scrubber's beat; in the `story` view the camera is the visitor's. |
+| `Panel.tsx` | The Tweakpane panel, rebuilt when the world changes: the shared settings, then a tab per variant or layout with its sliders, then the readout. |
 | `stats.ts` | Cost per frame (CPU and GPU), draw calls, frames drawn, and the benchmark. |
 
-`window.__workbench` exposes `get`, `set`, `benchmark`, `stats` and `cloud`, so the workbench can be driven from the console or the Chrome DevTools MCP.
+`window.__workbench` exposes `get`, `set`, `benchmark`, `stats`, `cloud` and `city`, so the workbench can be driven from the console or the Chrome DevTools MCP.
 
 ## Fallbacks
 

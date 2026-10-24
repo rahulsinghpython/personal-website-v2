@@ -1,8 +1,12 @@
 import { create } from 'zustand'
-import { defaultValues, type PartId } from '../src/experience/machine/part'
+import type { PartId } from '../src/experience/machine/part'
+import { defaultValues } from '../src/experience/params'
 import { variants } from '../src/experience/machine/variants'
 import { TIERS, type Tier } from '../src/state/tiers'
+import { CITY_KEYS } from './city'
 
+/** What the workbench shows: the Machine, or the city that replaces it (docs/DECISIONS.md, D40). */
+export type World = 'machine' | 'city'
 export type Shading = 'flat' | 'shaded'
 export type ViewId = 'iso' | 'front' | 'side' | 'top' | 'free' | 'story'
 export type Focus = PartId | 'all'
@@ -11,6 +15,8 @@ export type Focus = PartId | 'all'
 export type Params = Record<string, Record<string, Record<string, number>>>
 
 export type WorkbenchState = {
+  world: World
+  /** The Machine's variant. The city's layout is in ./city.ts. */
   variant: string
   tier: Tier
   view: ViewId
@@ -47,6 +53,7 @@ function defaultParams(): Params {
 }
 
 const DEFAULTS = {
+  world: 'city' as World,
   variant: variants[0]!.id,
   tier: 'high' as Tier,
   view: 'iso' as ViewId,
@@ -77,6 +84,7 @@ function fromUrl() {
       values[key] = Number(value)
   }
   return {
+    world: oneOf(query.get('world'), ['machine', 'city'] as const) ?? DEFAULTS.world,
     variant:
       oneOf(
         query.get('variant'),
@@ -122,6 +130,7 @@ export const useWorkbench = create<WorkbenchState>()((set) => ({
 function toUrl(state: WorkbenchState) {
   const query = new URLSearchParams()
   const text = {
+    world: state.world,
     variant: state.variant,
     tier: state.tier,
     view: state.view,
@@ -155,8 +164,8 @@ function toUrl(state: WorkbenchState) {
   const current = new URLSearchParams(location.search)
   const cam = current.get('cam')
   if (cam && state.view === 'free') query.set('cam', cam)
-  // Owned by cloud.ts.
-  for (const key of ['draw', 'pts']) {
+  // Owned by cloud.ts and city.ts.
+  for (const key of ['draw', 'pts', ...CITY_KEYS]) {
     const value = current.get(key)
     if (value) query.set(key, value)
   }

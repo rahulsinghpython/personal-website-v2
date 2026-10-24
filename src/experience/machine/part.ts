@@ -1,25 +1,11 @@
 import type { BufferGeometry } from 'three'
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js'
+import { defaultValues, type ParamSchema, type ParamValues } from '../params'
 
 export type PartId = 'core' | 'scanner' | 'rings' | 'lens'
 
 /** The order the parts assemble in, which is the order the career happened in. */
 export const PART_ORDER: PartId[] = ['core', 'scanner', 'rings', 'lens']
-
-/** One number a part's shape depends on, with the range it can be tuned over. */
-export type ParamSpec = { value: number; min: number; max: number; step?: number }
-export type ParamSchema = Record<string, ParamSpec>
-
-/** Shorthand for a ParamSpec. */
-export const param = (value: number, min: number, max: number, step = 0.01): ParamSpec => ({
-  value,
-  min,
-  max,
-  step,
-})
-
-/** The values of one part's parameters. */
-export type ParamValues<S extends ParamSchema = ParamSchema> = { readonly [K in keyof S]: number }
 
 export type MachineSchema = Record<PartId, ParamSchema>
 
@@ -58,10 +44,6 @@ export function defineMachine<S extends MachineSchema>(machine: {
       build: machine.build[id] as PartDef['build'],
     })),
   }
-}
-
-export function defaultValues(schema: ParamSchema): Record<string, number> {
-  return Object.fromEntries(Object.entries(schema).map(([key, spec]) => [key, spec.value]))
 }
 
 /** A Machine with every parameter at the value it was given in code. */

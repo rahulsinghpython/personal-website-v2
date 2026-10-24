@@ -2,7 +2,7 @@
 
 Rahul Singh's personal site. It is not a portfolio template. It is one dark 3D world, **a laser scan of a city at night around Marina Bay**, where the things that light up turn out to be Rahul's whole career.
 
-**Status: the plain site exists (content layer, the Index, prerendered HTML). The home page still draws the Machine, the single object the site was built around until 2026-10-19, when Rahul replaced it with the city ([DECISIONS D38](docs/DECISIONS.md)). The city is chosen from sketches and not built yet; Phase 4's interactions wait for it.** [docs/ROADMAP.md](docs/ROADMAP.md) is the authority on what is built and what is next.
+**Status: the plain site exists (content layer, the Index, prerendered HTML). The home page still draws the Machine, the single object the site was built around until 2026-10-19, when Rahul replaced it with the city ([DECISIONS D38](docs/DECISIONS.md)). The city exists only on the workbench, as a greybox with the sketch's story ([D40](docs/DECISIONS.md)); Phase 4's interactions wait for it.** [docs/ROADMAP.md](docs/ROADMAP.md) is the authority on what is built and what is next.
 
 ## Read before you build
 
@@ -35,7 +35,7 @@ Use these words the same way in code, commits and conversation.
 
 - **The city**: the laser-scanned city around Marina Bay that the site happens in ([DECISIONS D38](docs/DECISIONS.md)).
 - **Subject**: what one job's beat is about in the city: the river and streets (Core), the scanned roof (Scanner), the HDB windows (Rings), the CBD tower (Lens). The company is small print ([DECISIONS D24](docs/DECISIONS.md)).
-- **The Machine**, **part**: the single object the site was built around until D38, and its four subsystems. The code in `src/experience/machine/` is still the Machine until the city replaces it. The four job beats keep the parts' names as ids.
+- **The Machine**, **part**: the single object the site was built around until D38, and its four subsystems. The code in `src/experience/machine/` is still the Machine until the city replaces it; the city's is in `src/experience/city/`. The four job beats keep the parts' names as ids.
 - **Dust**: the points while scattered and unreadable (the opening state).
 - **Cold / lit**: the city at rest / what Rahul's work touches, in the accent. They replace dormant and awake.
 - **Beat**: one step of the scroll story (Found, Signal, Core, Scanner, Rings, Lens, Whole, Contact).

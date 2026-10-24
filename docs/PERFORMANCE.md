@@ -140,6 +140,21 @@ Scrolling away and back to the same position gave the same camera position and p
 
 Start-up on the production build (`pnpm preview`): one long task of 72 ms as the scene attaches, which is three.js being evaluated, the points being sampled and the shader compiled. That is on a fast desktop CPU, so it will be several times longer on a phone. It happens after the text is on screen and not during scroll, so it breaks no row above, but it is the number to bring down if Lighthouse's blocking-time score suffers once deployed.
 
+### The city on the workbench, on the development machine
+
+2026-10-24, look A of the points round ([DECISIONS D42](DECISIONS.md)) with the traffic, the river and the train moving ([D43](DECISIONS.md)), story view, 1600 by 900, frames counted by the workbench readout.
+
+| | |
+| --- | --- |
+| Points, draw calls | 90,000, 1 |
+| GPU time per frame at the Rings beat, median | 0.21 ms |
+| Sampling the points, development server | about 60 ms |
+| Frames drawn in 3 s at rest, before the city has risen (Signal) | 0 |
+| Frames drawn in 3 s at rest, Whole, high tier, moving | 92: capped at 30 a second |
+| Frames drawn in 3 s at rest, Whole, low tier | 0 |
+
+The motion is worked out in the vertex shader; the CPU sets three numbers a frame.
+
 ### Measured on the development machine
 
 A high-tier device (RTX 4070 Ti, i5-13600KF), so these say the scene is cheap there and nothing about the mid or low tier. It is the only device measured in the greybox phase; Rahul put the others off ([DECISIONS D28](DECISIONS.md)).

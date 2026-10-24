@@ -1,6 +1,6 @@
 import { OrbitControls } from '@react-three/drei'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { useEffect, useMemo, useRef, useState, type ComponentRef } from 'react'
+import { useEffect, useMemo, useRef, useState, type ComponentRef, type ReactNode } from 'react'
 import {
   DoubleSide,
   MathUtils,
@@ -198,9 +198,9 @@ function StoryCamera() {
 
 /**
  * Greybox lighting, so the form inside the outline can be read from any angle. The key light
- * rides above and beside the camera. The real Machine is unlit points; see docs/PERFORMANCE.md.
+ * rides above and beside the camera. The real scene is unlit points; see docs/PERFORMANCE.md.
  */
-function Headlight() {
+export function Headlight() {
   const light = useRef<DirectionalLight>(null)
   useFrame(({ camera }) => light.current?.position.set(4, 5, 2).applyMatrix4(camera.matrixWorld))
   return (
@@ -209,6 +209,29 @@ function Headlight() {
       <directionalLight ref={light} intensity={5} />
     </>
   )
+}
+
+/** How many beats one notch of a mouse wheel (100 pixels of scroll) moves the story. */
+const BEATS_PER_NOTCH = 0.12
+
+/**
+ * In the story view the camera is the visitor's, so it does not orbit. The wheel scrolls the
+ * story instead, as the page will: down moves on, up goes back.
+ */
+function ScrollToScrub() {
+  const element = useThree((state) => state.gl.domElement)
+  useEffect(() => {
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault()
+      const last = beats.length - 1
+      const beat = useWorkbench.getState().beat ?? 0
+      const next = Math.min(last, Math.max(0, beat + (event.deltaY / 100) * BEATS_PER_NOTCH))
+      useWorkbench.setState({ beat: +next.toFixed(3) })
+    }
+    element.addEventListener('wheel', onWheel, { passive: false })
+    return () => element.removeEventListener('wheel', onWheel)
+  }, [element])
+  return null
 }
 
 /** Takes over rendering in the main viewport so each frame can be measured. */
@@ -223,11 +246,36 @@ function Probe() {
   return null
 }
 
-export function Viewport({ machine, main }: { machine: MachineDef; main: boolean }) {
-  const tier = useWorkbench((state) => state.tier)
-  const capDpr = useWorkbench((state) => state.capDpr)
+/** The Machine as the earlier rounds built it: solid parts, or the cloud sampled from them. */
+export function MachineScene({ machine }: { machine: MachineDef }) {
   const shading = useWorkbench((state) => state.shading)
   const draw = useCloud((state) => state.draw)
+  if (draw === 'points') return <Cloud machine={machine} />
+  return (
+    <>
+      {shading === 'shaded' && <Headlight />}
+      {machine.parts.map((part) => (
+        <Part key={part.id} machine={machine.id} part={part} />
+      ))}
+    </>
+  )
+}
+
+/** One canvas with the shared camera, showing whatever it is given. */
+export function Viewport({
+  main,
+  id,
+  label,
+  children,
+}: {
+  main: boolean
+  id: string
+  label: string
+  children: ReactNode
+}) {
+  const world = useWorkbench((state) => state.world)
+  const tier = useWorkbench((state) => state.tier)
+  const capDpr = useWorkbench((state) => state.capDpr)
   const view = useWorkbench((state) => state.view)
   const cap = TIERS[tier].pixelRatioCap
 
@@ -240,21 +288,14 @@ export function Viewport({ machine, main }: { machine: MachineDef; main: boolean
         camera={{ fov: FOV, near: 0.1, far: 100 }}
       >
         <color attach="background" args={['#0a0a0a']} />
-        {draw === 'points' ? (
-          <Cloud machine={machine} />
-        ) : (
-          <>
-            {shading === 'shaded' && <Headlight />}
-            {machine.parts.map((part) => (
-              <Part key={part.id} machine={machine.id} part={part} />
-            ))}
-          </>
-        )}
-        {view === 'story' ? <StoryCamera /> : <Rig />}
+        {children}
+        {/* In the story view the scene places the camera itself: the city's in CityScene.tsx. */}
+        {view === 'story' ? world === 'machine' && <StoryCamera /> : <Rig />}
+        {view === 'story' && <ScrollToScrub />}
         {main && <Probe />}
       </Canvas>
       <figcaption>
-        {machine.id} <span>{machine.label}</span>
+        {id} <span>{label}</span>
       </figcaption>
     </figure>
   )

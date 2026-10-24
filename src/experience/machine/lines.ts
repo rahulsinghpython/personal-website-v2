@@ -9,7 +9,7 @@ import {
 } from 'three'
 import { shareOf, spinOf, type MachineDef, type MachineValues } from './part'
 import { DEPTH_GLSL } from './points'
-import { outlineOf } from './shapes'
+import { outlineOf } from '../shapes'
 
 // The Machine's drawing: the centre line of every rod and ring and the rim of every plate and
 // can, as true one-pixel lines. An awake part has "lines drawn" (docs/EXPERIENCE.md): the points

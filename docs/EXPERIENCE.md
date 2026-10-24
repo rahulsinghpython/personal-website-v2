@@ -10,7 +10,7 @@ A city at night, drawn as a laser scan: points, a few lines, and surfaces only w
 
 ### The layout
 
-As in the sketch. The detail is a round on the workbench.
+As in the sketch, kept over a layout true to the map, because the experience matters more than accuracy ([DECISIONS D40](DECISIONS.md)). It is `src/experience/city/layouts.ts`, drawn on the workbench.
 
 - **The water.** The Singapore River runs into Marina Bay. The river is how the visitor arrives: the dust pours down into it.
 - **The landmarks, round the water and in front,** so the city reads as Singapore from the first view: Marina Bay Sands across the bay, the ArtScience Museum in front of it, the Supertrees behind it, the Flyer and the Esplanade on the north shore, the Merlion at the river mouth. Drawn in code and kept recognisable, not traced.
@@ -70,9 +70,9 @@ The page is one long scroll. The canvas is fixed behind it and the city responds
 | 6 | **Whole** | The camera rises over the bay. Everything Rahul's work touched is lit. | Five years, one city. |
 | 7 | **Contact** | The view across the bay to Marina Bay Sands, lit. Short line and three links. | How to get in touch. |
 
-**How the beats are built.** Not settled. The Machine's choreography ([DECISIONS D31](DECISIONS.md), [D35](DECISIONS.md)) carries over only in principle: one camera pose per beat; a beat's picture is finished a little before its text has fully arrived and holds a little after; scrolling back undoes it exactly.
+**How the beats are built.** A first version is on the workbench: the sketch's camera pose at each beat, the map landing at Signal and the city rising building by building on the way to Core ([DECISIONS D40](DECISIONS.md)). Not settled until Rahul has scrubbed and then scrolled it. The Machine's choreography ([DECISIONS D31](DECISIONS.md), [D35](DECISIONS.md)) carries over only in principle: one camera pose per beat; a beat's picture is finished a little before its text has fully arrived and holds a little after; scrolling back undoes it exactly.
 
-**The camera is calm** ([DECISIONS D38](DECISIONS.md)). Rahul found the sketch's camera moved too much for some people. It faces one way, within about 15 degrees, and glides from subject to subject like a slow drone. It never swings round the city. With reduced motion it cuts between beats.
+**The camera is calm** ([DECISIONS D38](DECISIONS.md)). Rahul found the sketch's camera moved too much for some people. It faces one way, within about 15 degrees (the sketch's poses, kept for now, range over 25), and glides from subject to subject like a slow drone. It never swings round the city. With reduced motion it cuts between beats.
 
 ### The reveal budget
 

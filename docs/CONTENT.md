@@ -151,7 +151,9 @@ Answered on 2026-10-05.
 | 6 | Location and availability? | Based in Singapore, stated. Availability is not mentioned. |
 | 7 | Title? | Software Engineer / AI Engineer. |
 | 8 | What can be shown? | Answered on 2026-10-08: everything the old site showed, the screenshots, photos and the LiDAR mesh video. See [Projects](#projects). |
+| 9 | Is the LinkedIn URL right? | Answered on 2026-10-24: yes, the URL above is right. |
+| 10 | Should the copy lead with the work or with the company and role? | Answered on 2026-10-24: with the work. Rahul: "we should lead with work". The company and role become small print, as in the city ([DECISIONS D24](DECISIONS.md)). |
 
 ## Still needs Rahul
 
-1. **The LinkedIn URL** above was carried over from the old site and has not been checked.
+Nothing open.
