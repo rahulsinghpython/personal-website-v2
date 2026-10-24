@@ -27,6 +27,29 @@ body {
   outline-offset: 2px;
 }
 
+@keyframes cue-in {
+  from {
+    opacity: 0;
+    translate: 0 -0.5rem;
+  }
+}
+@keyframes cue-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0);
+  }
+  50% {
+    transform: translateY(0.625rem);
+    animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+  }
+}
+@keyframes cue-out {
+  to {
+    opacity: 0;
+  }
+}
+
 @media print {
   body {
     background-color: #fff;
@@ -104,6 +127,102 @@ body {
     @apply text-lit;
   }
 
+  /* Contact, opened in place from the header (D48): the same rows as at the end of the story, in
+     a panel under the button. A native popover, so it sits over everything, the city included. */
+  .reach {
+    @apply fixed inset-auto top-16 right-3 m-0 w-[min(25rem,calc(100vw-1.5rem))] border border-cold/15 bg-void/95 px-5 pt-3 pb-4 text-cold sm:top-22 sm:right-10;
+  }
+  .reach .contact {
+    @apply border-t-0;
+  }
+  .reach .contact a {
+    @apply text-[0.9375rem];
+  }
+  .reach::backdrop {
+    background: transparent;
+  }
+
+  /* The exhibit's words, at the foot of the window on a dark band like a job's (D45), so they read
+     over the city behind them. */
+  .caption {
+    background-image: linear-gradient(0deg, rgb(10 10 10 / 0.9) 0, rgb(10 10 10 / 0) 100%);
+  }
+  @media (orientation: landscape) {
+    .caption {
+      background-image: linear-gradient(
+        30deg,
+        rgb(10 10 10 / 0.92) 0,
+        rgb(10 10 10 / 0.7) 22rem,
+        rgb(10 10 10 / 0) 40rem
+      );
+    }
+  }
+
+  /* The résumé (D49): what can be done with the PDF, beside it. */
+  .resume-action {
+    @apply block border border-cold/20 px-4 py-3 text-center font-mono text-xs tracking-[0.08em] text-cold uppercase transition-colors hover:border-lit hover:text-lit focus-visible:border-lit focus-visible:text-lit;
+  }
+  .resume-main {
+    @apply border-lit bg-lit text-void hover:bg-transparent;
+  }
+  /* Each page of the PDF, drawn by PDF.js, as a sheet of paper on the dark page; and the blank
+     sheet that holds its place while it loads. */
+  .resume-page {
+    @apply w-fit max-w-full overflow-hidden bg-white shadow-[0_1.5rem_4rem_-1rem_rgb(0_0_0/0.8)];
+  }
+  .resume-blank {
+    @apply aspect-[1/1.414] w-full max-w-[52rem] border border-cold/15 bg-cold/5 shadow-none;
+  }
+
+  /* The opening's hint that the page goes on (D48). It comes in a moment after the page, so the
+     change catches the eye; then a chevron under the words bounces the way the page goes. It goes as the first scroll starts, where the browser can tie
+     it to the scroll; elsewhere it scrolls away with the opening line. */
+  .scroll-cue {
+    @apply flex flex-col items-center gap-3 p-2;
+  }
+  .scroll-cue > * {
+    animation: cue-in 900ms ease-out 1.2s both;
+  }
+  .scroll-cue .readout {
+    @apply text-[0.8125rem] tracking-[0.14em] text-cold transition-colors;
+  }
+  .scroll-cue:hover .readout,
+  .scroll-cue:focus-visible .readout {
+    @apply text-lit;
+  }
+  .cue-touch {
+    @apply hidden;
+  }
+  @media (pointer: coarse) {
+    .cue-wheel {
+      @apply hidden;
+    }
+    .cue-touch {
+      @apply inline;
+    }
+  }
+  /* A chevron pointing down, in the accent, bouncing the way the page goes. */
+  .cue-arrow svg {
+    @apply block h-4 w-7 text-lit;
+    filter: drop-shadow(0 0 0.375rem rgb(255 167 38 / 0.6));
+    animation: cue-bounce 1.6s 2.1s infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-cue > * {
+      animation-delay: 0s;
+    }
+    .cue-arrow svg {
+      animation: none;
+    }
+  }
+  @supports (animation-timeline: scroll()) {
+    .scroll-cue {
+      animation: cue-out linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0 12vh;
+    }
+  }
+
   /* A dark band behind a job's text, so it reads over the city lit behind it: at the left of a
      wide window and the bottom of a tall one, where the camera keeps the text (D45). */
   @media (orientation: landscape) {
@@ -145,6 +264,11 @@ body {
   .held [data-panel]:not(.loose) {
     --gutter: 2.5rem;
   }
+}
+/* Except the opening line, which stands in the middle and crumbles where it stands (D37). */
+.held #found > [data-panel] {
+  position: static;
+  width: auto;
 }
 .held .band:not(:has(> .loose)) {
   background-image: none;

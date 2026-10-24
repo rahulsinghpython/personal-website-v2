@@ -1,7 +1,7 @@
 import { monthRange } from '../content/dates'
 import { eras } from '../content/eras'
 import { projectsFor } from '../content/projects'
-import { site } from '../content/site'
+import { opens, site } from '../content/site'
 
 /** The Index: the same content as the story, plain, dense and printable. */
 export function IndexView() {
@@ -21,7 +21,7 @@ export function IndexView() {
         <ul className="mt-6 text-sm">
           {site.contact.map((link) => (
             <li key={link.id}>
-              <a href={link.href} className="block py-1.5 print:py-0">
+              <a href={link.href} {...opens(link)} className="block py-1.5 print:py-0">
                 <span className="readout print:text-black">{`${link.label} / `}</span>
                 {link.text}
               </a>

@@ -70,7 +70,7 @@ The page is one long scroll. The canvas is fixed behind it and the city responds
 
 | # | Beat | What the visitor sees | What they learn |
 | --- | --- | --- | --- |
-| 0 | **Found** | Black. Small type in the middle of the window, a size up from the other statements: `YOU'VE FOUND RAHUL.` A faint haze of light in the dark round it. Moving the pointer lights the haze near it. | Something is here. Nothing is explained. |
+| 0 | **Found** | Black. Small type in the middle of the window, a size up from the other statements: `YOU'VE FOUND RAHUL.` A faint haze of light in the dark round it. Moving the pointer lights the haze near it. At the foot of the window, `SCROLL TO LOOK CLOSER` (`SWIPE UP` on touch), and an amber chevron under it bouncing downward; it fades on the first scroll and is a link to the next beat ([D48](DECISIONS.md)). | Something is here. Nothing is explained. |
 | 1 | **Signal** | First scroll. The opening line crumbles into bright grains that fall into the haze ([DECISIONS D37](DECISIONS.md)). Then the haze comes down as rain onto the river and the bay, flashing as it hits the water, and spreads from the water across the land as a map: the bay, the river, the roads, every footprint ([D44](DECISIONS.md)). | The haze was a place all along. |
 | 2 | **Core** | The city rises out of the map, building by building, and the camera glides down to the CBD. Requests run along the river and the streets as light. The first tag: the work, with the years and the company in small print. | Things in the city light up, and each one is a kind of work. |
 | 3 | **Scanner** | A roof stands as raw points. The visitor sweeps across it and surface appears where they sweep. | Rahul built this kind of software. They have been looking at a scan the whole time. |
@@ -131,6 +131,18 @@ A plain text version of everything: name, one line, the four eras with roles and
 - Built from the same content data as the main experience, so the two can never disagree.
 - It is also what a visitor gets with no WebGL, and what search engines and screen readers read.
 - It should be good in its own right: fast, well set, printable.
+
+## Contact, at any time
+
+`CONTACT` sits in the header beside `INDEX` on every page with the city. It opens the three ways to reach Rahul in place, over the city, without scrolling the story to its end, with a button that copies the email address. A native popover, so it works with scripts off and closes on Escape or a click elsewhere ([DECISIONS D48](DECISIONS.md)). The Contact beat still ends the story.
+
+## The exhibit
+
+The city on its own, at `/exhibit`, linked from the header as `EXHIBIT` ([DECISIONS D48](DECISIONS.md)). No story and no scroll: the city whole and lit as the story leaves it at Whole, the four jobs tagged at their subjects, and a caption at the foot of the window. The visitor drags to turn it, scrolls or pinches to come closer, and right-drags or uses two fingers to move along the ground, kept over the map and never under it. The camera moves only when the visitor moves it and comes to rest a moment after; the traffic, the river and the train move as on the home page. The calm camera of the story does not apply here: this is the one place the visitor may swing round the city, because they are the one swinging it.
+
+## The résumé
+
+`/resume`, linked from the header as `RESUME` on the story and the exhibit ([DECISIONS D49](DECISIONS.md)). Each page of the PDF as a sheet of paper on the dark page, drawn by PDF.js, the same on a phone as on a laptop, its text selectable and its links live. Beside it, `DOWNLOAD PDF` in the accent and `OPEN IN A NEW TAB`; on a phone they come first and the sheets follow. A blank sheet holds the place while the viewer loads, and without scripts the page still offers the file. The PDF is Rahul's own file, replaced by hand; the site does not write it.
 
 ## Other contexts
 

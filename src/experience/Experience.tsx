@@ -5,11 +5,10 @@ import { beats } from '../content/beats'
 import { measure, progress, readScroll } from '../state/progress'
 import { guessTier, tierBudget, type Tier } from '../state/tiers'
 import { applyCamera } from './camera/camera'
-import { cityMap, GROUPS } from './city/city'
-import { layouts, type CityValues } from './city/layouts'
+import { cityMap } from './city/city'
+import { applyCity, layout, look, values, VOID } from './city/draw'
 import {
   CITY_GRAINS,
-  CITY_LOOKS,
   cityLift,
   cityPointsMaterial,
   sampleCity,
@@ -19,7 +18,6 @@ import { cityFlow, cityStory, MOVES_FROM, seekCity, seekCityStill, mapShown } fr
 import { mountPins, type Pins } from './city/pins'
 import { holdText, type HeldText } from './hold'
 import { rubOut, sampleInk, type Ink } from './ink'
-import { defaultValues } from './params'
 
 // The scene: the city as points, drawn behind the page and driven by how far it is scrolled
 // (docs/DECISIONS.md, D38 and D44). This is the lazy entry. Nothing outside src/experience/ may
@@ -45,17 +43,10 @@ const GRAIN_SHARE = 0.03
 const GRAIN_SIZE = 1.5
 /** The heading that crumbles: the Found beat's line (src/sections/Story.tsx). */
 const OPENING_LINE = 'found-title'
-/** The page's background (--color-void), so the canvas can be opaque. */
-const VOID = '#0a0a0a'
 /** The map's lines, as the workbench draws them under the points. */
 const MAP = '#4d4b47'
 
 const LAST = beats.length - 1
-const layout = layouts[0]!
-const look = CITY_LOOKS[0]!
-const values = Object.fromEntries(
-  Object.entries(layout.params).map(([group, schema]) => [group, defaultValues(schema)]),
-) as CityValues
 
 /**
  * Moves the torch toward the pointer and says whether it has come to rest. The light follows the
@@ -84,22 +75,6 @@ function lightTorch(
   if (held) light.z = lit
   material.uniforms.uAspect!.value = width / height
   return held
-}
-
-/** Copies the story into a points material. Called every frame, so it makes nothing new. */
-function applyCity(material: ShaderMaterial, flow: [number, number, number]) {
-  const uniforms = material.uniforms
-  uniforms.uRise!.value = cityStory.rise
-  uniforms.uPour!.value = cityStory.pour
-  uniforms.uWindows!.value = cityStory.windows
-  const lit = uniforms.uLit!.value as number[]
-  const gain = uniforms.uGain!.value as number[]
-  for (let i = 0; i < GROUPS.length; i++) {
-    lit[i] = cityStory.lit[i]!
-    gain[i] = cityStory.gain[i]!
-  }
-  uniforms.uFocus!.value = cityStory.camera.distance
-  ;(uniforms.uFlow!.value as Vector3).set(...flow)
 }
 
 /**

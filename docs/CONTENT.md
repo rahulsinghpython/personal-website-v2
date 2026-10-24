@@ -137,6 +137,32 @@ Each job beat leads with the work ([DECISIONS D45](DECISIONS.md)): a readout wit
 
 **Rewritten for the city on 2026-10-24:** Whole's `FIVE YEARS. ONE MACHINE.`, written for the Machine, is now `Four jobs. Five years. One city.` ([DECISIONS D45](DECISIONS.md)).
 
+**Added on 2026-10-25** ([DECISIONS D48](DECISIONS.md)): under Found's line, the readout `SCROLL TO LOOK CLOSER`, or `SWIPE UP TO LOOK CLOSER` on a touch screen, the one hint the opening gives; and `CONTACT` in the header, which opens the contact links in place.
+
+### The exhibit
+
+In `src/content/exhibit.ts`. It states nothing about Rahul beyond what the story does.
+
+| Part | Copy |
+| --- | --- |
+| Readout | `EXHIBIT` |
+| Title | `THE CITY` |
+| Caption | Marina Bay at night, drawn as a laser scan. What is lit is Rahul's work. |
+| How | `DRAG TO LOOK ROUND. SCROLL OR PINCH TO COME CLOSER.` |
+| Without the scene | `THE CITY NEEDS JAVASCRIPT AND WEBGL. THE STORY AND THE INDEX READ WITHOUT THEM.` |
+
+### The résumé
+
+In `src/content/resume.ts`. The PDF itself is `public/resume.pdf`, Rahul's own file: what it says is his, not this doc's. Until he replaces it, it is a placeholder with his name, title and contact links and the word `PLACEHOLDER`.
+
+| Part | Copy |
+| --- | --- |
+| Readout | `RESUME` |
+| Download | `DOWNLOAD PDF`, saved as `Rahul-Singh-Resume.pdf` |
+| Open | `OPEN IN A NEW TAB` |
+| Without scripts, or if the PDF cannot be drawn | `OPEN THE PDF` |
+| Where the PDF cannot be shown | This browser can't show the PDF here. |
+
 ## Claims
 
 Each job's work, as the page says it and the Index lists it, in `src/content/eras.ts`: one line a claim, the strongest first. Each has a few words for its tag in the city and the place it is pinned to ([DECISIONS D45](DECISIONS.md)); a claim with nothing in the city to point at has no pin. The facts are the Career section's, and the projects' summaries are carried here, so the story page does not repeat them.

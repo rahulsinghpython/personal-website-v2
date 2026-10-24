@@ -29,3 +29,12 @@ export const statements: Record<BeatId, string> = {
   whole: 'Four jobs. Five years. One city.',
   contact: 'You found me. Say something.',
 }
+
+/**
+ * The one hint on the opening screen, under the line: that the page goes on, and what to do (D48).
+ * Said for a wheel or a trackpad, and for a finger.
+ */
+export const cues = {
+  scroll: 'Scroll to look closer',
+  swipe: 'Swipe up to look closer',
+}

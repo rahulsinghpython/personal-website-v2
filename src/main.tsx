@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
 import type { PrerenderArguments, PrerenderResult } from 'vite-prerender-plugin'
 import { App } from './App'
-import { description, INDEX_PATH, pageFor, titleFor } from './routes'
+import { description, EXHIBIT_PATH, INDEX_PATH, pageFor, RESUME_PATH, titleFor } from './routes'
 import './styles/index.css'
 
 function tree(path: string) {
@@ -29,7 +29,7 @@ export async function prerender({ url }: PrerenderArguments): Promise<PrerenderR
 
   return {
     html: renderToString(tree(url)),
-    links: new Set([INDEX_PATH]),
+    links: new Set([INDEX_PATH, EXHIBIT_PATH, RESUME_PATH]),
     head: {
       lang: 'en',
       title: titleFor(pageFor(url)),

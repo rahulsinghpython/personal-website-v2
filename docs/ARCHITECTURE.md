@@ -18,6 +18,7 @@ How the site is built. The content layer, the Index and prerendering exist. The 
 | Prerendering | vite-prerender-plugin | vite-prerender-plugin 0.5.14 (dev only, nothing shipped) | Writes every page's HTML at build time, so content is readable with JavaScript off. See [DECISIONS D16](DECISIONS.md). |
 | Styling | Tailwind CSS | tailwindcss 4.3.3, @tailwindcss/vite 4.3.3 | Matches Rahul's other current projects. It looks for class names in `src/` only (set in `src/styles/index.css`); by default it scans the whole repo, and words in docs and scripts became shipped CSS. |
 | Lint and format | oxlint, Prettier | oxlint 1.86.0, prettier 3.9.9 | Same. |
+| PDF viewer | react-pdf over PDF.js | react-pdf 11.0.0, pdfjs-dist 6.3.289, the version react-pdf pins (installed 2026-10-25) | Draws the résumé PDF the same in every browser, phones included, with selectable text and live links. Rahul's choice over the browser's own viewer ([DECISIONS D49](DECISIONS.md)). Loaded lazily on `/resume` only, from `src/resume/PdfSheet.tsx`, which sets PDF.js's worker as react-pdf asks. pdfjs-dist is a direct dependency only so the worker's file can be found. |
 | Bundle check | `scripts/check-size.mjs`, run at the end of `pnpm build` and in CI | No package | Fails the build when a size budget is exceeded. Reads Vite's manifest (`build.manifest`). See [DECISIONS D19](DECISIONS.md). |
 | Hosting | Vercel | Not set up yet | Same. |
 
@@ -55,7 +56,7 @@ The page is two layers that never depend on each other to render.
 
 In `vite dev` there is no prerendering: `#root` starts empty and the app renders on the client.
 
-**Pages.** There are two, and no router: `/` is the story and `/plain` is the Index ([DECISIONS D17](DECISIONS.md)). `src/routes.ts` maps a path to a page. Links between them are ordinary links and load a new document.
+**Pages.** There are four, and no router: `/` is the story, `/plain` is the Index ([DECISIONS D17](DECISIONS.md)), `/exhibit` is the city on its own, to look round ([D48](DECISIONS.md)), and `/resume` shows the résumé PDF, `public/resume.pdf`, drawn by PDF.js through a lazy import of its own, and offers it for download ([D49](DECISIONS.md)). The exhibit reaches its scene through a second lazy import, `src/experience/Exhibit.tsx`, which draws the same city with the same code (`src/experience/city/draw.ts`) and adds only the camera: three.js's own `OrbitControls`, so no new package. `src/routes.ts` maps a path to a page. Links between them are ordinary links and load a new document.
 
 **Scene layer.** A fixed full-viewport canvas behind the content. It is loaded in a separate chunk after the first paint, so the opening screen (text on black) never waits for three.js. If the chunk fails or WebGL is missing, the content layer is already a complete page.
 

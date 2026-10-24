@@ -7,19 +7,22 @@ import type { BeatId } from '../content/beats'
  * no city yet: it is what the city is made from (docs/DECISIONS.md, D37). `banded` lays a dark
  * band behind the text, so a job's lines read over the city lit behind them (D45). With the scene,
  * the text in `data-panel` is held still on the window and swapped as the story moves (D46).
- * `dwell` gives the beat more scroll, spent on its claims arriving (src/state/progress.ts).
+ * `dwell` gives the beat more scroll, spent on its claims arriving (src/state/progress.ts). `foot`
+ * stands at the bottom of the section, outside the text: the opening's hint to scroll (D48).
  */
 export function Beat({
   id,
   centred = false,
   banded = false,
   dwell = false,
+  foot,
   children,
 }: {
   id: BeatId
   centred?: boolean
   banded?: boolean
   dwell?: boolean
+  foot?: ReactNode
   children: ReactNode
 }) {
   return (
@@ -30,11 +33,12 @@ export function Beat({
       aria-labelledby={`${id}-title`}
       className={`flex flex-col px-6 py-16 sm:px-10 ${dwell ? 'min-h-[130svh]' : 'min-h-svh'} ${
         centred ? 'items-center justify-center text-center' : 'justify-end'
-      } ${banded ? 'band' : ''}`}
+      } ${banded ? 'band' : ''} ${foot ? 'relative' : ''}`}
     >
       <div data-panel className="max-w-xl">
         {children}
       </div>
+      {foot && <div className="absolute inset-x-0 bottom-8 flex justify-center">{foot}</div>}
     </section>
   )
 }

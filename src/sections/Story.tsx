@@ -1,24 +1,47 @@
-import { statements } from '../content/beats'
+import { cues, statements } from '../content/beats'
 import { yearRange } from '../content/dates'
 import { eras } from '../content/eras'
-import { site } from '../content/site'
-import { INDEX_PATH } from '../routes'
+import { opens, site } from '../content/site'
+import { EXHIBIT_PATH, INDEX_PATH, RESUME_PATH } from '../routes'
 import { Beat } from './Beat'
 import { EraBeat } from './EraBeat'
+import { Header } from './Header'
 import { Scene } from './Scene'
+
+const LINKS = [
+  { href: EXHIBIT_PATH, label: 'Exhibit' },
+  { href: INDEX_PATH, label: 'Index' },
+  { href: RESUME_PATH, label: 'Resume' },
+]
 
 /** The content layer: the eight beats, in story order. */
 export function Story() {
   return (
     <>
       <Scene />
-      <header className="fixed top-0 right-0 z-10 p-3 sm:p-7">
-        <a href={INDEX_PATH} className="readout block p-3 text-cold">
-          Index
-        </a>
-      </header>
+      <Header links={LINKS} />
       <main>
-        <Beat id="found" centred>
+        {/* The one hint the opening gives: that the page goes on. It says nothing of what is
+            here (VISION, principle 2): a chevron bounces the way the page goes, and it fades on the
+            first scroll (D48). */}
+        <Beat
+          id="found"
+          centred
+          foot={
+            // Also a link to the next beat, for a visitor who clicks rather than scrolls.
+            <a href="#signal" className="scroll-cue" aria-label={cues.scroll}>
+              <span className="readout">
+                <span className="cue-wheel">{cues.scroll}</span>
+                <span className="cue-touch">{cues.swipe}</span>
+              </span>
+              <span className="cue-arrow" aria-hidden="true">
+                <svg viewBox="0 0 28 16" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M2 2l12 12L26 2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            </a>
+          }
+        >
           {/* A size up from the other statements: it stands alone in the middle (D37). */}
           <h1 id="found-title" className="statement text-xl sm:text-2xl">
             {statements.found}
@@ -65,7 +88,7 @@ export function Story() {
           <ul className="contact mt-6">
             {site.contact.map((link) => (
               <li key={link.id}>
-                <a href={link.href}>
+                <a href={link.href} {...opens(link)}>
                   <span className="readout">{link.label}</span>
                   <span className="break-all">{link.text}</span>
                 </a>

@@ -637,3 +637,41 @@ The words also stay whole for the first 12 per cent of the way past their beat b
 **Checked in the automated Chrome** at 1440 by 900: a scroll left at 30, 70 or 90 per cent of the way between any two beats came to rest on one of them, the job beats included. `?snap=0` leaves it where it was left. Not yet scrolled by Rahul.
 
 **Open:** whether mandatory snap feels right on Rahul's phone and laptop, or the softer `proximity`; how long the words stay past their beat.
+
+### D48. A hint to scroll, Contact at any time, and the city as an exhibit — Proposed, 2026-10-25
+
+Rahul asked for three things: a hint to scroll on the landing page, "cause it just says you've found rahul"; a more immediate way to get in touch, because a visitor "might just wanna do that straight"; and "a view where I have an exhibition of the 3D world we just created".
+
+**The hint.** A first version, `SCROLL` in dim grey over a still line, was too quiet; Rahul: make it intuitive "so the user notices". Now, at the foot of the window under the opening line, `SCROLL TO LOOK CLOSER` (`SWIPE UP TO LOOK CLOSER` on a touch screen) comes in a moment after the page, so the change catches the eye. Under it, an amber chevron pointing down bounces, the way the page goes. A drop of light falling down a thin line and landing with a ripple, as the haze is about to rain onto the bay (D44), was tried first; Rahul asked for "a bouncing downward arrow" instead, which a visitor reads at once. It is a link to the next beat, for a visitor who clicks rather than scrolls. It says nothing of what is there, so the opening still explains nothing (VISION, principle 2). Where the browser can tie an animation to the scroll it fades over the first 12 per cent of a window; elsewhere it scrolls away with the line. It is CSS on the page, not the canvas, so it costs no frames.
+
+*Against interaction rule 2*, which allows no looping decoration: the arrow bounces, by Rahul's ask, only on the opening screen, only until the visitor first scrolls, and not with reduced motion, where it stands still.
+
+A fact found while building it: since D46 the held-text style also caught the Found beat, so the opening line sat at the bottom left of the window instead of in the middle. It is centred again (`src/styles/index.css`).
+
+**Contact.** `CONTACT`, in the accent, beside `INDEX` in the header of the story and the exhibit (`src/sections/Header.tsx`). It opens a panel under the button with the same three rows as the Contact beat, and a button that copies the email address, for a visitor with no mail app behind `mailto:`. A native popover: it works with scripts off, sits over the city and the pins, and closes on Escape or a click anywhere else. A link to `#contact` was the other way, and was passed over: it would sweep the whole story past in a second to reach the end.
+
+**The exhibit.** A third page, `/exhibit`, linked from the header as `EXHIBIT`: the city on its own, with no story and no scroll. It is the city as the story leaves it at Whole, risen and lit, the four jobs tagged at their subjects (D45), drawn by a second lazy entry with the same code as the home page; only the camera is new. Drag turns it, scroll or pinch comes closer towards the pointer, a right drag or two fingers moves along the ground; the camera never goes under the ground or past the edge of the map, and glides to rest a moment after input stops. The story's calm camera (D38) is not bent: it is about the camera moving on its own, and here only the visitor moves it. The traffic, the river and the train move on the same terms as on the home page (D26, D43). Prerendered like the other pages, with a caption that reads without the scene; `scripts/check-size.mjs` knows the page.
+
+**Cost:** the critical path of `/` rose 1.8 kB, to 81.9 kB; `/exhibit`'s is 80.2 kB. The scene chunks together rose 6.3 kB, to 263.4 kB, most of it `OrbitControls`, which ships with three.js.
+
+**Checked in the automated Chrome** at 1440 by 900 and at 390 by 844 with touch: the opening line centred with the hint under it; Contact open and closed; on the exhibit a drag turned the city and the wheel came closer, and the whole map is in the window on both sizes. Not yet tried by Rahul.
+
+**Open:** the words (`SCROLL TO LOOK CLOSER`, `EXHIBIT`); how fast the arrow bounces; whether the exhibit wants the landmarks named, like labels in a museum; where on a phone the exhibit's city sits, low in the window for now.
+
+### D49. A résumé page that shows the PDF — Proposed, 2026-10-25
+
+Rahul asked for a résumé page, "maybe with a mini renderer", then, while three designs were being drawn up to choose from: "just make a dummy pdf first, I'll replace it later". So the designs were not drawn, and the page presents a PDF that Rahul owns.
+
+**What it is.** `/resume`, linked from the header as `RESUME` on the story and the exhibit. At the left, the name, title and place, `DOWNLOAD PDF` in the accent, and `OPEN IN A NEW TAB`; on a phone these come first. At the right, each page of the PDF as a sheet of paper on the dark page, as wide as its column allows up to about A4 on a screen. Prerendered, and readable with scripts off: a blank sheet holds the place, offering the file to open.
+
+**Drawn by PDF.js, through react-pdf.** The first version used the browser's own viewer in an `<object>`, with its toolbar and sidebar asked away. It looked different in each browser and could not show the PDF on a phone, which got a button instead. Offered pdf.js, Rahul: "yes use new package lol dont reinvent the wheel". So react-pdf 11.0.0, the React wrapper over PDF.js, draws each page to a canvas with its text layer, so the text can be selected and copied, and its link layer, so the PDF's own links work. Phones get the same sheets. It is loaded by a lazy import of its own (`src/resume/PdfSheet.tsx`), after the page is on screen, as the scene is on the home page, so the page's critical path does not carry it. pdfjs-dist is also a direct dependency, at the version react-pdf pins, only so the worker's file can be found under pnpm. The header gets an optional dark fade on this page, where text scrolls under it.
+
+**The PDF.** `public/resume.pdf`, copied into the build as it is. For now it is a one-page placeholder written by hand (no library): Rahul's name, title, contact links and the word `PLACEHOLDER`. Rahul replaces it with his own, keeping the name. Its facts are his, outside CONTENT; the page around it states only what CONTENT does.
+
+**Passed over, for now:** a résumé built from the content modules, which would overlap the Index.
+
+**Cost:** 567.3 kB gzipped for the viewer, loaded on `/resume` only: 188.9 kB of PDF.js and react-pdf, 376.1 kB of PDF.js's worker, 2.3 kB of CSS. A new budget of 600 kB in PERFORMANCE, and one of 500 kB for the PDF itself, both checked by `scripts/check-size.mjs`, which also fails the build if the PDF is missing. Every page's critical path rose by about 0.6 kB, to 83.5 kB for `/`. The header's four items fit one row at 390 pixels wide, its links a little closer on a phone.
+
+**Checked in the automated Chrome** at 1440 by 900 and at 390 by 844 with touch: the placeholder drawn as a sheet, its text in the text layer, no console warnings, no sideways scroll. Not yet tried by Rahul.
+
+**Open:** the real PDF; whether the Index and the résumé should become one page.

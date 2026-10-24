@@ -8,6 +8,13 @@ export type ContactLink = {
   href: string
 }
 
+/**
+ * A contact link opens in a new tab, so the visitor keeps their place in the city. Not the email
+ * address: `mailto:` opens a mail app, and a new tab for it would be left empty.
+ */
+export const opens = (link: ContactLink) =>
+  link.href.startsWith('mailto:') ? {} : { target: '_blank', rel: 'noopener noreferrer' }
+
 export const site = {
   name: 'Rahul Singh',
   /** The opening screen uses the first name only. */

@@ -11,13 +11,20 @@ const DIST = 'dist'
 const MANIFEST = '.vite/manifest.json'
 
 // Mirrors the Loading table in docs/PERFORMANCE.md. Change both together, with a DECISIONS entry.
-const BUDGET_KB = { critical: 100, scene: 400, whole: 1000 }
+const BUDGET_KB = { critical: 100, scene: 400, whole: 1000, resume: 500, viewer: 600 }
 
 // The site's pages (src/routes.ts). Any other HTML in the build, the workbench say, is a failure.
-const PAGES = ['index.html', 'plain/index.html']
+const PAGES = ['index.html', 'plain/index.html', 'exhibit/index.html', 'resume/index.html']
 
 // The scene is whatever the lazy entries under this folder pull in beyond the page's own files.
 const SCENE_SRC = 'src/experience/'
+
+// The résumé's PDF viewer (D49): PDF.js and its worker, by the lazy entry under this folder.
+const VIEWER_SRC = 'src/resume/'
+
+// The résumé PDF (D49), copied from public/ and replaced by hand. Loaded only on /resume, and on
+// a phone only when asked for, so it has a budget of its own.
+const RESUME = 'resume.pdf'
 
 // Emitted by the build but requested by no page (see "How it is prerendered" in ARCHITECTURE.md).
 // Any other file that no budget covers fails the check, so nothing ships unmeasured.
@@ -117,9 +124,22 @@ else rows.push(['Scene chunk', 'not built yet', ''])
 
 budget('Whole experience', new Set([...home, ...scene]), BUDGET_KB.whole)
 
+// The PDF viewer: what the résumé page's lazy entry pulls in beyond the page's own files.
+const viewer = new Set()
+for (const chunk of chunks) {
+  if (chunk.isDynamicEntry && chunk.src?.startsWith(VIEWER_SRC))
+    collect(chunk, { lazy: true, skip: criticalByPage.get('resume/index.html') }, viewer)
+}
+budget('Resume viewer', viewer, BUDGET_KB.viewer)
+
+if (allFiles.includes(RESUME)) budget('Resume PDF', new Set([RESUME]), BUDGET_KB.resume)
+else failures.push(`No ${RESUME} in ${DIST}. The résumé page links to it.`)
+
 // Everything else in dist has to be accounted for.
 const counted = new Set([
   MANIFEST,
+  RESUME,
+  ...viewer,
   ...scene,
   ...[...criticalByPage.values()].flatMap((f) => [...f]),
 ])

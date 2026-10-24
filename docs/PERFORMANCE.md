@@ -34,6 +34,8 @@ These are targets set before any code exists. Measure a baseline at the end of t
 | Critical path (HTML, CSS, fonts, entry JS), gzipped | ≤ 100 KB |
 | Scene chunk (three.js, R3F, GSAP, scene code), gzipped | ≤ 400 KB, loaded after first paint. Raised from 300 KB on 2026-10-07 ([DECISIONS D29](DECISIONS.md)) |
 | Whole experience, transferred | ≤ 1 MB |
+| The résumé viewer (PDF.js and its worker), gzipped | ≤ 600 KB, loaded after first paint on `/resume` only. 567 KB on 2026-10-25, most of it the worker ([DECISIONS D49](DECISIONS.md)) |
+| The résumé PDF, gzipped | ≤ 500 KB. Loaded only on `/resume` ([DECISIONS D49](DECISIONS.md)) |
 | Font files | ≤ 2 families, subset, WOFF2 |
 | Image textures in the scene | 0 |
 

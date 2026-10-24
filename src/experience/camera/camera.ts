@@ -63,7 +63,11 @@ export function applyCamera(
     pose.z + Math.cos(azimuth) * flat,
   )
   camera.lookAt(pose.x, pose.y, pose.z)
+  frame(camera, width, height, lens)
+}
 
+/** Sets the camera's lens for a window of this size in CSS pixels, wherever the camera is. */
+export function frame(camera: PerspectiveCamera, width: number, height: number, lens: Lens) {
   // The lens changes with the window, and with the story only for the city, so it is left alone
   // on every frame where neither has changed. Kept as plain numbers: nothing new is made per frame.
   const framed = camera.userData as Partial<Lens & { width: number; height: number }>
