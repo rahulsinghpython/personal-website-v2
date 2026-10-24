@@ -29,6 +29,8 @@ Each one is explained in the doc it links to. If a task seems to need breaking o
 6. **Never invent facts.** Employers, dates, numbers and project names come from [CONTENT](docs/CONTENT.md) only. If it is not there, ask.
 7. **Take the philosophy of Lando's site, not its look.** No neon lime, no helmet, no racing motifs.
 
+**The one exception is the résumé** at `/resume` ([DECISIONS D49](docs/DECISIONS.md)). It is a plain page outside the city, and its facts are Rahul's own PDF, not CONTENT, so rules 1, 3 and 6 do not apply to it. Rahul's reason: a résumé made into part of the world would defeat its purpose, and the site's. Do not pull it into the city, rebuild it from the content modules, or check the PDF against CONTENT.
+
 ## Vocabulary
 
 Use these words the same way in code, commits and conversation.

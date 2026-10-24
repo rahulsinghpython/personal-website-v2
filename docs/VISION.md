@@ -69,7 +69,7 @@ Near-black, one accent colour, two typefaces, few words. If something can be rem
 ## What success looks like
 
 - A first-time visitor says some version of "oh, it's a whole career" without being told.
-- Someone forwards the link for the site itself, not for the résumé.
+- Someone forwards the link for the site itself, not for the résumé. The résumé is still there, at `/resume`, as the one plain document outside the world ([DECISIONS D49](DECISIONS.md)): a visitor who needs it gets it as it is.
 - A recruiter on a mid-range phone gets name, current role and contact in under five seconds.
 - It meets every number in [PERFORMANCE](PERFORMANCE.md).
 - An engineer who opens DevTools finds nothing embarrassing.
