@@ -6,7 +6,7 @@
 export const progress = {
   /** Where the scroll position says the story is. */
   target: 0,
-  /** Where the scene is. It chases the target, which is what makes the Machine feel smooth. */
+  /** Where the scene is. It chases the target, which is what makes the city feel smooth. */
   eased: 0,
 }
 

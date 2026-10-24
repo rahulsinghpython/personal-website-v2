@@ -2,66 +2,39 @@ import { useEffect, useRef } from 'react'
 import { Pane } from 'tweakpane'
 import { layouts, type CityGroup } from '../src/experience/city/layouts'
 import { CITY_LOOKS } from '../src/experience/city/points'
-import type { PartId } from '../src/experience/machine/part'
-import { POINT_LOOK } from '../src/experience/machine/points'
-import { variants } from '../src/experience/machine/variants'
 import { applyView } from './camera'
 import { LOOK_KEYS, useCity, type CityState } from './city'
 import { useCloud } from './cloud'
 import { benchmark, stats } from './stats'
-import { useWorkbench, type WorkbenchState, type World } from './store'
+import { useWorkbench, type WorkbenchState } from './store'
 
-const SETTINGS = [
-  'world',
-  'tier',
-  'view',
-  'shading',
-  'compare',
-  'thumb',
-  'phone',
-  'capDpr',
-] as const
+const SETTINGS = ['tier', 'view', 'shading', 'compare', 'thumb', 'phone', 'capDpr'] as const
 type Settings = Pick<WorkbenchState, (typeof SETTINGS)[number]>
 
 const pick = (state: WorkbenchState): Settings =>
   Object.fromEntries(SETTINGS.map((key) => [key, state[key]])) as Settings
 
-/** The views each world offers. The city's `story` is the sketch's camera at the scrubber's beat. */
-const VIEWS: Record<World, Record<string, WorkbenchState['view']>> = {
-  machine: {
-    'three-quarter': 'iso',
-    front: 'front',
-    side: 'side',
-    top: 'top',
-    free: 'free',
-    story: 'story',
-  },
-  city: {
-    'three-quarter': 'iso',
-    'across the bay': 'front',
-    side: 'side',
-    'the map': 'top',
-    free: 'free',
-    story: 'story',
-  },
+/** The views. `story` is the sketch's camera at the scrubber's beat. */
+const VIEWS: Record<string, WorkbenchState['view']> = {
+  'three-quarter': 'iso',
+  'across the bay': 'front',
+  side: 'side',
+  'the map': 'top',
+  free: 'free',
+  story: 'story',
 }
 
 /**
  * The control panel. Tweakpane edits plain objects, so the panel keeps its own copies of the
  * store's values, writes changes back to the store, and refreshes when the store changes
- * from somewhere else (the URL, the console, a reset). It is rebuilt when the world changes.
+ * from somewhere else (the URL, the console, a reset).
  */
 export function Panel() {
   const container = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const world = useWorkbench.getState().world
     const pane = new Pane({ container: container.current!, title: 'Workbench' })
-    const cleanups = [
-      addSettings(pane, world),
-      world === 'city' ? addCity(pane) : addMachine(pane),
-      addReadout(pane),
-    ]
+    const cleanups = [addSettings(pane), addCity(pane), addReadout(pane)]
     return () => {
       for (const cleanup of cleanups) cleanup()
       pane.dispose()
@@ -71,13 +44,12 @@ export function Panel() {
   return <div className="panel" ref={container} />
 }
 
-function addSettings(pane: Pane, world: World) {
+function addSettings(pane: Pane) {
   const store = useWorkbench
   const settings = pick(store.getState())
   const bindings = [
-    pane.addBinding(settings, 'world', { options: { city: 'city', machine: 'machine' } }),
     pane.addBinding(settings, 'tier', { options: { high: 'high', mid: 'mid', low: 'low' } }),
-    pane.addBinding(settings, 'view', { options: VIEWS[world] }),
+    pane.addBinding(settings, 'view', { options: VIEWS }),
     pane.addBinding(settings, 'shading', { options: { shaded: 'shaded', flat: 'flat' } }),
     pane.addBinding(settings, 'compare', { label: 'side by side' }),
     pane.addBinding(settings, 'thumb', { label: 'thumbnail' }),
@@ -99,118 +71,7 @@ function addSettings(pane: Pane, world: World) {
   })
 }
 
-/** The Machine's controls, as rounds 2 to 6 used them. */
-function addMachine(pane: Pane) {
-  const store = useWorkbench
-  const own = { focus: store.getState().focus }
-  pane
-    .addBinding(own, 'focus', {
-      label: 'show part',
-      options: { all: 'all', core: 'core', scanner: 'scanner', rings: 'rings', lens: 'lens' },
-    })
-    .on('change', (event) => store.setState({ focus: event.value }))
-
-  // Round 6. With the story off the Machine is whole and dormant, as the earlier rounds saw it.
-  const unsubscribeStory = addStory(pane)
-
-  // The cloud. `share` is how much of the point budget a part gets for its size.
-  const cloud = structuredClone(useCloud.getState())
-  const pushCloud = () => {
-    if (JSON.stringify(cloud) !== JSON.stringify(useCloud.getState()))
-      useCloud.setState(structuredClone(cloud))
-  }
-  pane
-    .addBinding(cloud, 'draw', { options: { solid: 'solid', points: 'points' } })
-    .on('change', pushCloud)
-  const points = pane.addFolder({ title: 'Points' })
-  points.addBinding(cloud, 'density', { min: 0.02, max: 1, step: 0.01 })
-  points.addBinding(cloud, 'size', {
-    min: 0.004,
-    max: 0.05,
-    step: 0.001,
-    format: (value: number) => value.toFixed(3),
-  })
-  points.addBinding(cloud, 'brightness', { min: 0.05, max: 2, step: 0.01 })
-  points.addBinding(cloud, 'boost', { label: 'low-count boost', min: 0, max: 0.8, step: 0.01 })
-  points.addBinding(cloud, 'thin', { label: 'thin-piece lift', min: 0, max: 1, step: 0.01 })
-  for (const part of ['core', 'scanner', 'rings', 'lens'] as const)
-    points.addBinding(cloud.weights, part, {
-      label: `${part} share`,
-      min: 0.2,
-      max: 20,
-      step: 0.1,
-    })
-  points.addButton({ title: 'Reset to the chosen look' }).on('click', () => {
-    useCloud.setState(structuredClone(POINT_LOOK))
-  })
-  points.on('change', pushCloud)
-  const unsubscribeCloud = useCloud.subscribe((state) => {
-    if (JSON.stringify(cloud) === JSON.stringify(state)) return
-    // In place: the share sliders are bound to this `weights` object, not to a replacement.
-    const { weights, ...rest } = state
-    Object.assign(cloud, rest)
-    Object.assign(cloud.weights, weights)
-    pane.refresh()
-  })
-
-  // One tab per variant, one folder per part, one slider per parameter.
-  const values = structuredClone(store.getState().params)
-  const tabs = pane.addTab({ pages: variants.map((machine) => ({ title: machine.id })) })
-  variants.forEach((machine, index) => {
-    const page = tabs.pages[index]!
-    for (const part of machine.parts) {
-      const folder = page.addFolder({ title: part.id })
-      for (const [key, spec] of Object.entries(part.params)) {
-        folder
-          .addBinding(values[machine.id]![part.id]!, key, {
-            min: spec.min,
-            max: spec.max,
-            step: spec.step,
-          })
-          .on('change', (event) =>
-            store.getState().setParam(machine.id, part.id as PartId, key, event.value),
-          )
-      }
-    }
-    page
-      .addButton({ title: `Copy ${machine.id}'s values` })
-      .on('click', () =>
-        navigator.clipboard.writeText(JSON.stringify(store.getState().params[machine.id], null, 2)),
-      )
-    page
-      .addButton({ title: `Reset ${machine.id}` })
-      .on('click', () => store.getState().resetVariant(machine.id))
-  })
-  // Tweakpane also fires this while the pane is disposed, which must not change the variant.
-  let live = true
-  tabs.on('select', (event) => {
-    const picked = variants[event.index]
-    if (live && picked) store.setState({ variant: picked.id })
-  })
-  const select = (variant: string) => {
-    const page = tabs.pages[variants.findIndex((machine) => machine.id === variant)]
-    if (page && !page.selected) page.selected = true
-  }
-  select(store.getState().variant)
-
-  const unsubscribe = store.subscribe((state) => {
-    own.focus = state.focus
-    for (const [variant, parts] of Object.entries(state.params))
-      for (const [part, partValues] of Object.entries(parts))
-        Object.assign(values[variant]![part]!, partValues)
-    select(state.variant)
-    pane.refresh()
-  })
-
-  return () => {
-    live = false
-    unsubscribe()
-    unsubscribeCloud()
-    unsubscribeStory()
-  }
-}
-
-/** The beat scrubber, shared by both worlds. Off, each is shown whole, outside the story. */
+/** The beat scrubber. Off, the city is shown outside the story, risen as far as the slider says. */
 function addStory(pane: Pane) {
   const store = useWorkbench
   const scrub = { on: store.getState().beat !== null, beat: store.getState().beat ?? 0 }

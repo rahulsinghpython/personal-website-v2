@@ -2,7 +2,7 @@
 
 How the site is built. The content layer, the Index and prerendering exist. The scene layer is mounted on the home page: the city as points, driven by scroll ([DECISIONS D44](DECISIONS.md)); see [ROADMAP](ROADMAP.md) for what Phase 3b still owes. Where a section below describes something not built yet, it says so. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
 
-**The Machine has been replaced by a city ([DECISIONS D38](DECISIONS.md)), and the home page draws the city since 2026-10-24 ([D44](DECISIONS.md)).** Where this doc says "the Machine" it describes code that is still in the repository for the workbench's comparison and is deleted next; the page no longer reaches it. The city's code is in `src/experience/city/` and keeps the same structure: geometry generated in code, sampled to one cloud of points, moved in the vertex shader. Its story is not a GSAP timeline but a plain function of the beat, `seekCity` in `src/experience/city/story.ts`, so the page no longer loads GSAP. Its ambient motion is the traffic, the river and the train, which move once the city has risen, on the way to Core (D43).
+**The site happens in a city ([DECISIONS D38](DECISIONS.md)), drawn on the home page since 2026-10-24 ([D44](DECISIONS.md)).** The Machine it replaced was deleted on 2026-10-25, with its code, the workbench's `machine` world and GSAP ([D50](DECISIONS.md)); it is in git history up to `93798bd`. The city's code is in `src/experience/city/`: geometry generated in code, sampled to one cloud of points, moved in the vertex shader. Its story is a plain function of the beat, `seekCity` in `src/experience/city/story.ts`. Its ambient motion is the traffic, the river and the train, which move once the city has risen, on the way to Core (D43).
 
 ## Stack
 
@@ -14,7 +14,6 @@ How the site is built. The content layer, the Index and prerendering exist. The 
 | 3D | three.js through React Three Fiber, with selected helpers from drei | three 0.186.1, @types/three 0.186.0, @react-three/fiber 9.8.1, @react-three/drei 10.7.9 (installed 2026-10-05) | Rahul has shipped three.js. R3F lets scene and DOM share state. The only drei helper in use is `OrbitControls`, on the workbench. R3F's peer range is React `>=19 <19.4`, so React stays below 19.4 until R3F widens it. |
 | Shared state | zustand | zustand 5.0.15 (installed 2026-10-05) | Tiny, and readable from inside the render loop without causing React re-renders. So far it holds only the workbench's state. |
 | Workbench panel | Tweakpane | tweakpane 4.0.5, @tweakpane/core 2.0.5 for its types (dev only, nothing shipped) | The control panel of the design workbench. See [DECISIONS D20](DECISIONS.md). |
-| Choreography | GSAP, one paused master timeline | gsap 3.15.0 (installed 2026-10-07). Only `gsap/gsap-core` is imported | The whole story is one timeline whose position is set from scroll progress. The core alone is enough because everything animated is a number on a plain object; no ScrollTrigger and no CSS plugin ([DECISIONS D30](DECISIONS.md)). |
 | Prerendering | vite-prerender-plugin | vite-prerender-plugin 0.5.14 (dev only, nothing shipped) | Writes every page's HTML at build time, so content is readable with JavaScript off. See [DECISIONS D16](DECISIONS.md). |
 | Styling | Tailwind CSS | tailwindcss 4.3.3, @tailwindcss/vite 4.3.3 | Matches Rahul's other current projects. It looks for class names in `src/` only (set in `src/styles/index.css`); by default it scans the whole repo, and words in docs and scripts became shipped CSS. |
 | Lint and format | oxlint, Prettier | oxlint 1.86.0, prettier 3.9.9 | Same. |
@@ -23,6 +22,8 @@ How the site is built. The content layer, the Index and prerendering exist. The 
 | Hosting | Vercel | Not set up yet | Same. |
 
 Versions were the latest stable on 2026-10-05, when the scaffold was made and when Phase 2 added three.js. When a later phase adds a "not yet" row, install the latest stable then and record it here. Do not copy versions from other repos.
+
+GSAP, which drove the Machine's story, was removed with it on 2026-10-25 ([D50](DECISIONS.md)): the city's story is a plain function of the beat.
 
 Deliberately not used: a smooth-scroll library (see [DECISIONS D8](DECISIONS.md)), a UI component kit, a post-processing stack, a physics engine, a CMS.
 
@@ -42,7 +43,7 @@ The page is two layers that never depend on each other to render.
 │   …                                           │  screen readers see
 ├──────────────────────────────────────────────┤
 │ Scene layer (<canvas>, position: fixed)       │  behind the content
-│   the Machine, driven by scroll progress      │  aria-hidden, lazy-loaded
+│   the city, driven by scroll progress         │  aria-hidden, lazy-loaded
 └──────────────────────────────────────────────┘
 ```
 
@@ -97,64 +98,49 @@ scroll position ──▶ target progress ──▶ eased progress ──▶ the
 
 The canvas does not run a continuous loop. A frame is drawn only when something asked for one: scroll, pointer movement over an interactive area, a click, a resize. While eased progress is still catching up, frames keep being requested; once it has settled, rendering stops entirely, unless a part has ambient motion ([DECISIONS D26](DECISIONS.md)), in which case frames continue at a capped rate, 30 a second, while the canvas is visible. The only ambient motion is the city's traffic, river and train, and they move on their own only once the city has risen, so nothing is drawn at rest before then on any tier, and never on the low tier ([DECISIONS D43](DECISIONS.md)). This is the technical side of "the visitor causes the motion" and it is the single largest performance win. See [PERFORMANCE](PERFORMANCE.md).
 
-## How the Machine is drawn
+## How the city is drawn
 
-**Geometry is generated, not loaded.** Each part is described in code as a set of simple shapes (cylinders, tori, discs, tubes along curves). There is no model file.
+**Geometry is generated, not loaded.** The city is a layout described as data (`city/layouts.ts`): the water, the roads, the CBD, the heartland and where each landmark stands. `city/city.ts` turns it into blocks and simple shapes (boxes, drums, lathed profiles, rods), each marked with when it rises; the eight landmarks are drawn in `city/landmarks.ts` from the operations in `shapes.ts`. There is no model file ([DECISIONS D4](DECISIONS.md)).
 
-**Points are sampled from that geometry once**, at startup or at build time. Each point gets, as vertex attributes:
+**Points are sampled from that geometry once**, when the scene attaches (`city/points.ts`), where they mean something: on windows, edges and roofs, the rest left dark ([D42](DECISIONS.md)). Each point gets, as vertex attributes: its place in the city; its place in the haze of the opening (`aDust`) and where it lands on the water as rain (`aWater`); which group it belongs to (`aGroup`: a job's subject, the CBD, the landmarks, and so on), so a beat can light or dim it; when its building rises (`aRise`); whether it is a window (`aWindow`); how it moves if it is traffic, the river or the train (`aMove`, `aPath`); and a little brightness and jitter of its own, so points do not all move in step.
 
-- its position in the assembled Machine,
-- its position as dust,
-- which part it belongs to,
-- a small random offset so points do not all move in step.
+**All point animation happens in the vertex shader.** The CPU sets a handful of uniforms per frame from the story (`city/draw.ts`, `applyCity`): how far the haze has rained down and the city risen, how lit and how bright each group is, the share of windows lit, how far the traffic has moved, the pointer for the torch. No per-point work happens in JavaScript after setup.
 
-Two things about the sampling are deliberate ([DECISIONS D27](DECISIONS.md)). Points are not shared out by surface area alone: the thinner a piece is, the more closely its points are packed, or the plates would take nearly every point and the lines would vanish. And a point's size is in the Machine's own units, not in pixels, so the Machine is the same picture on a phone and on a monitor.
+**The whole city is one draw call**, and the opening line's grains one more. The map's lines are one more, drawn only around Signal.
 
-**All point animation happens in the vertex shader.** The CPU sets a handful of uniforms per frame (overall progress, how assembled and how awake each part is, pointer position for the torch and the scan beam). The GPU interpolates every point between dust and assembled and picks its colour and size. No per-point work happens in JavaScript after setup.
+**No lights, no shadows, no environment map, no textures.** Points are unlit and coloured in the shader, cold or lit in the accent. Glow is faked with additive blending and soft point sprites, not a bloom pass. A point's size is in the city's own units, not in pixels, so the city is the same picture on a phone and on a monitor.
 
-**The whole cloud is one draw call**, or one per part if that makes per-part control simpler. Lines and the few solid surfaces are a small number of additional draw calls.
-
-**No lights, no shadows, no environment map, no textures.** Points and lines are unlit and coloured in the shader. Glow is faked with additive blending and soft point sprites, not a bloom pass.
-
-Parts are data. Adding or changing a part should mean editing its description, not writing new rendering code:
-
-```ts
-// shape of the idea, not final code
-type Part = {
-  id: 'core' | 'scanner' | 'rings' | 'lens'
-  era: EraId                    // links to src/content
-  build: () => BufferGeometry[] // the shapes points are sampled from
-  window: [number, number]      // the slice of progress in which it assembles
-}
-```
+**The exhibit** (`/exhibit`, [D48](DECISIONS.md)) draws the same cloud with the same code, held at Whole, with three.js's `OrbitControls` for a camera the visitor moves.
 
 ## Planned layout
 
 ```
 src/
-  content/         typed facts: site, eras, projects, beats (copy). Mirrors docs/CONTENT.md.
-  sections/        the DOM beats. Story.tsx lays out all eight; the four era beats share EraBeat.tsx.
-                   Scene.tsx is the one place the page reaches the scene, by a dynamic import.
+  content/         typed facts: site, eras, projects, beats (copy), and the exhibit's and résumé's
+                   words. Mirrors docs/CONTENT.md.
+  sections/        the pages. Story.tsx lays out all eight beats; the four era beats share EraBeat.tsx.
+                   Header.tsx is every page's header and Contact. Scene.tsx is where the story reaches
+                   the scene, Exhibit.tsx the exhibit, Resume.tsx the résumé, each by a dynamic import.
   index-view/      the Index (plain version), served at /plain
+  resume/          PdfSheet.tsx: the résumé PDF drawn by PDF.js, the résumé page's lazy entry (D49)
   experience/      everything inside the canvas
-    shapes.ts      the few operations the Machine and the city are made from: lathe, ring, rod, repeat
+    shapes.ts      the few operations the city and its landmarks are made from: lathe, ring, rod, repeat
     params.ts      a number a shape depends on, with the range the workbench can tune it over
-    city/          the city (D38 to D40). Nothing in it imports machine/
+    city/          the city (D38 to D46)
       plan.ts      the flat map: points, outlines, distances
       layouts.ts   the layout as data: water, roads, viaduct, CBD, open ground, landmarks
-      landmarks.ts the eight landmarks as greybox massing
+      landmarks.ts the eight landmarks
       city.ts      a layout turned into blocks, then into shapes and map lines, each marked with when it rises
-      story.ts     the city's story as a function of the beat: the sketch's camera, the map landing, the rise
-    machine/       part definitions, point sampling, shaders
-      part.ts      what a part is: parameters in, geometry out
-      points.ts    the Machine as a point cloud: surface sampling, the points material, the chosen look
-      machine.ts   the Machine: the signed-off silhouette and the picked detail of each part
-      cube.ts      the cube of cubes with a city on its roof, which the Lens carries
-      variants.ts  the shapes the workbench switches between; one, now the shape is settled
-    camera/        camera.ts: the camera's pose at each beat, and how a pose is applied
-    timeline.ts    the master timeline, and the plain object it writes the story into
+      points.ts    the city as points: sampling, the points material, the chosen look
+      story.ts     the city's story as a function of the beat: the camera, the rain, the rise, what is lit
+      draw.ts      what the home page and the exhibit share: the layout, the look, the story into a material
+      pins.ts      each claim pinned to its proof in the city (D45)
+    camera/        camera.ts: how a pose is applied and the picture framed
     ink.ts         where the letters of the opening line are on the page, and the mask that rubs it out (D37)
-    Experience.tsx the lazy-loaded entry to the scene: the canvas and the frame loop
+    cue.ts         when a beat's words and pins come and go (D46)
+    hold.ts        the beats' text held still on the window (D46)
+    Experience.tsx the story's lazy entry: the canvas and the frame loop
+    Exhibit.tsx    the exhibit's lazy entry: the city held at Whole, and the visitor's camera (D48)
   state/           progress.ts: progress, read from scroll. tiers.ts: the tier numbers, and a
                    stand-in for tier detection until Phase 5. The store is not built yet.
   styles/
@@ -167,25 +153,25 @@ scripts/
 docs/
 ```
 
-`src/experience/` and `workbench/` are the only places allowed to import three.js. Everything else in `src/` must work if the scene never loads, and reaches it through one lazy import. oxlint enforces this (`no-restricted-imports` in `.oxlintrc.json`): three.js, React Three Fiber and anything under `src/experience/` cannot be imported from the rest of `src/`, and nothing in `src/` can import the workbench or Tweakpane. The rule also catches the dynamic import, so `src/sections/Scene.tsx` switches it off for that one line. A static import slipping in there would not be caught by lint; the bundle check would catch it, because the critical path would pass its budget.
+`src/experience/` and `workbench/` are the only places allowed to import three.js. Everything else in `src/` must work if the scene never loads, and reaches it through a lazy import: one for the story, one for the exhibit. oxlint enforces this (`no-restricted-imports` in `.oxlintrc.json`): three.js, React Three Fiber and anything under `src/experience/` cannot be imported from the rest of `src/`, and nothing in `src/` can import the workbench or Tweakpane. The rule also catches the dynamic import, so `src/sections/Scene.tsx` and `src/sections/Exhibit.tsx` switch it off for that one line. A static import slipping in there would not be caught by lint; the bundle check would catch it, because the critical path would pass its budget.
 
 ## The workbench
 
 The design tool described in [DESIGN-PROCESS](DESIGN-PROCESS.md#the-workbench). It lives in `workbench/`, outside `src/`, with its own `workbench/index.html`, and is served by `pnpm dev` at `/workbench/`.
 
-**It cannot ship.** `vite build` builds only the root `index.html`, and nothing in `src/` imports `workbench/`, so it is never part of the production module graph. It has no `prerender` script and no page links to it, so it is never rendered at build time either. Two checks back this up: the lint rule above, and `scripts/check-size.mjs`, which fails the build on any HTML page other than `/` and `/plain` and on any file no budget covers.
+**It cannot ship.** `vite build` builds only the root `index.html`, and nothing in `src/` imports `workbench/`, so it is never part of the production module graph. It has no `prerender` script and no page links to it, so it is never rendered at build time either. Two checks back this up: the lint rule above, and `scripts/check-size.mjs`, which fails the build on any HTML page other than the site's four and on any file no budget covers.
 
-**The split.** The Machine's own code (each part as a function of its parameters) is in `src/experience/machine/`, and the city's in `src/experience/city/`; the city's will ship with the scene. The workbench only imports them and adds the tools around it:
+**The split.** The city's code is in `src/experience/city/` and ships with the scene. The workbench only imports it and adds the tools around it:
 
 | File | What it is |
 | --- | --- |
-| `store.ts` | The workbench's state in zustand: the world (city or Machine), the Machine's variant, tier, view, every parameter value. Mirrored to the URL. |
-| `city.ts` | The city's state: its numbers, what is shown, how far it has risen outside the story. Mirrored to the URL. |
-| `CityScene.tsx` | The city greybox in a viewport: ground, water, map lines and the solid pieces, which rise in the shader. In the `story` view it places the camera from `src/experience/city/story.ts`. |
-| `cloud.ts` | How the points are drawn: the sliders' values, starting from the chosen look. Mirrored to the URL. |
-| `camera.ts` | One camera pose shared by every viewport, and each world's preset views. A mutable value, because it changes every frame while orbiting. |
-| `Viewport.tsx` | One canvas showing one option, rendering on demand, and the Machine's contents. With the story on, it puts the timeline at the scrubber's beat; in the `story` view the camera is the visitor's. |
-| `Panel.tsx` | The Tweakpane panel, rebuilt when the world changes: the shared settings, then a tab per variant or layout with its sliders, then the readout. |
+| `store.ts` | The workbench's own settings in zustand: tier, view, shading, side by side, thumbnail, phone size, the story's beat. Mirrored to the URL. |
+| `city.ts` | The city's state: the layout and its numbers, the looks as points, what is shown, how far it has risen outside the story. Mirrored to the URL. |
+| `CityScene.tsx` | The city in a viewport, as the greybox (ground, water, map lines and the solid pieces, which rise in the shader) or as points. In the `story` view it places the camera from `src/experience/city/story.ts`. |
+| `cloud.ts` | Whether the city is drawn solid or as points. Mirrored to the URL. |
+| `camera.ts` | One camera pose shared by every viewport, and the preset views. A mutable value, because it changes every frame while orbiting. |
+| `Viewport.tsx` | One canvas showing one option, rendering on demand: the orbit, the greybox's light, the wheel that scrubs the story in the `story` view, and the probe that measures frames. |
+| `Panel.tsx` | The Tweakpane panel: the shared settings, the story's scrubber, the city's controls with a tab per layout and per look, then the readout. |
 | `stats.ts` | Cost per frame (CPU and GPU), draw calls, frames drawn, and the benchmark. |
 
 `window.__workbench` exposes `get`, `set`, `benchmark`, `stats`, `cloud` and `city`, so the workbench can be driven from the console or the Chrome DevTools MCP.
@@ -204,6 +190,6 @@ The design tool described in [DESIGN-PROCESS](DESIGN-PROCESS.md#the-workbench). 
 
 - Canvas is `aria-hidden`. It carries no information that is not also in the DOM.
 - Reading order in the DOM matches the story order.
-- Every part that can be opened by clicking the Machine also has a real link or button.
+- Anything that can be opened by clicking in the city also has a real link or button.
 - Text contrast is checked against the near-black background, including the accent colour.
 - Focus is always visible.

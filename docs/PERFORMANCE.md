@@ -9,7 +9,7 @@ The concept was picked partly for its cost. Each visual choice removes a whole c
 | Choice | What it avoids |
 | --- | --- |
 | The world is black | No skybox, no environment map, no ground, no fog passes |
-| The Machine is points and lines | No lighting, no shadows, no materials that need textures |
+| The city is points | No lighting, no shadows, no materials that need textures |
 | Geometry is generated in code | No model downloads, no texture downloads, no decoder libraries |
 | Points move in the vertex shader | No per-point JavaScript per frame; the CPU sets a few numbers |
 | The whole cloud is one draw call | Draw-call count stays tiny however many points there are |
@@ -32,7 +32,7 @@ These are targets set before any code exists. Measure a baseline at the end of t
 | Cumulative Layout Shift | ≤ 0.02 |
 | Lighthouse performance score, mobile | ≥ 90 |
 | Critical path (HTML, CSS, fonts, entry JS), gzipped | ≤ 100 KB |
-| Scene chunk (three.js, R3F, GSAP, scene code), gzipped | ≤ 400 KB, loaded after first paint. Raised from 300 KB on 2026-10-07 ([DECISIONS D29](DECISIONS.md)) |
+| Scene chunk (three.js, R3F, scene code), gzipped | ≤ 400 KB, loaded after first paint. Raised from 300 KB on 2026-10-07 ([DECISIONS D29](DECISIONS.md)) |
 | Whole experience, transferred | ≤ 1 MB |
 | The résumé viewer (PDF.js and its worker), gzipped | ≤ 600 KB, loaded after first paint on `/resume` only. 567 KB on 2026-10-25, most of it the worker ([DECISIONS D49](DECISIONS.md)) |
 | The résumé PDF, gzipped | ≤ 500 KB. Loaded only on `/resume` ([DECISIONS D49](DECISIONS.md)) |

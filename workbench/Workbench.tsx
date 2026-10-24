@@ -1,16 +1,13 @@
 import { layouts } from '../src/experience/city/layouts'
 import { CITY_LOOKS } from '../src/experience/city/points'
-import { variants } from '../src/experience/machine/variants'
 import { useCity } from './city'
 import { CityScene } from './CityScene'
 import { useCloud } from './cloud'
 import { Panel } from './Panel'
 import { useWorkbench } from './store'
-import { MachineScene, Viewport } from './Viewport'
+import { Viewport } from './Viewport'
 
 export function Workbench() {
-  const world = useWorkbench((state) => state.world)
-  const variant = useWorkbench((state) => state.variant)
   const layout = useCity((state) => state.layout)
   const look = useCity((state) => state.look)
   const draw = useCloud((state) => state.draw)
@@ -24,26 +21,19 @@ export function Workbench() {
   // The city as points has one layout, so its options are the looks of the points round.
   const cityLayout = layouts.find((each) => each.id === layout) ?? layouts[0]!
   const options =
-    world === 'city' && draw === 'points'
+    draw === 'points'
       ? CITY_LOOKS.map((each) => ({
           id: each.id,
           label: each.label,
           current: each.id === look,
           scene: <CityScene layout={cityLayout} look={each.id} />,
         }))
-      : world === 'city'
-        ? layouts.map((each) => ({
-            id: each.id,
-            label: each.label,
-            current: each.id === layout,
-            scene: <CityScene layout={each} />,
-          }))
-        : variants.map((machine) => ({
-            id: machine.id,
-            label: machine.label,
-            current: machine.id === variant,
-            scene: <MachineScene machine={machine} />,
-          }))
+      : layouts.map((each) => ({
+          id: each.id,
+          label: each.label,
+          current: each.id === layout,
+          scene: <CityScene layout={each} />,
+        }))
   const current = options.find((option) => option.current) ?? options[0]!
 
   return (
@@ -61,8 +51,7 @@ export function Workbench() {
           </Viewport>
         )}
       </main>
-      {/* Rebuilt when the world changes, since the two have different controls. */}
-      {panel && <Panel key={world} />}
+      {panel && <Panel />}
     </div>
   )
 }

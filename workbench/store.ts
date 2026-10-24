@@ -1,30 +1,19 @@
 import { create } from 'zustand'
-import type { PartId } from '../src/experience/machine/part'
-import { defaultValues } from '../src/experience/params'
-import { variants } from '../src/experience/machine/variants'
 import { TIERS, type Tier } from '../src/state/tiers'
 import { CITY_KEYS } from './city'
 
-/** What the workbench shows: the Machine, or the city that replaces it (docs/DECISIONS.md, D40). */
-export type World = 'machine' | 'city'
+// The workbench's own settings. The city's numbers, layout and look are in ./city.ts, and whether
+// it is drawn solid or as points in ./cloud.ts.
+
 export type Shading = 'flat' | 'shaded'
 export type ViewId = 'iso' | 'front' | 'side' | 'top' | 'free' | 'story'
-export type Focus = PartId | 'all'
-
-/** Every parameter value, as variant, then part, then parameter name. */
-export type Params = Record<string, Record<string, Record<string, number>>>
 
 export type WorkbenchState = {
-  world: World
-  /** The Machine's variant. The city's layout is in ./city.ts. */
-  variant: string
   tier: Tier
   view: ViewId
   /** Flat is the silhouette test: one grey, no shading. Shaded shows the form inside the outline. */
   shading: Shading
-  /** Draw one part at full brightness and dim the other three. */
-  focus: Focus
-  /** Show every variant side by side, sharing one camera. */
+  /** Show every option side by side, sharing one camera. */
   compare: boolean
   /** Shrink the viewports, for the thumbnail test. */
   thumb: boolean
@@ -32,38 +21,23 @@ export type WorkbenchState = {
   phone: boolean
   panel: boolean
   /**
-   * Where the story is, in beats: 0 is Found and 7 is Contact. Null draws the Machine whole and
-   * dormant, outside the story, as rounds 2 to 4 saw it.
+   * Where the story is, in beats: 0 is Found and 7 is Contact. Null shows the city outside the
+   * story, risen as far as ./city.ts says.
    */
   beat: number | null
   /** Render at the tier's pixel-ratio cap even when this display's own ratio is lower. */
   capDpr: boolean
-  params: Params
-  setParam: (variant: string, part: PartId, key: string, value: number) => void
-  resetVariant: (variant: string) => void
 }
 
-function defaultParams(): Params {
-  return Object.fromEntries(
-    variants.map((machine) => [
-      machine.id,
-      Object.fromEntries(machine.parts.map((part) => [part.id, defaultValues(part.params)])),
-    ]),
-  )
-}
-
-const DEFAULTS = {
-  world: 'city' as World,
-  variant: variants[0]!.id,
-  tier: 'high' as Tier,
-  view: 'iso' as ViewId,
-  shading: 'shaded' as Shading,
-  focus: 'all' as Focus,
+const DEFAULTS: WorkbenchState = {
+  tier: 'high',
+  view: 'iso',
+  shading: 'shaded',
   compare: false,
   thumb: false,
   phone: false,
   panel: true,
-  beat: null as number | null,
+  beat: null,
   capDpr: false,
 }
 
@@ -71,33 +45,16 @@ const oneOf = <T extends string>(value: string | null, allowed: readonly T[]): T
   allowed.includes(value as T) ? (value as T) : undefined
 
 /** The state is kept in the URL so a view can be reloaded, screenshotted and sent to someone. */
-function fromUrl() {
+function fromUrl(): WorkbenchState {
   const query = new URLSearchParams(location.search)
   const flag = (key: string, fallback: boolean) =>
     query.has(key) ? query.get(key) !== '0' : fallback
-  const params = defaultParams()
-  for (const entry of query.get('p')?.split(',') ?? []) {
-    const [path, value] = entry.split(':')
-    const [variant, part, key] = path?.split('.') ?? []
-    const values = params[variant ?? '']?.[part ?? '']
-    if (values && key && key in values && Number.isFinite(Number(value)))
-      values[key] = Number(value)
-  }
   return {
-    world: oneOf(query.get('world'), ['machine', 'city'] as const) ?? DEFAULTS.world,
-    variant:
-      oneOf(
-        query.get('variant'),
-        variants.map((v) => v.id),
-      ) ?? DEFAULTS.variant,
     tier: oneOf(query.get('tier'), Object.keys(TIERS) as Tier[]) ?? DEFAULTS.tier,
     view:
       oneOf(query.get('view'), ['iso', 'front', 'side', 'top', 'free', 'story'] as const) ??
       (query.has('cam') ? 'free' : DEFAULTS.view),
     shading: oneOf(query.get('shading'), ['flat', 'shaded'] as const) ?? DEFAULTS.shading,
-    focus:
-      oneOf(query.get('focus'), ['all', 'core', 'scanner', 'rings', 'lens'] as const) ??
-      DEFAULTS.focus,
     compare: flag('compare', DEFAULTS.compare),
     thumb: flag('thumb', DEFAULTS.thumb),
     phone: flag('phone', DEFAULTS.phone),
@@ -107,36 +64,15 @@ function fromUrl() {
         ? Number(query.get('beat'))
         : null,
     capDpr: flag('capdpr', DEFAULTS.capDpr),
-    params,
   }
 }
 
-export const useWorkbench = create<WorkbenchState>()((set) => ({
-  ...fromUrl(),
-  setParam: (variant, part, key, value) =>
-    set((state) => {
-      const parts = state.params[variant]
-      const values = parts?.[part]
-      if (!parts || !values || values[key] === value) return state
-      return {
-        params: { ...state.params, [variant]: { ...parts, [part]: { ...values, [key]: value } } },
-      }
-    }),
-  resetVariant: (variant) =>
-    set((state) => ({ params: { ...state.params, [variant]: defaultParams()[variant]! } })),
-}))
+export const useWorkbench = create<WorkbenchState>()(() => fromUrl())
 
-/** Rewrites the query string, leaving what camera.ts and cloud.ts own as it is. */
+/** Rewrites the query string, leaving what camera.ts, cloud.ts and city.ts own as it is. */
 function toUrl(state: WorkbenchState) {
   const query = new URLSearchParams()
-  const text = {
-    world: state.world,
-    variant: state.variant,
-    tier: state.tier,
-    view: state.view,
-    shading: state.shading,
-    focus: state.focus,
-  }
+  const text = { tier: state.tier, view: state.view, shading: state.shading }
   for (const [key, value] of Object.entries(text))
     if (value !== DEFAULTS[key as keyof typeof text]) query.set(key, value)
   const flags = {
@@ -152,20 +88,10 @@ function toUrl(state: WorkbenchState) {
 
   if (state.beat !== null) query.set('beat', String(+state.beat.toFixed(3)))
 
-  const base = defaultParams()
-  const changed: string[] = []
-  for (const [variant, parts] of Object.entries(state.params))
-    for (const [part, values] of Object.entries(parts))
-      for (const [key, value] of Object.entries(values))
-        if (value !== base[variant]?.[part]?.[key])
-          changed.push(`${variant}.${part}.${key}:${+value.toFixed(4)}`)
-  if (changed.length > 0) query.set('p', changed.join(','))
-
   const current = new URLSearchParams(location.search)
   const cam = current.get('cam')
   if (cam && state.view === 'free') query.set('cam', cam)
-  // Owned by cloud.ts and city.ts.
-  for (const key of ['draw', 'pts', ...CITY_KEYS]) {
+  for (const key of ['draw', ...CITY_KEYS]) {
     const value = current.get(key)
     if (value) query.set(key, value)
   }

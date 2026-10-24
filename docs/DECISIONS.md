@@ -677,3 +677,21 @@ Rahul asked for a résumé page, "maybe with a mini renderer", then, while three
 **Checked in the automated Chrome** at 1440 by 900 and at 390 by 844 with touch: the placeholder drawn as a sheet, its text in the text layer, no console warnings, no sideways scroll. Not yet tried by Rahul.
 
 **Open:** the real PDF; whether the Index and the résumé should become one page.
+
+### D50. The Machine's code is deleted — Accepted, 2026-10-25
+
+The city replaced the Machine on the home page on 2026-10-24 (D44), and the Machine's code was kept only so the workbench could compare the two, to be deleted once Rahul had scrolled the city. Rahul, on 2026-10-25: "lets delete all the machine codes first and update documents". So it goes now, before that scroll: the city is not compared with the Machine any more.
+
+**What went.**
+
+- `src/experience/machine/`: the Machine, its parts, its point sampling and material, its lines and the cube of cubes.
+- `src/experience/timeline.ts`, the GSAP timeline that told the Machine's story, and the `gsap` package with it: nothing else imported it. The city's story is a plain function of the beat (D44).
+- From `src/experience/camera/camera.ts`, the Machine's camera poses and lens; a lens is now always given.
+- From `src/experience/shapes.ts`, what only the Machine used: the outline each shape carried for the Machine's lines, the ball, the grid noise and the degrees helper.
+- From the workbench, the `machine` world: the world setting, the Machine's variants and part sliders, `show part`, its points sliders and its story camera. `cloud.ts` keeps only `draw`, solid or points. The workbench opens on the city as before, and its old `world=machine` links now show the city.
+
+**What stays.** `workbench/references.html`, the Machine's references round, is a design record, not code, and REFERENCES describes it. The beats keep the parts' names as ids (core, scanner, rings, lens). The decisions and the roadmap keep the Machine's history; ARCHITECTURE, DESIGN-PROCESS, PERFORMANCE and CLAUDE.md now describe only the city. All of it is in git history up to `93798bd`.
+
+**Cost:** none to the site. The page stopped loading the Machine on 2026-10-24, so every budget is unchanged: the scene chunk is 263.4 kB and the critical path of `/` 83.5 kB. The repository loses about 1,600 lines of code.
+
+**Checked:** typecheck, lint and the build pass; the workbench opens on the city and draws the story at beat 4 as points with no new console messages.

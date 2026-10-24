@@ -44,7 +44,7 @@ export type Claim = {
 
 export type Era = {
   id: EraId
-  /** The part of the Machine this era became, kept as the id of its beat. */
+  /** The id of this era's beat: the name of the part of the Machine it once was (D38). */
   part: PartId
   /** The kind of work, which the page leads with. The company is small print (D24). */
   field: string

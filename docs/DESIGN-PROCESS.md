@@ -1,6 +1,6 @@
 # Design process
 
-How the Machine and the look of the site get designed, given that there is no designer and no 3D artist on this project.
+How the city and the look of the site get designed, given that there is no designer and no 3D artist on this project.
 
 The short answer: **we design in the browser, by looking, in small rounds where Rahul picks.** Nobody is asked to imagine the result from a description, and nobody opens a design tool.
 
@@ -17,7 +17,7 @@ A chat can look at a screenshot and judge whether a shape reads clearly. It cann
 
 A development-only page that is never shipped. It is the design tool for this project.
 
-It shows the Machine live with a free camera and a panel of controls:
+It shows the city live with a free camera and a panel of controls:
 
 - a slider for every shape parameter (radii, counts, spacing, thickness),
 - point density, size and brightness,
@@ -35,21 +35,20 @@ The control panel is Tweakpane ([DECISIONS D20](DECISIONS.md)). Because the work
 
 Run `pnpm dev` and open `/workbench/`. How it is built and why it cannot ship is in [ARCHITECTURE](ARCHITECTURE.md#the-workbench).
 
-- **World.** `city` (the default) or `machine` ([DECISIONS D40](DECISIONS.md)). Each world has its own controls, options and camera presets; the settings below apply to both unless they say otherwise. The Machine's links need `world=machine`.
-- **Variants.** The tabs A, B and C switch between the options of the current round. Each tab holds that variant's sliders, grouped by part.
-- **Side by side.** Shows every variant at once with one shared camera. This is the view a round is decided in.
+- **The city only.** Until 2026-10-25 a `world` setting switched between the city and the Machine; the Machine's code was deleted then ([DECISIONS D50](DECISIONS.md)). Its rounds are in git history up to `93798bd`.
+- **Options.** The tabs A, B and C switch between the options of the current round: the layouts, or with `draw` set to `points`, the looks. Each tab holds that option's sliders.
+- **Side by side.** Shows every option at once with one shared camera. This is the view a round is decided in.
 - **Thumbnail.** Shrinks the viewports to 160 pixels, for the thumbnail test.
-- **Show part** (the Machine). Draws one part at full brightness and dims the other three, so the four can be told apart while everything is grey.
-- **Draw.** `solid` is the greybox; `points` is the cloud sampled from it. The Points folder sets how much of the tier's point budget is used, how big and bright a point is, how much fewer points are boosted to compensate, how much closer points are packed on thin pieces than on broad ones, and each part's share of the points. Size is in the Machine's own units, not pixels, so the picture is the same at any window size ([DECISIONS D27](DECISIONS.md)). These values travel in the URL as `pts=`.
-  The sliders start from the look chosen in round 4 ([DECISIONS D28](DECISIONS.md)), and `Reset to the chosen look` puts them back. D28 lists the looks that were passed over as rows of numbers; put a row after `pts=` to see it again.
-- **Phone size.** Makes each viewport 390 pixels wide, the size of a phone screen held upright. With the tier set to low it shows what a low-tier phone would be given: `/workbench/?world=machine&draw=points&phone=1&tier=low`.
-- **Shading.** `flat` is one grey with no shading, the pure silhouette. `shaded` lights the greybox from the camera so the form inside the outline can be read. The lighting is a greybox aid only; the real Machine is unlit.
-- **Tier.** Applies that tier's pixel-ratio cap. `tier dpr` renders at the cap even when this display's own ratio is lower, to see what a denser screen would be asked to draw.
-- **Copy values.** Puts the current variant's numbers on the clipboard as JSON, ready to paste into the code as defaults.
-- **Readout.** Frame rate, CPU and GPU time per frame, draw calls, and a count of frames drawn. The count must stop when input stops. `Run benchmark` draws 240 frames back to back and reports what they cost.
-- **The URL holds the state:** `?tier=mid&view=front&compare=1&phone=1&shading=flat&panel=0`, changed parameters as `p=A.core.radius:0.8`, and a free camera as `cam=`. Reload it, screenshot it, or send it.
 
-- **Story** (the Machine). `in the story` puts the Machine in the story at `beat`, from 0 (Found) to 7 (Contact); drag it to scrub. With it off the Machine is whole and dormant, as rounds 2 to 4 saw it. The `story` view gives the visitor's camera for that beat; any other view watches the same moment from outside. The story view's camera does not orbit, since it is the visitor's; the mouse wheel over it scrolls the beat instead, as the page will. `/workbench/?world=machine&draw=points&view=story&beat=3.5`. The beads do not drift here.
+- **Draw.** `solid` is the greybox; `points` is the cloud sampled from it, as the city's bullet below describes.
+- **Phone size.** Makes each viewport 390 pixels wide, the size of a phone screen held upright. With the tier set to low it shows what a low-tier phone would be given: `/workbench/?view=story&beat=4&draw=points&phone=1&tier=low`.
+- **Shading.** `flat` is one grey with no shading, the pure silhouette. `shaded` lights the greybox from the camera so the form inside the outline can be read. The lighting is a greybox aid only; the real city is unlit.
+- **Tier.** Applies that tier's pixel-ratio cap. `tier dpr` renders at the cap even when this display's own ratio is lower, to see what a denser screen would be asked to draw.
+- **Copy values.** Puts the current option's numbers on the clipboard as JSON, ready to paste into the code as defaults.
+- **Readout.** Frame rate, CPU and GPU time per frame, draw calls, and a count of frames drawn. The count must stop when input stops. `Run benchmark` draws 240 frames back to back and reports what they cost.
+- **The URL holds the state:** `?tier=mid&view=front&compare=1&phone=1&shading=flat&panel=0`, the city's changed numbers as `c=A.cbd.height:1.2`, and a free camera as `cam=`. Reload it, screenshot it, or send it.
+
+- **Story.** `in the story` puts the city in the story at `beat`, from 0 (Found) to 7 (Contact); drag it to scrub. The `story` view gives the visitor's camera for that beat, and the mouse wheel over it scrolls the beat, as the page does; any other view watches the same moment from outside.
 
 - **The city** ([DECISIONS D40](DECISIONS.md)). One tab, the layout, holds its numbers in four groups: water, CBD, heartland and landmarks. `show` lights one district and dims the rest; `what each job lights` shows the four subjects: the river, the Science Centre, BLK 2024 and the Lens's tower. `risen from the map` lowers every building towards its footprint, to 0 for the flat map, and `map lines` draws the map on the ground. The views are `across the bay`, the way the visitor looks, `the map`, from straight above, and `story`, the visitor's camera at the scrubber's beat. With `in the story` on, the city lands and rises with the beat, as the sketch did, and the rise slider waits. These travel in the URL as `show=`, `rise=`, `map=0` and, for changed numbers, `c=A.cbd.height:1.2`. `/workbench/?view=story&beat=1.5`.
   `draw` set to `points` draws the city as points ([DECISIONS D42](DECISIONS.md)). The options are then the looks: one, A, since Rahul picked it; the ones passed over are rows in D42. The Points folder has a tab per look with its numbers: the point count on the high tier, size and brightness, how a building's points are shared between windows, walls, edges and roofs, how much of a landmark is outline, and the shares of the whole that go to buildings, landmarks, roads, water and the viaduct. In the story, the beat lights and dims the city as `CITY_LIGHTS` in `src/experience/city/story.ts` says, and the traffic, the river and the train move with the beat; `moves on its own` in the City folder also runs them on their own clock, as the site will ([DECISIONS D43](DECISIONS.md)), and travels as `motion=0` when off. These travel in the URL as `draw=points`, `look=B` and, for changed numbers, `cl=A.size:0.006`. `/workbench/?view=story&beat=4&draw=points`.
@@ -66,7 +65,7 @@ Six rounds, in this order. Shape comes before look, and look before motion, beca
 | 2 | **Silhouette** | Three deliberately different whole Machines, as plain grey solids | One, or a mix | Recognisable and strange at thumbnail size |
 | 3 | **Parts** | Two or three versions of each part inside the chosen silhouette | One per part | The four parts can be told apart; each hints at its job |
 | 4 | **Points** | The chosen shape as a point cloud | Density, size, brightness | Still reads at low-tier point counts on a phone |
-| 5 | **Colour and type** | Three accents, three type pairings, on real copy over the real Machine | One of each | Text is readable; colour clearly means "awake" |
+| 5 | **Colour and type** | Three accents, three type pairings, on real copy over the real city | One of each | Text is readable; colour clearly means "awake" |
 | 6 | **Motion** | Dust layout, assembly order and overlap, easing, camera path | By scrolling it | A first-time viewer gets the reveal by beat 3 |
 
 How every round runs:
@@ -108,7 +107,7 @@ Almost every machined-looking object is a few simple operations repeated.
 | **Extrude**: a 2D outline pushed into depth | Brackets, fins, plates with cut-outs | Scanner |
 | **Radial and linear repetition** | Bolt circles, fins, vanes, stacked discs | Detail on every part |
 
-Two things make this tractable. First, the lathe: much of the Machine can be designed as a **2D profile line**, which is far easier to reason about and adjust than a 3D shape. Second, **repetition and symmetry** do most of the work of looking engineered; one small shape repeated twenty-four times around a ring looks designed.
+Two things make this tractable. First, the lathe: much of a landmark can be designed as a **2D profile line**, which is far easier to reason about and adjust than a 3D shape. Second, **repetition and symmetry** do most of the work of looking engineered; one small shape repeated twenty-four times around a ring looks designed.
 
 Each part is a function with parameters. Those parameters are what the workbench sliders control.
 

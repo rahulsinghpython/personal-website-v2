@@ -1,6 +1,5 @@
 import { createRoot } from 'react-dom/client'
 import { layouts } from '../src/experience/city/layouts'
-import { variants } from '../src/experience/machine/variants'
 import { applyView, poseFromUrl } from './camera'
 import { useCity } from './city'
 import { useCloud } from './cloud'
@@ -22,7 +21,6 @@ declare global {
       stats: typeof stats
       cloud: typeof useCloud
       city: typeof useCity
-      variants: string[]
       layouts: string[]
     }
   }
@@ -33,28 +31,16 @@ if (!poseFromUrl()) {
   applyView(view === 'free' ? 'iso' : view)
 }
 
-// A free camera placed for one world is the wrong size for the other, so switching world from a
-// free camera starts from the three-quarter view.
-useWorkbench.subscribe((state, previous) => {
-  if (state.world === previous.world) return
-  const view = state.view === 'free' ? 'iso' : state.view
-  if (view !== state.view) useWorkbench.setState({ view })
-  applyView(view)
-})
-
 window.__workbench = {
   get: useWorkbench.getState,
   set: (partial) => {
-    const before = useWorkbench.getState().world
     useWorkbench.setState(partial)
-    // A change of world applies its own view, above.
-    if (partial.view && useWorkbench.getState().world === before) applyView(partial.view)
+    if (partial.view) applyView(partial.view)
   },
   benchmark,
   stats,
   cloud: useCloud,
   city: useCity,
-  variants: variants.map((machine) => machine.id),
   layouts: layouts.map((layout) => layout.id),
 }
 

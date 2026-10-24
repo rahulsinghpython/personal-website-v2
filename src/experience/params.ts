@@ -1,5 +1,4 @@
 // The numbers a shape depends on, each with the range the workbench's sliders can tune it over.
-// Shared by the Machine and the city.
 
 /** One number a shape depends on, with the range it can be tuned over. */
 export type ParamSpec = { value: number; min: number; max: number; step?: number }

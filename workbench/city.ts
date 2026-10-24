@@ -9,8 +9,8 @@ import {
 import { CITY_LOOKS, type CityLook } from '../src/experience/city/points'
 import { defaultValues } from '../src/experience/params'
 
-// The city's state on the workbench: which layout, its numbers, and what is shown. Kept apart from
-// the Machine's in ./store.ts, because the city is not made of the Machine's four parts.
+// The city's state on the workbench: which layout, its numbers, its looks as points, and what is
+// shown. The workbench's own settings are in ./store.ts.
 
 /** Draw one district at full brightness and dim the rest, so they can be told apart in grey. */
 export type Show = 'all' | 'water' | 'landmarks' | 'cbd' | 'heartland' | 'subjects'
