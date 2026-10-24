@@ -3,8 +3,7 @@ import type { Lens, Pose } from '../camera/camera'
 import { GROUPS, type Group } from './city'
 
 // The city's story, as a pure function of where the visitor is: the same beat always gives the
-// same picture, so scrolling back undoes it. On the workbench for now; the home page still tells
-// the Machine's story through ../timeline.ts.
+// same picture, so scrolling back undoes it. The home page and the workbench both tell it.
 
 /**
  * The camera at each beat: the poses of the "From the map" sketch Rahul picked (D38 to D40). It
@@ -36,6 +35,17 @@ export const CITY_POSES: Record<BeatId, Pose> = {
 const FOV = 40
 const RIGHT = 0.1
 const UP = 0.15
+
+/**
+ * The opening (docs/DECISIONS.md, D44). The first scroll crumbles the name into grains that fall
+ * into the haze, evenly with the scroll, as the Machine's did (D37). Then the haze comes down as
+ * rain onto the river and the bay, and spreads from the water across the land as the map: in
+ * beats, from Found to just before Signal, each point taking `POUR_SPAN` of the way.
+ */
+const CRUMBLED = 0.6
+const POUR_FROM = 0.3
+const POUR_TO = 1.45
+export const POUR_SPAN = 0.45
 
 /** When the buildings rise, in beats: on the way from Signal to Core, as in the sketch. */
 const RISE_FROM = 1.58
@@ -126,6 +136,10 @@ export const cityStory = {
   lens: { fov: FOV, right: 0, up: 0 } satisfies Lens,
   /** How far the dust has landed as a map, from 0 to 1. */
   land: 0,
+  /** How far the opening line has crumbled into the haze, from 0 to 1 (see ../ink.ts). */
+  crumble: 0,
+  /** How far the haze has rained down and spread into the map, from 0 to 1. */
+  pour: 0,
   /** How far the city has risen out of the map, from 0 (flat) to 1 (every building standing). */
   rise: 0,
   /** Per group, in the order of GROUPS: how far it is lit, from cold (0) to the accent (1). */
@@ -165,6 +179,8 @@ export function seekCity(beat: number) {
   cityStory.lens.up = UP * shift
   cityStory.land = smooth((at - 1) / 0.55)
   cityStory.rise = clamp((at - RISE_FROM) / (RISE_TO - RISE_FROM))
+  cityStory.crumble = clamp(at / CRUMBLED)
+  cityStory.pour = clamp((at - POUR_FROM) / (POUR_TO - POUR_FROM))
 
   // Lit as the camera moves: over the whole of the way from one beat to the next.
   const la = CITY_LIGHTS[beats[from]!]
@@ -175,4 +191,30 @@ export function seekCity(beat: number) {
     cityStory.gain[i] = ga + ((lb.gain[group] ?? lb.rest) - ga) * k
   })
   cityStory.windows = la.windows + (lb.windows - la.windows) * k
+}
+
+/**
+ * How much of the map's lines show at `beat`: while the city lies flat at Signal, as the sketch
+ * drew them, fading out on either side.
+ */
+export function mapShown(beat: number) {
+  const t = Math.min(1, Math.abs(beat - 1.5) / 0.32)
+  return 1 - t * t * (3 - 2 * t)
+}
+
+/**
+ * The story for a visitor who asked for reduced motion (EXPERIENCE, "Reduced motion"): no
+ * rain and no lighting up in sequence. The city is whole and lit from the start, and the camera
+ * cuts from one beat's pose to the next.
+ */
+export function seekCityStill(beat: number) {
+  seekCity(Math.round(Math.min(LAST, Math.max(0, beat))))
+  const whole = CITY_LIGHTS.whole
+  GROUPS.forEach((group, i) => {
+    cityStory.lit[i] = whole.lit[group] ?? 0
+    cityStory.gain[i] = whole.gain[group] ?? whole.rest
+  })
+  cityStory.windows = whole.windows
+  cityStory.land = cityStory.rise = cityStory.pour = 1
+  cityStory.crumble = 0
 }

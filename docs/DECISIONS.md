@@ -559,3 +559,63 @@ The city's ambient life, which D38 kept from the sketch: the traffic, the river 
 **Cost:** nothing measurable on the GPU beyond D42's; frames at rest are in PERFORMANCE.
 
 **Open:** whether it feels right scrolled, which is Rahul's, on the workbench and then on his tablet. The speeds. At the Rings beat the Esplanade's domes still peek over Pinnacle@Duxton's left end from behind it.
+
+### D44. The city on the home page; the opening restyled as rain — Proposed, 2026-10-24
+
+Rahul asked for the city on the home page, and for the opening to keep the crumbling name but take "a fresh angle": "the name crumbling into grains is nice but we enhance it into suiting this scene now". Built and checked in the browser; not yet scrolled by Rahul.
+
+**The opening** (`src/experience/city/story.ts`, `src/experience/city/points.ts`):
+
+- **Found:** the name in the middle of the window, in a faint haze of light: a third of the city's points, hanging in a wide, shallow cloud round where the camera looks, thinning to no outline at its edges. The pointer torch lights the haze (D36).
+- **The first scroll** crumbles the name from its left end, as before (D37), but its grains fall into the haze, across at an even pace and down faster and faster, as rain falls, and cool into it.
+- **Then the rain.** From a little after the crumbling starts to just before Signal, the haze comes down as rain: every point falls, brighter while it falls, onto the nearest water, the river or the bay, flashes as it hits it, and spreads from there over the land to its place on the map. The nearer the water its place, the sooner it falls, so the map spreads out from the river: the shore of the bay lights up as a ring and the city streams out from it. The rest of the points come in as they spread. Singapore's rain feeding the river is the touch of place; the data landing before the city is built from it is Rahul's method (D39) again.
+- **From Signal on,** the story is the workbench's: the map's lines, the city rising, each job lit, the traffic (D40 to D43).
+
+**The page.** `src/experience/Experience.tsx` now draws the city, look A (D42), at the tier's budget or 90,000 points, whichever is fewer. It keeps what the Machine's page had: progress eased from the scroll, frames drawn only when something changed, the opening line read off the page, the torch. The story is `seekCity`, a plain function of the beat, not a GSAP timeline, so the page no longer loads GSAP and the scene chunk fell from 269.6 to 254.4 kB. With reduced motion there is no haze, no crumbling and no rain: the city is whole and lit, and the camera cuts between beats (`seekCityStill`).
+
+**Checked in the automated Chrome, 1600 by 900:** no frames drawn at rest at Found or Signal; about 26 a second at Core and Whole while the traffic moves, under the cap of 30; none at Core on the low tier, which still reads at 20,000 points; none at Found with reduced motion.
+
+**Left:** the Machine's code, kept for the workbench's comparison until Rahul has scrolled the city on the page, then deleted with the workbench's `machine` world and GSAP. At Core the job's text sits over the buildings; how the words sit over the city is its own item (D38). Sampling the points runs on the main thread when the scene attaches; on a phone that is the number to watch (PERFORMANCE).
+
+### D45. The words over the city: every claim pinned to its proof — Accepted, 2026-10-24
+
+The job beats said everything in one block at the bottom left: a readout, a statement, then every project and work line in the same small grey type, over the subject. Rahul: it "completely ruined how the info will be displayed", it was an under-engineered way to show the information, and the site has to sell him. The best facts weighed the same as the least, and nothing said what the lit city proved.
+
+**How it was reached.** Three systems were sketched over real shots of each beat, in a private artifact (`Reading the City`): A, Survey pins, every claim pinned to its proof; B, Inspector, the screen as a point-cloud tool with a properties panel and a layers list; C, Focus pull, one claim at a time in large type while the city blurs. Rahul: "A is actually quite solid", but not if it added scrolling, so the claims stopped taking turns on the scroll. On the next version the opened label jumped away from the pointer; it was fixed to open in place, and Rahul said "much better, lets go".
+
+**What it is.**
+
+- **The beat's text, at the left on a dark band** (at the bottom on a tall window): the job and the kind of work in the accent, the headline large, which leads with the work, the company, role and years as small print, then every claim as its own numbered line, the strongest first. It is the whole job, readable with no scene, and the Index says the same lines.
+- **The pins.** Each claim that has something in the city to point at gets a numbered pin there, with a short tag: the requests on the streets, the microservices on a CBD tower, the scanned roof, BLK 2024, the train for CI/CD, the Lens tower. As a job's beat arrives, its pins light one after another, inside the scroll that already brings it in: each job is still one window, and the page is no longer. At rest every pin is out at once.
+- **Pointing**, a bonus and never needed. Pointing at a claim's line or its pin opens the pin's full sentence and dims the others; on touch a tap does it. The database's line draws its five systems onto five HDB blocks. A tag opens in place: it hangs from the corner nearest its pin and grows away from it, so it never moves out from under the pointer; it is kept inside the window, closed and open alike, which keeps that true.
+- **Whole** puts one tag a job at its subject, the career as a map of the city, and its list links to each job.
+- **On a small screen** the pins stay numbered points and the list is read under the city; a tap opens one. A pin whose point is out of the window is not drawn.
+- **With reduced motion** a job's pins are all out at its beat, with no lighting in turn.
+
+**The copy.** The work lines became claims (`src/content/eras.ts`, CONTENT): each with its full line, a few words for the tag, the kind of claim and the place it points at. The project summaries are carried by the claims; the Index keeps the projects' names. The headlines lead with the work, and Whole's line, written for the Machine, is now `Four jobs. Five years. One city.` A job's headline is set large in sentence case, not small in capitals: the statements of the other beats are unchanged.
+
+**How it is built.** The pins are HTML in a layer over the page the size of the canvas (`src/sections/Scene.tsx`), made by the scene (`src/experience/city/pins.ts`) and placed on every frame it draws, by projecting each pin's point through the camera; nothing goes through React and a frame where nothing moved writes nothing. Their points come from the city's plan, so they move with it. They are hidden from assistive technology: they repeat what the page says.
+
+**Cost:** the critical path rose 2.0 kB, to 79.5 kB for `/`, for the styles and the claims; the scene chunk 2.0 kB, to 256.4 kB.
+
+**Checked in the automated Chrome**, at 1600 by 900, 1280 by 720, 1180 by 820, 1024 by 768, 768 by 1024 and 504 by 846: every pin's tag inside the window, closed and open, and an opened tag covering where it was and still under the pointer. Not yet scrolled by Rahul on a real device.
+
+**Open:** the Core's fifth claim, the business trips abroad, has no pin until the plane from Changi exists. Where each tag hangs was chosen by eye at 1600 by 900. Whether to add B's layers list, to show where the visitor is in the career and that two jobs run at once, or C's focus pull for each headline.
+
+### D46. The text held still, and a beat's words arriving with the camera — Proposed, 2026-10-24
+
+With D45 on the page, Rahul: the whole left side moving with the scroll "feels like a credit of a movie". He suggested fixing the text to the scene and moving the bullet points instead.
+
+**What it is.** While the scene runs, each beat's text is held in one place on the window, where it stood when its beat arrived: at the bottom left, or the bottom of a tall window. Nothing rolls. On the way to the next beat the text fades out early, the city moves on its own for a stretch with no words over it, and near the end of the way the new heading comes in, then the claims one after another, each line arriving with its pin in the city (`src/experience/cue.ts`). They rise 8 pixels as they come, a breath and not a roll. The bullets are what moves, as Rahul suggested, but by arriving with their pins rather than by scrolling, which would have been the credits again. The sections stay, so the scroll is not taken over.
+
+**Slower where the claims light up.** Rahul, scrolling it: "slow down the scroll a bit at the highlighting segments". The jobs' sections and Whole's are 1.3 windows tall instead of one (`dwell`, `src/sections/Beat.tsx`), and on the way to them the first half of the scroll takes the story the first 60 per cent of the way, the camera's move, at about the pace it had, and the second half the rest, where the heading and the claims arrive: about 1.6 times the scroll they had (`src/state/progress.ts`). The scroll slows there; it is never held. The page is 9.5 windows long instead of 8.
+
+The words also wait for the camera and for the city: before this the Core's pins came in while the city was still a flat map, hanging over towers not yet risen.
+
+**What does not change.** Without the scene, the text scrolls with the page in its sections, as before. The opening line still scrolls and crumbles where it stands (D37). A text too tall for the window, less 96 pixels kept for the city, scrolls as without the scene. A job's dark band is held with its text and fades with it. Text that is not showing takes no pointer; a screen reader still reads every beat; a link reached by the keyboard in a text not showing scrolls to its beat. With reduced motion each beat's words cut in and out halfway between beats.
+
+**Cost:** 0.3 kB on the critical path, to 79.8 kB, and 0.7 kB in the scene chunk, to 257.1 kB. A held text writes its opacity only when it changes.
+
+**Checked in the automated Chrome** at 1600 by 900 and 504 by 667: no beat's text too tall to hold; every pin's tag inside the window and under the pointer, as in D45. Not yet scrolled by Rahul.
+
+**Open:** the timing, by Rahul scrolling it: how early the words go, how long the city moves alone, how fast the lines follow each other (`cue.ts`), and how much slower the claims' stretch is (`progress.ts`).

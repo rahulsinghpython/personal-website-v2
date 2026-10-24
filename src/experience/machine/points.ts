@@ -10,6 +10,7 @@ import {
   Vector4,
 } from 'three'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js'
+import { CRUMBLE } from '../ink'
 import { shareOf, spinOf, type MachineDef, type MachineValues, type PartId } from './part'
 
 // The Machine as a point cloud: points scattered over the surface of each part, and the material
@@ -200,13 +201,6 @@ export function samplePoints(
   cloud.setAttribute('aSpin', new BufferAttribute(spin, 2))
   return cloud
 }
-
-/**
- * How the opening line crumbles (see ../ink.ts). The line goes from its left end to its right:
- * `sweep` is how much of a grain's turn to leave is set by how far along the line it stands, the
- * rest being chance, and `span` is the share of the whole crumbling that one grain takes to go.
- */
-export const CRUMBLE = { sweep: 0.75, span: 0.4 }
 
 /**
  * How far from the middle of the cloud a grain of the opening line may land, in the Machine's

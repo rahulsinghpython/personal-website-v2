@@ -1,38 +1,41 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { PerspectiveCamera, Points, ShaderMaterial, Vector3, Vector4 } from 'three'
+import { beats } from '../content/beats'
 import { measure, progress, readScroll } from '../state/progress'
 import { guessTier, tierBudget, type Tier } from '../state/tiers'
 import { applyCamera } from './camera/camera'
-import { rubOut, sampleInk, type Ink } from './ink'
-import { machine } from './machine/machine'
-import { machineDefaults } from './machine/part'
-import { linesMaterial, sampleLines } from './machine/lines'
+import { cityMap, GROUPS } from './city/city'
+import { layouts, type CityValues } from './city/layouts'
 import {
-  dustLook,
-  lift,
-  POINT_LOOK,
-  pointsMaterial,
-  sampleGrains,
-  samplePoints,
-} from './machine/points'
-import { applyStory, seek, seekStill, story } from './timeline'
+  CITY_GRAINS,
+  CITY_LOOKS,
+  cityLift,
+  cityPointsMaterial,
+  sampleCity,
+  sampleCityGrains,
+} from './city/points'
+import { cityFlow, cityStory, MOVES_FROM, seekCity, seekCityStill, mapShown } from './city/story'
+import { mountPins, type Pins } from './city/pins'
+import { holdText, type HeldText } from './hold'
+import { rubOut, sampleInk, type Ink } from './ink'
+import { defaultValues } from './params'
 
-// The scene: the Machine as points, drawn behind the page and driven by how far it is scrolled.
-// This is the lazy entry. Nothing outside src/experience/ may import three.js, and the page
-// reaches this file through one dynamic import (src/sections/Scene.tsx).
+// The scene: the city as points, drawn behind the page and driven by how far it is scrolled
+// (docs/DECISIONS.md, D38 and D44). This is the lazy entry. Nothing outside src/experience/ may
+// import three.js, and the page reaches this file through one dynamic import
+// (src/sections/Scene.tsx).
 
 /** Seconds for the scene to close about two thirds of the gap to the scroll position. */
 const CHASE = 0.22
 /** A gap this small cannot be seen, so the scene is taken to have arrived and stops drawing. */
 const ARRIVED = 0.0004
-/** Frames a second while only the beads are moving (D26). */
+/** Frames a second while only the traffic, the river and the train are moving (D26). */
 const AMBIENT_FPS = 30
 /** Seconds for the torch to close about two thirds of the gap to the pointer, and to light. */
 const TORCH_CHASE = 0.07
 const TORCH_LIGHT = 0.3
-/** The most grains the opening line is given, and the share of the cloud's points it may take. */
-const GRAINS = 5000
+/** The share of the city's points the opening line may take as grains. */
 const GRAIN_SHARE = 0.03
 /** A grain's width while it stands on its letter, in CSS pixels. */
 const GRAIN_SIZE = 1.5
@@ -40,12 +43,20 @@ const GRAIN_SIZE = 1.5
 const OPENING_LINE = 'found-title'
 /** The page's background (--color-void), so the canvas can be opaque. */
 const VOID = '#0a0a0a'
+/** The map's lines, as the workbench draws them under the points. */
+const MAP = '#4d4b47'
 
-const values = machineDefaults(machine)
+const LAST = beats.length - 1
+const layout = layouts[0]!
+const look = CITY_LOOKS[0]!
+const values = Object.fromEntries(
+  Object.entries(layout.params).map(([group, schema]) => [group, defaultValues(schema)]),
+) as CityValues
 
 /**
  * Moves the torch toward the pointer and says whether it has come to rest. The light follows the
- * pointer a moment behind, and comes up and goes down, not on and off.
+ * pointer a moment behind, and comes up and goes down, not on and off. It lights the haze only,
+ * so it goes out as the haze rains down.
  */
 function lightTorch(
   material: ShaderMaterial,
@@ -55,7 +66,7 @@ function lightTorch(
   dt: number,
 ) {
   const light = material.uniforms.uTorch!.value as Vector3
-  const lit = pointer.on && story.gather.lens < 1 ? 1 : 0
+  const lit = pointer.on && cityStory.pour < 1 ? 1 : 0
   const x = (pointer.x / width) * 2 - 1
   const y = 1 - (pointer.y / height) * 2
   // Unlit, it has no place to travel from: it comes up where the pointer is.
@@ -71,10 +82,25 @@ function lightTorch(
   return held
 }
 
+/** Copies the story into a points material. Called every frame, so it makes nothing new. */
+function applyCity(material: ShaderMaterial, flow: [number, number, number]) {
+  const uniforms = material.uniforms
+  uniforms.uRise!.value = cityStory.rise
+  uniforms.uPour!.value = cityStory.pour
+  uniforms.uWindows!.value = cityStory.windows
+  const lit = uniforms.uLit!.value as number[]
+  const gain = uniforms.uGain!.value as number[]
+  for (let i = 0; i < GROUPS.length; i++) {
+    lit[i] = cityStory.lit[i]!
+    gain[i] = cityStory.gain[i]!
+  }
+  uniforms.uFocus!.value = cityStory.camera.distance
+  ;(uniforms.uFlow!.value as Vector3).set(...flow)
+}
+
 /**
  * Puts the grains on the opening line, wherever the page has scrolled it to, and rubs the line
- * out as far as it has crumbled. A grain is drawn until the point it is a copy of is, which is
- * by the time the last part has gathered.
+ * out as far as it has crumbled. The grains are drawn until the haze starts to rain down.
  */
 function crumbleLine(
   grains: Points | null,
@@ -84,8 +110,8 @@ function crumbleLine(
   height: number,
 ) {
   if (!grains || !ink) return
-  rubOut(ink, story.crumble)
-  grains.visible = story.crumble < 1 || story.gather.lens < 1
+  rubOut(ink, cityStory.crumble)
+  grains.visible = cityStory.pour < 0.5
   if (!grains.visible) return
   const corner = ink.line.getBoundingClientRect()
   ;(material.uniforms.uLine!.value as Vector4).set(
@@ -94,46 +120,44 @@ function crumbleLine(
     2 / width,
     -2 / height,
   )
-  material.uniforms.uCrumble!.value = story.crumble
+  material.uniforms.uCrumble!.value = cityStory.crumble
   material.uniforms.uAspect!.value = width / height
 }
 
-/**
- * `?lines=0` and `?depth=0` in the address turn off the drawn lines and the fade with depth, to
- * compare the Machine with and without them (docs/DECISIONS.md, D34). `?words=0` leaves the
- * opening line alone (D37).
- */
+/** `?words=0` in the address leaves the opening line alone (D37). */
 const wanted = (key: string) => new URLSearchParams(location.search).get(key) !== '0'
 
-function Machine({ tier, points, still }: { tier: Tier; points: number; still: boolean }) {
+function City({
+  tier,
+  points,
+  still,
+  pinLayer,
+}: {
+  tier: Tier
+  points: number
+  still: boolean
+  pinLayer: HTMLElement | null
+}) {
   const invalidate = useThree((state) => state.invalidate)
   const dpr = useThree((state) => state.viewport.dpr)
   const bufferHeight = useThree((state) => state.size.height) * dpr
-  const count = Math.round(points * POINT_LOOK.density)
-  const scale = lift(count, POINT_LOOK.boost)
-  const dust = dustLook(count, POINT_LOOK.boost)
+  const count = Math.min(look.count, points)
+  const scale = cityLift(look, count)
 
-  const geometry = useMemo(
-    () => samplePoints(machine, values, count, POINT_LOOK.weights, POINT_LOOK.thin),
-    [count],
-  )
-  const material = useMemo(() => pointsMaterial(), [])
+  const geometry = useMemo(() => sampleCity(layout, values, look, count), [count])
+  const material = useMemo(() => cityPointsMaterial(layout), [])
+  const map = useMemo(() => cityMap(layout, values), [])
+  const mapLines = useRef<{ material: { opacity: number }; visible: boolean }>(null)
   useEffect(() => () => geometry.dispose(), [geometry])
   useEffect(() => () => material.dispose(), [material])
+  useEffect(() => () => map.dispose(), [map])
 
-  const [drawn] = useState(() => wanted('lines'))
-  const [depth] = useState(() => (wanted('depth') ? undefined : 0))
-  const lines = useMemo(() => sampleLines(machine, values), [])
-  const lineMaterial = useMemo(() => linesMaterial(), [])
-  useEffect(() => () => lines.dispose(), [lines])
-  useEffect(() => () => lineMaterial.dispose(), [lineMaterial])
-
-  // The opening line crumbles into the dust on the first scroll (D37): its letters are read off
-  // the page, and again whenever the page lays them out differently. Not with reduced motion,
-  // where there is no dust for it to crumble into.
+  // The opening line crumbles into the haze on the first scroll: its letters are read off the
+  // page, and again whenever the page lays them out differently. Not with reduced motion, where
+  // there is no haze for it to crumble into.
   const [worded] = useState(() => wanted('words') && !still)
   const [ink, setInk] = useState<Ink | null>(null)
-  const grainCount = Math.min(GRAINS, Math.round(count * GRAIN_SHARE))
+  const grainCount = Math.min(CITY_GRAINS, Math.round(count * GRAIN_SHARE))
   useEffect(() => {
     const line = worded ? document.getElementById(OPENING_LINE) : null
     if (!line) return
@@ -150,13 +174,39 @@ function Machine({ tier, points, still }: { tier: Tier; points: number; still: b
   }, [worded, grainCount])
   // The line is left as the page drew it when its ink is read again, and when the scene goes.
   useEffect(() => () => void (ink && rubOut(ink, 0)), [ink])
-  const grains = useMemo(() => ink && sampleGrains(geometry, ink.grains), [geometry, ink])
-  const grainMaterial = useMemo(() => pointsMaterial(true), [])
+  const grains = useMemo(() => ink && sampleCityGrains(geometry, ink), [geometry, ink])
+  const grainMaterial = useMemo(() => cityPointsMaterial(layout, true), [])
   const grainPoints = useRef<Points>(null)
   useEffect(() => () => grains?.dispose(), [grains])
   useEffect(() => () => grainMaterial.dispose(), [grainMaterial])
 
-  // The page moving is the only thing that asks for a frame.
+  // Each claim pinned to its proof in the city (D45), placed on every frame drawn below.
+  const pins = useRef<Pins | null>(null)
+  useEffect(() => {
+    if (!pinLayer) return
+    const mounted = mountPins(pinLayer, layout, values)
+    pins.current = mounted
+    invalidate()
+    return () => {
+      pins.current = null
+      mounted.dispose()
+    }
+  }, [pinLayer, invalidate])
+
+  // The beats' text held still on the window and swapped as the story moves, in time with the
+  // pins (D46). Only while the scene runs: without it the text scrolls with the page.
+  const heldText = useRef<HeldText | null>(null)
+  useEffect(() => {
+    const text = holdText()
+    heldText.current = text
+    invalidate()
+    return () => {
+      heldText.current = null
+      text.dispose()
+    }
+  }, [invalidate])
+
+  // The page moving is the only thing that asks for a frame, besides the traffic below.
   useEffect(() => {
     const follow = () => {
       progress.target = readScroll()
@@ -178,20 +228,20 @@ function Machine({ tier, points, still }: { tier: Tier; points: number; still: b
     }
   }, [invalidate])
 
-  // The pointer torch: a mouse moving over the page lights the dust near it. There is none for
+  // The pointer torch: a mouse moving over the page lights the haze near it. There is none for
   // touch, where nothing hovers, and none on the low tier (docs/PERFORMANCE.md). It asks for
-  // frames only while there is dust to light, which is until every part has gathered.
+  // frames only while there is haze to light.
   const torch = useRef({ x: 0, y: 0, on: false })
   useEffect(() => {
     if (tier === 'low') return
     const move = (event: PointerEvent) => {
       if (event.pointerType !== 'mouse') return
       torch.current = { x: event.clientX, y: event.clientY, on: true }
-      if (story.gather.lens < 1) invalidate()
+      if (cityStory.pour < 1) invalidate()
     }
     const leave = () => {
       torch.current.on = false
-      if (story.gather.lens < 1) invalidate()
+      if (cityStory.pour < 1) invalidate()
     }
     addEventListener('pointermove', move, { passive: true })
     document.documentElement.addEventListener('pointerleave', leave)
@@ -201,8 +251,11 @@ function Machine({ tier, points, still }: { tier: Tier; points: number; still: b
     }
   }, [tier, invalidate])
 
-  // The beads drift only on a device with frames to spare, and only if motion is welcome.
+  // The traffic, the river and the train move on their own only on a device with frames to
+  // spare, only if motion is welcome, and only once the city has risen (D43). Their clock only
+  // adds up while it runs, so pausing never makes them jump.
   const ambient = tier !== 'low' && !still
+  const clock = useRef(0)
   const waiting = useRef(false)
   const tick = useCallback(() => {
     waiting.current = false
@@ -216,64 +269,69 @@ function Machine({ tier, points, still }: { tier: Tier; points: number; still: b
     const arrived = still || Math.abs(gap) < ARRIVED
     progress.eased = arrived ? progress.target : progress.eased + gap * (1 - Math.exp(-dt / CHASE))
 
-    if (still) seekStill(progress.eased)
-    else seek(progress.eased)
-    const drifting = ambient && story.wake.rings > 0
-    if (drifting) story.drift += dt * story.wake.rings
-    applyStory(material)
-    applyStory(lineMaterial)
-    applyStory(grainMaterial)
+    const beat = progress.eased * LAST
+    if (still) seekCityStill(beat)
+    else seekCity(beat)
+    const moving = ambient && beat >= MOVES_FROM
+    if (moving) clock.current += dt
+    const flow = cityFlow(beat, clock.current)
+    applyCity(material, flow)
+    applyCity(grainMaterial, flow)
     crumbleLine(grainPoints.current, grainMaterial, ink, size.width, size.height)
-    applyCamera(camera as PerspectiveCamera, story.camera, size.width, size.height)
+    applyCamera(
+      camera as PerspectiveCamera,
+      cityStory.camera,
+      size.width,
+      size.height,
+      cityStory.lens,
+    )
+    pins.current?.place(camera as PerspectiveCamera, size.width, size.height, beat, still)
+    heldText.current?.place(beat, still)
+    if (mapLines.current) {
+      const shown = still ? 0 : mapShown(beat)
+      mapLines.current.visible = shown > 0.01
+      mapLines.current.material.opacity = shown
+    }
 
     const held = lightTorch(material, torch.current, size.width, size.height, dt)
 
     if (!arrived || !held) invalidate()
-    else if (drifting && !waiting.current) {
+    else if (moving && !document.hidden && !waiting.current) {
       waiting.current = true
       setTimeout(tick, 1000 / AMBIENT_FPS)
     }
   })
 
-  // What both the cloud and the grains of the opening line are drawn with.
-  const look = {
-    'uniforms-uSize-value': POINT_LOOK.size * scale,
-    'uniforms-uBrightness-value': POINT_LOOK.brightness * scale,
-    'uniforms-uHeight-value': bufferHeight,
-    'uniforms-uDustShare-value': dust.share,
-    'uniforms-uDustLift-value': dust.lift,
-    ...(depth === 0 && { 'uniforms-uDepth-value': 0 }),
-  }
-
   return (
     <>
+      <lineSegments ref={mapLines as never} geometry={map} position-y={0.004} visible={false}>
+        <lineBasicMaterial color={MAP} transparent opacity={0} />
+      </lineSegments>
       <points geometry={geometry} frustumCulled={false}>
-        <primitive object={material} attach="material" {...look} />
+        <primitive
+          object={material}
+          attach="material"
+          uniforms-uSize-value={look.size * scale}
+          uniforms-uBrightness-value={look.brightness * scale}
+          uniforms-uHeight-value={bufferHeight}
+        />
       </points>
       {grains && (
         <points ref={grainPoints} geometry={grains} frustumCulled={false}>
           <primitive
             object={grainMaterial}
             attach="material"
-            {...look}
+            uniforms-uHeight-value={bufferHeight}
             uniforms-uGrain-value-x={GRAIN_SIZE * dpr}
           />
         </points>
-      )}
-      {drawn && (
-        <lineSegments geometry={lines} frustumCulled={false}>
-          <primitive
-            object={lineMaterial}
-            attach="material"
-            {...(depth === 0 && { 'uniforms-uDepth-value': 0 })}
-          />
-        </lineSegments>
       )}
     </>
   )
 }
 
-export default function Experience() {
+/** `pins` is the layer over the page the claims' pins are drawn in (src/sections/Scene.tsx). */
+export default function Experience({ pins }: { pins: HTMLElement | null }) {
   const [tier] = useState(guessTier)
   const [budget] = useState(() => tierBudget(tier))
   const [still] = useState(() => matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -292,10 +350,10 @@ export default function Experience() {
       // The canvas is fixed to the window, so scrolling cannot move it: do not re-measure it on
       // every scroll event.
       resize={{ scroll: false }}
-      camera={{ near: 0.1, far: 100 }}
+      camera={{ near: 0.05, far: 100 }}
     >
       <color attach="background" args={[VOID]} />
-      <Machine tier={tier} points={budget.points} still={still} />
+      <City tier={tier} points={budget.points} still={still} pinLayer={pins} />
     </Canvas>
   )
 }

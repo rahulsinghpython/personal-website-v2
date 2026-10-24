@@ -32,18 +32,20 @@ export function IndexView() {
         {newestFirst.map((era) => (
           <section key={era.id} aria-labelledby={`${era.id}-title`} className="mt-12 print:mt-6">
             <h2 id={`${era.id}-title`} className="statement">
-              {era.companyFull ? `${era.company} (${era.companyFull})` : era.company}
+              {era.field}
             </h2>
-            <p className="readout mt-2 print:text-black">{`${era.role} / ${monthRange(era)}`}</p>
+            <p className="readout mt-2 print:text-black">
+              {`${era.companyFull ? `${era.company} (${era.companyFull})` : era.company} / ${era.role} / ${monthRange(era)}`}
+            </p>
+            {/* The projects' facts are in the claims, so only their names are added (D45). */}
+            {projectsFor(era.id).map((project) => (
+              <p key={project.id} className="readout mt-4 text-cold print:text-black">
+                {project.name}
+              </p>
+            ))}
             <ul className="mt-4 space-y-2 text-sm leading-relaxed text-dim print:text-black">
-              {projectsFor(era.id).map((project) => (
-                <li key={project.id}>
-                  <span className="readout block text-cold print:text-black">{project.name}</span>
-                  {project.summary}
-                </li>
-              ))}
-              {era.work.map((line) => (
-                <li key={line}>{line}</li>
+              {era.claims.map((claim) => (
+                <li key={claim.text}>{claim.text}</li>
               ))}
             </ul>
           </section>

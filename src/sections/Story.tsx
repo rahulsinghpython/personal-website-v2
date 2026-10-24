@@ -35,33 +35,39 @@ export function Story() {
           <EraBeat key={era.id} era={era} />
         ))}
 
-        <Beat id="whole">
-          <h2 id="whole-title" className="statement">
+        <Beat id="whole" banded dwell>
+          <p className="readout text-lit">The whole career</p>
+          <h2 id="whole-title" className="headline mt-3">
             {statements.whole}
           </h2>
-          {/* The DOM equivalent of clicking a part on the Machine. */}
-          <nav aria-label="Eras" className="mt-8">
-            <ul>
-              {eras.map((era) => (
-                <li key={era.id}>
-                  <a href={`#${era.part}`} className="readout block py-2 text-cold">
-                    {`${yearRange(era)} / ${era.company} / ${era.role}`}
+          {/* The DOM equivalent of clicking a job's subject in the city. Each job's tag in the
+              city has the same name, so pointing at either lights both (D45). */}
+          <nav aria-label="Jobs" className="mt-6">
+            <ol className="claims">
+              {eras.map((era, index) => (
+                <li key={era.id} data-claim={`job-${era.part}`}>
+                  <span className="readout">{String(index + 1).padStart(2, '0')}</span>
+                  <a href={`#${era.part}`} className="block">
+                    {era.field}
+                    <span className="readout block">{`${era.company} / ${yearRange(era)}`}</span>
                   </a>
                 </li>
               ))}
-            </ul>
+            </ol>
           </nav>
         </Beat>
 
-        <Beat id="contact">
+        {/* Banded like a job: the links are what the story ends on, and the city is lit behind them. */}
+        <Beat id="contact" banded>
           <h2 id="contact-title" className="statement">
             {statements.contact}
           </h2>
-          <ul className="mt-8">
+          <ul className="contact mt-6">
             {site.contact.map((link) => (
               <li key={link.id}>
-                <a href={link.href} className="readout block py-2 text-cold">
-                  {`${link.label} / ${link.text}`}
+                <a href={link.href}>
+                  <span className="readout">{link.label}</span>
+                  <span className="break-all">{link.text}</span>
                 </a>
               </li>
             ))}

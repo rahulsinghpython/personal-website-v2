@@ -274,6 +274,11 @@ export function viaductPieces(line: Vec2[]): BufferGeometry[] {
 /** When the viaduct rises. */
 export const VIADUCT_RISE = 0.4
 
+/** The map in thin lines alone, for the page, which draws the city as points and not as solids. */
+export function cityMap(layout: Layout, values: CityValues): BufferGeometry {
+  return mapLines(layout, planCity(layout, values), values.water.river!)
+}
+
 /** The landmarks drawn as one piece; the Science Centre is the Scanner's subject, apart. */
 export const AROUND_THE_BAY: LandmarkId[] = [
   'mbs',

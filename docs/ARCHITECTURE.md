@@ -1,8 +1,8 @@
 # Architecture
 
-How the site is built. The content layer, the Index and prerendering exist. The scene layer is mounted on the home page in a first version: the Machine as points, driven by scroll (see [ROADMAP](ROADMAP.md) for what Phase 3 still owes). Where a section below describes something not built yet, it says so. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
+How the site is built. The content layer, the Index and prerendering exist. The scene layer is mounted on the home page: the city as points, driven by scroll ([DECISIONS D44](DECISIONS.md)); see [ROADMAP](ROADMAP.md) for what Phase 3b still owes. Where a section below describes something not built yet, it says so. Read [EXPERIENCE](EXPERIENCE.md) for what is being built and [PERFORMANCE](PERFORMANCE.md) for the limits it must stay inside.
 
-**The Machine is being replaced by a city ([DECISIONS D38](DECISIONS.md)).** Where this doc says "the Machine" it describes the code as it is today. The city's code is in `src/experience/city/` and is drawn on the workbench only, as a layout greybox ([D40](DECISIONS.md)). The city is built into the same structure: geometry generated in code, sampled to one cloud of points, moved in the vertex shader, driven by one timeline set from progress. Its ambient motion is the traffic, the river and the train, which move from the Core beat on, not only from the Rings beat as the beads did.
+**The Machine has been replaced by a city ([DECISIONS D38](DECISIONS.md)), and the home page draws the city since 2026-10-24 ([D44](DECISIONS.md)).** Where this doc says "the Machine" it describes code that is still in the repository for the workbench's comparison and is deleted next; the page no longer reaches it. The city's code is in `src/experience/city/` and keeps the same structure: geometry generated in code, sampled to one cloud of points, moved in the vertex shader. Its story is not a GSAP timeline but a plain function of the beat, `seekCity` in `src/experience/city/story.ts`, so the page no longer loads GSAP. Its ambient motion is the traffic, the river and the train, which move once the city has risen, on the way to Core (D43).
 
 ## Stack
 
@@ -61,6 +61,10 @@ In `vite dev` there is no prerendering: `#root` starts empty and the app renders
 
 The opening screen is deliberately just type on a dark background. That is why no loading screen is needed.
 
+**The pins** ([DECISIONS D45](DECISIONS.md)). A third, thin layer over the content: a fixed element the size of the canvas (`src/sections/Scene.tsx`), with no pointer events of its own, that the scene fills with HTML pins (`src/experience/city/pins.ts`). Each pin is a claim's place in the city, worked out from the city's plan; on every frame the scene draws, it is projected through the camera and its element moved there with a transform. Nothing goes through React, a frame where nothing moved writes nothing, and a tag's size is read only when it comes out, opens or closes. The pins repeat the claims and are `aria-hidden`. A claim's line on the page and its pin share a name in `data-claim`, which is how pointing at one lights both.
+
+**Held text** ([D46](DECISIONS.md)). While the scene runs it adds `held` to the page, and each beat's text (`data-panel`) is held fixed where it stood when its beat arrived, instead of scrolling. The scene sets each text's opacity and the arrival of each claim line from eased progress, in the same frame as the pins and on one shared timing (`src/experience/hold.ts`, `src/experience/cue.ts`). The sections keep their heights, so the scroll and the progress measured from it are unchanged. Without the scene the text scrolls as an ordinary page.
+
 ## State
 
 Three kinds of state, kept apart on purpose.
@@ -76,20 +80,21 @@ The rule that protects frame rate: **nothing that changes every frame goes throu
 ### Progress drives everything
 
 ```
-scroll position ──▶ target progress ──▶ eased progress ──▶ master timeline position
+scroll position ──▶ target progress ──▶ eased progress ──▶ the city's story (seekCity)
                                               │
                                               ├──▶ camera pose
-                                              ├──▶ shader uniforms (assembly, wake, per part)
+                                              ├──▶ shader uniforms (rain, rise, what is lit)
+                                              ├──▶ the pins and the held text (D45, D46)
                                               └──▶ current beat (written to the store when it changes)
 ```
 
-- Target progress comes from the scroll position, measured against the sections: a beat has arrived when the bottom of its section meets the bottom of the window, which is where its text sits. Between two arrivals progress moves evenly. When every section is one window tall this is the scroll position divided by the scrollable height; when one is taller, as on a phone, the scene still stays in step with the text ([DECISIONS D31](DECISIONS.md)). `src/state/progress.ts`.
-- Eased progress chases the target a little each frame. This is what makes the Machine feel smooth while the page itself scrolls natively.
+- Target progress comes from the scroll position, measured against the sections: a beat has arrived when the bottom of its section meets the bottom of the window, which is where its text sits. Between two arrivals progress moves evenly. When every section is one window tall this is the scroll position divided by the scrollable height; when one is taller, as on a phone, the scene still stays in step with the text ([DECISIONS D31](DECISIONS.md)). On the way to a beat that dwells, a job or Whole, whose section is 1.3 windows tall, the second half of the scroll is spent on the last 40 per cent of the way, where its claims arrive ([D46](DECISIONS.md)). `src/state/progress.ts`.
+- Eased progress chases the target a little each frame. This is what makes the city feel smooth while the page itself scrolls natively.
 - The scene is a **pure function of eased progress**. Same progress, same picture. That makes it reversible (scroll up to undo), testable (set progress to any value and look), and easy to debug.
 
 ### Rendering on demand
 
-The canvas does not run a continuous loop. A frame is drawn only when something asked for one: scroll, pointer movement over an interactive area, a click, a resize. While eased progress is still catching up, frames keep being requested; once it has settled, rendering stops entirely, unless a part has ambient motion ([DECISIONS D26](DECISIONS.md)), in which case frames continue at a capped rate, 30 a second, while the canvas is visible. The only ambient motion is the beads, and they move only once the Rings are awake, so nothing is drawn at rest before the Rings beat on any tier. This is the technical side of "the visitor causes the motion" and it is the single largest performance win. See [PERFORMANCE](PERFORMANCE.md).
+The canvas does not run a continuous loop. A frame is drawn only when something asked for one: scroll, pointer movement over an interactive area, a click, a resize. While eased progress is still catching up, frames keep being requested; once it has settled, rendering stops entirely, unless a part has ambient motion ([DECISIONS D26](DECISIONS.md)), in which case frames continue at a capped rate, 30 a second, while the canvas is visible. The only ambient motion is the city's traffic, river and train, and they move on their own only once the city has risen, so nothing is drawn at rest before then on any tier, and never on the low tier ([DECISIONS D43](DECISIONS.md)). This is the technical side of "the visitor causes the motion" and it is the single largest performance win. See [PERFORMANCE](PERFORMANCE.md).
 
 ## How the Machine is drawn
 
@@ -189,8 +194,8 @@ The design tool described in [DESIGN-PROCESS](DESIGN-PROCESS.md#the-workbench). 
 | Condition | Result |
 | --- | --- |
 | JavaScript off | Content layer only. Fully readable. |
-| WebGL unavailable or context lost | Content layer plus a static image of the finished Machine. |
-| `prefers-reduced-motion` | Machine shown assembled and awake; camera cuts between beats; no assembly animation; the beads do not drift. Built in Phase 3 in this plain form; Phase 5 reviews it. |
+| WebGL unavailable or context lost | Content layer plus a static image of the lit city. |
+| `prefers-reduced-motion` | The city shown whole and lit; camera cuts between beats; no crumbling, no rain, no rise; nothing moves on its own (`seekCityStill`). Phase 5 reviews it. |
 | Low tier device | Fewer points, lower pixel ratio, optional interactions off. See tiers in [PERFORMANCE](PERFORMANCE.md). |
 | Visitor clicks `INDEX` | The Index at `/plain`: same content, no canvas. |
 

@@ -1,4 +1,4 @@
-import { CRUMBLE, seeded } from './machine/points'
+import { rng } from './city/plan'
 
 // The opening line as ink: where the letters of the Found heading are on the page, so that points
 // can stand on them, and the line can be rubbed out as those points leave (docs/DECISIONS.md, D37).
@@ -16,6 +16,13 @@ export type Ink = {
   /** Rubs the line out from its left end to its right. Held still, and moved by `rubOut`. */
   rub: Animation
 }
+
+/**
+ * How the opening line crumbles. The line goes from its left end to its right: `sweep` is how
+ * much of a grain's turn to leave is set by how far along the line it stands, the rest being
+ * chance, and `span` is the share of the whole crumbling that one grain takes to go.
+ */
+export const CRUMBLE = { sweep: 0.75, span: 0.4 }
 
 /** How finely the letters are read: this many samples across one CSS pixel. */
 const DETAIL = 4
@@ -96,7 +103,7 @@ export function sampleInk(line: HTMLElement, count: number): Ink | null {
   }
   if (!inked.length) return null
 
-  const random = seeded(3)
+  const random = rng(3)
   const grains = new Float32Array(count * 3)
   const width = Math.max(1, right - left)
   for (let i = 0; i < count; i++) {

@@ -9,6 +9,7 @@ import {
   ShaderMaterial,
   Vector2,
   Vector3,
+  Vector4,
 } from 'three'
 import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js'
 import {
@@ -26,7 +27,9 @@ import {
 import type { LandmarkId } from './landmarks'
 import type { CityValues, Layout } from './layouts'
 import { rng, type Vec2 } from './plan'
-import { RISE_SPAN } from './story'
+import type { Ink } from '../ink'
+import { CRUMBLE } from '../ink'
+import { POUR_SPAN, RISE_SPAN } from './story'
 
 // The city as points (docs/EXPERIENCE.md, "The city"): a city at night is its lights. Points are
 // placed where they mean something, on windows, edges and roofs, and the rest is left dark. One
@@ -107,6 +110,18 @@ const TRAIN = { points: 900, car: 0.13, gap: 0.015, wait: 1.6 }
 /** The river's packets: how many streams across it, points to a packet, their spacing and fade. */
 const PACKET = { streams: 5, points: 5, gap: 0.009, trail: 0.7 }
 
+/**
+ * The haze the opening line crumbles into: a wide, shallow cloud round where the camera looks at
+ * Found (CITY_POSES in ./story.ts), reaching past the edges of a wide window.
+ */
+const HAZE = { x: 0, y: 4.3, z: 0.5, across: 4.6, up: 1.8, deep: 1.6 }
+
+/** The share of a point's fall from the haze that is falling; the rest is spreading over the land. */
+const FALL = 0.45
+
+/** The most grains the opening line is given. */
+export const CITY_GRAINS = 4000
+
 /** A window's width and height, as the sketch spaced them. */
 const WINDOW = { across: 0.045, up: 0.055 }
 
@@ -173,6 +188,10 @@ class Writer {
   readonly move: Float32Array
   /** A car's road, as its start and heading; for the river and the train, how far aside and the line's length. */
   readonly path: Float32Array
+  /** The opening: where a point hangs in the haze, where its rain hits the water, when it falls. */
+  readonly dust: Float32Array
+  readonly water: Float32Array
+  readonly late: Float32Array
   written = 0
 
   constructor(
@@ -187,6 +206,45 @@ class Writer {
     this.jitter = new Float32Array(count)
     this.move = new Float32Array(count * 4)
     this.path = new Float32Array(count * 4)
+    this.dust = new Float32Array(count * 3)
+    this.water = new Float32Array(count * 2)
+    this.late = new Float32Array(count)
+  }
+
+  /**
+   * Gives every point written its part in the opening. It hangs somewhere in the haze, falls as
+   * rain onto the nearest water, the river or the bay, and spreads from there to its place. The
+   * nearer the water its place is, the sooner it falls, so the map spreads out from the river.
+   */
+  rain(layout: Layout, random: () => number) {
+    const [cx, cz, radius] = circleOf(layout.bay)
+    for (let i = 0; i < this.written; i++) {
+      const height = random() * 2 - 1
+      const angle = random() * Math.PI * 2
+      // Thinning towards its edges, so the haze has no outline.
+      const reach = Math.cbrt(random()) * (0.55 + 0.45 * random())
+      const flat = Math.sqrt(1 - height * height) * reach
+      this.dust.set(
+        [
+          HAZE.x + Math.cos(angle) * flat * HAZE.across,
+          HAZE.y + height * reach * HAZE.up,
+          HAZE.z + Math.sin(angle) * flat * HAZE.deep,
+        ],
+        i * 3,
+      )
+      const home: Vec2 = [this.position[i * 3]!, this.position[i * 3 + 2]!]
+      const onRiver = nearestOn(layout.river, home)
+      const fromBay = Math.hypot(home[0] - cx, home[1] - cz)
+      const onBay: Vec2 =
+        fromBay <= radius
+          ? home
+          : [cx + ((home[0] - cx) / fromBay) * radius, cz + ((home[1] - cz) / fromBay) * radius]
+      const river = Math.hypot(home[0] - onRiver[0], home[1] - onRiver[1])
+      const bay = Math.hypot(home[0] - onBay[0], home[1] - onBay[1])
+      const water = river < bay ? onRiver : onBay
+      this.water.set(water, i * 2)
+      this.late[i] = 0.55 * Math.min(1, Math.min(river, bay) / 2.5) + 0.45 * random()
+    }
   }
 
   put(x: number, y: number, z: number, group: Group, bright: number, rise: number, window = 0) {
@@ -219,6 +277,9 @@ class Writer {
     cloud.setAttribute('aJitter', new BufferAttribute(this.jitter.subarray(0, n), 1))
     cloud.setAttribute('aMove', new BufferAttribute(this.move.subarray(0, n * 4), 4))
     cloud.setAttribute('aPath', new BufferAttribute(this.path.subarray(0, n * 4), 4))
+    cloud.setAttribute('aDust', new BufferAttribute(this.dust.subarray(0, n * 3), 3))
+    cloud.setAttribute('aWater', new BufferAttribute(this.water.subarray(0, n * 2), 2))
+    cloud.setAttribute('aLate', new BufferAttribute(this.late.subarray(0, n), 1))
     return cloud
   }
 }
@@ -557,7 +618,54 @@ export function sampleCity(
     out.put(cx + Math.cos(angle) * r, 0, cz + Math.sin(angle) * r, 'bay', 1, 0)
   }
 
+  // Its own stream of numbers, so changing the opening moves nothing in the city.
+  out.rain(layout, rng(5))
   return out.geometry()
+}
+
+/**
+ * The grains of the opening line: copies of points whose place in the haze is below the line,
+ * so every grain falls, picked evenly and given a place on a letter (see ../ink.ts). `ink` holds
+ * three numbers a grain: how far across and down the line it stands, in CSS pixels, and when it
+ * leaves, from 0 to 1. Nothing is added to the city for them.
+ */
+export function sampleCityGrains(cloud: BufferGeometry, ink: Ink): BufferGeometry {
+  const dust = cloud.getAttribute('aDust')
+  const below: number[] = []
+  for (let i = 0; i < dust.count; i++) {
+    const across = (dust.getX(i) - HAZE.x) / HAZE.across
+    if (dust.getY(i) < HAZE.y - 0.1 && Math.abs(across) < 0.7) below.push(i)
+  }
+  const count = Math.min(ink.grains.length / 3, below.length)
+  const grains = new BufferGeometry()
+  for (const [name, attribute] of Object.entries(cloud.attributes)) {
+    const size = attribute.itemSize
+    const copy = new Float32Array(count * size)
+    for (let i = 0; i < count; i++) {
+      const from = below[Math.floor((i * below.length) / count)]! * size
+      for (let j = 0; j < size; j++) copy[i * size + j] = attribute.array[from + j]!
+    }
+    grains.setAttribute(name, new BufferAttribute(copy, size))
+  }
+  grains.setAttribute('aWord', new BufferAttribute(ink.grains.slice(0, count * 3), 3))
+  return grains
+}
+
+/** The nearest point to `point` on a line of segments. */
+function nearestOn(line: Vec2[], [x, z]: Vec2): Vec2 {
+  let best: Vec2 = line[0]!
+  let nearest = Infinity
+  for (let i = 1; i < line.length; i++) {
+    const [ax, az] = line[i - 1]!
+    const [bx, bz] = line[i]!
+    const dx = bx - ax
+    const dz = bz - az
+    const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / (dx * dx + dz * dz || 1)))
+    const at: Vec2 = [ax + dx * t, az + dz * t]
+    const d = Math.hypot(x - at[0], z - at[1])
+    if (d < nearest) [nearest, best] = [d, at]
+  }
+  return best
 }
 
 const lineLength = (line: Vec2[]) =>
@@ -608,11 +716,35 @@ function circleOf(outline: Vec2[]): [x: number, z: number, radius: number] {
  * `uLand` fades the city in as the map lands, `uLit` and `uGain` light and dim each group, and
  * `uWindows` is the share of the heartland's windows lit.
  */
-export function cityPointsMaterial(layout: Layout) {
+export function cityPointsMaterial(layout: Layout, grains = false) {
   const lines = [...layout.river, ...layout.mrt].map(([x, z]) => new Vector2(x, z))
   return new ShaderMaterial({
-    defines: { RIVER: layout.river.length, TRACK: layout.mrt.length, LINES: lines.length },
+    defines: {
+      RIVER: layout.river.length,
+      TRACK: layout.mrt.length,
+      LINES: lines.length,
+      ...(grains && { GRAINS: '' }),
+    },
     uniforms: {
+      // The opening (D44): how far the haze has rained down, how bright the haze is against the
+      // city, and how much brighter a point flashes as it hits the water.
+      uPour: { value: 1 },
+      uDustGain: { value: 0.45 },
+      // The share of points that hang in the haze and fall as rain. The rest are not drawn until
+      // they are spreading over the land, so the haze is faint and the rain is light.
+      uHazeShare: { value: 0.33 },
+      uSplash: { value: 2 },
+      uRain: { value: 2.5 },
+      // The pointer torch (D36): where it is in the window, from -1 to 1 each way, and how lit;
+      // the window's width over its height; how far it reaches and how much it brightens.
+      uTorch: { value: new Vector3() },
+      uAspect: { value: 1 },
+      uTorchReach: { value: new Vector2(0.42, 2.5) },
+      // The grains of the opening line (see sampleCityGrains): how far it has crumbled, where its
+      // corner is and how big a CSS pixel is, a grain's width in pixels, brightness and growth.
+      uCrumble: { value: 0 },
+      uLine: { value: new Vector4() },
+      uGrain: { value: new Vector3(1.5, 1, 1.6) },
       // The river's centre line, then the viaduct's, for the points that follow them.
       uLines: { value: lines },
       // How far a point moving at a speed of 1 has travelled: a car, the river, the train.
@@ -654,6 +786,23 @@ export function cityPointsMaterial(layout: Layout) {
       attribute vec4 aPath;
       uniform vec2 uLines[LINES];
       uniform vec3 uFlow;
+      uniform float uPour;
+      uniform float uDustGain;
+      uniform float uHazeShare;
+      uniform float uSplash;
+      uniform float uRain;
+      uniform vec3 uTorch;
+      uniform float uAspect;
+      uniform vec2 uTorchReach;
+      attribute vec3 aDust;
+      attribute vec2 aWater;
+      attribute float aLate;
+      #ifdef GRAINS
+        uniform float uCrumble;
+        uniform vec4 uLine;
+        uniform vec3 uGrain;
+        attribute vec3 aWord;
+      #endif
       varying float vBrightness;
       varying float vWarm;
 
@@ -697,6 +846,23 @@ export function cityPointsMaterial(layout: Layout) {
         float start = aRise * ${(1 - RISE_SPAN).toFixed(3)};
         at.y *= smoothstep(start, start + ${RISE_SPAN.toFixed(3)}, uRise);
 
+        // The opening: the point hangs in the haze, falls as rain onto the water, faster and
+        // faster, and spreads from there to its place on the map.
+        float poured = clamp((uPour - aLate * ${(1 - POUR_SPAN).toFixed(3)}) / ${POUR_SPAN.toFixed(3)}, 0.0, 1.0);
+        float away = 1.0 - poured;
+        if (poured < 1.0) {
+          float fall = clamp(poured / ${FALL.toFixed(3)}, 0.0, 1.0);
+          float spread = smoothstep(${FALL.toFixed(3)}, 1.0, poured);
+          vec2 over = mix(mix(aDust.xz, aWater, smoothstep(0.0, 1.0, fall)), at.xz, spread);
+          at = vec3(over.x, aDust.y * (1.0 - fall * fall), over.y);
+        }
+        // Brighter while it falls, so the rain can be followed down, and a flash as it hits the water.
+        float raining = poured > 0.0 && poured < ${FALL.toFixed(3)} ? sin(3.14159 * poured / ${FALL.toFixed(3)}) : 0.0;
+        float splash = 1.0 - smoothstep(0.0, 0.1, abs(poured - ${FALL.toFixed(3)}));
+        // Only some points are haze and rain; the others come in as they spread.
+        float haze = step(fract(aJitter * 13.37), uHazeShare);
+        shown *= max(haze, smoothstep(${FALL.toFixed(3)}, ${(FALL + 0.2).toFixed(3)}, poured));
+
         vec4 viewPosition = modelViewMatrix * vec4(at, 1.0);
         gl_Position = projectionMatrix * viewPosition;
         float pixelsPerUnit = 0.5 * uHeight * projectionMatrix[1][1] / -viewPosition.z;
@@ -704,7 +870,7 @@ export function cityPointsMaterial(layout: Layout) {
 
         float lit = uLit[group];
         float window = aWindow > 0.0 ? step(aWindow, uWindows) : 0.0;
-        vWarm = max(lit, window);
+        vWarm = max(lit, window) * poured;
 
         // Nothing is drawn narrower than a pixel: a point that should be is dimmer by the area
         // it gained. One drawn wider than the cap is dimmed a little, as the sketch did.
@@ -712,7 +878,30 @@ export function cityPointsMaterial(layout: Layout) {
         brightness *= min(1.0, size * size) * (size > uMaxSize ? 0.6 : 1.0);
         brightness *= mix(1.0, uWindowGain, window);
         brightness *= clamp(1.25 - (-viewPosition.z - uFocus) * 0.2, 0.3, 1.3);
+        brightness *= mix(1.0, uDustGain, away) * (1.0 + uSplash * splash + uRain * raining);
+        // The torch lights the haze near the pointer, and fades as the haze comes down.
+        vec2 fromTorch = (gl_Position.xy / gl_Position.w - uTorch.xy) * vec2(uAspect, 1.0);
+        float torch = uTorch.z * away * smoothstep(uTorchReach.x, 0.0, length(fromTorch));
+        brightness *= 1.0 + uTorchReach.y * torch;
         gl_PointSize = clamp(size, 1.0, uMaxSize);
+
+        #ifdef GRAINS
+          // A grain stands on its letter until the line crumbles as far as it, then falls into
+          // its place in the haze, in the window and not in the city: the line is on the page.
+          // Across at an even pace and down faster and faster, as rain falls.
+          float held = 1.0 - smoothstep(0.0, 1.0,
+            (uCrumble - aWord.z * ${(1 - CRUMBLE.span).toFixed(3)}) / ${CRUMBLE.span.toFixed(3)});
+          float flown = smoothstep(1.0, 0.25, held);
+          vec2 from = uLine.xy + aWord.xy * uLine.zw;
+          vec2 to = gl_Position.xy / gl_Position.w;
+          gl_Position = vec4(mix(from.x, to.x, flown), mix(from.y, to.y, flown * flown), 0.0, 1.0);
+          // Brighter than the haze on its way, so the eye can follow it; landed, it cools into
+          // the haze and is gone, since the point it is a copy of is already there.
+          brightness = uGrain.y * (0.7 + 0.3 * aJitter) * (1.0 + uGrain.z * flown);
+          brightness *= 1.0 - smoothstep(0.75, 1.0, flown);
+          gl_PointSize = uGrain.x * (1.0 + uGrain.z * flown);
+          vWarm = 0.0;
+        #endif
         vBrightness = brightness;
         if (brightness <= 0.001) gl_Position = vec4(2.0, 2.0, 2.0, 1.0);
       }

@@ -12,17 +12,30 @@ export const progress = {
 
 /** The scroll position at which each beat's text has fully arrived, in story order. */
 let arrivals: number[] = []
+/** Which beats dwell: their sections are marked `data-dwell`. */
+let dwells: boolean[] = []
+
+/**
+ * On the way to a beat that dwells, the jobs and Whole, where the claims light up with their pins
+ * (docs/DECISIONS.md, D46): the first `SCROLL` of the scroll takes the story the first `STORY` of
+ * the way, the camera's move, at about the pace of any other beat in a section that is taller,
+ * and the rest of the scroll, slower, the claims arriving. Rahul asked for the scroll to slow
+ * there, not stop: it is never held.
+ */
+const DWELL = { scroll: 0.5, story: 0.6 }
 
 /**
  * Finds where each beat arrives: the scroll position that puts the bottom of its section at the
  * bottom of the window, which is where its text sits. Measured from the sections and not taken
  * as an even share of the page, so the scene stays in step with the text when one beat's section
- * is taller than another's, as on a phone.
+ * is taller than another's, as on a phone, or taller to dwell.
  */
 export function measure() {
-  arrivals = Array.from(document.querySelectorAll<HTMLElement>('[data-beat]'), (section) =>
+  const sections = Array.from(document.querySelectorAll<HTMLElement>('[data-beat]'))
+  arrivals = sections.map((section) =>
     Math.max(0, section.offsetTop + section.offsetHeight - innerHeight),
   )
+  dwells = sections.map((section) => section.hasAttribute('data-dwell'))
 }
 
 /** Progress at the current scroll position. */
@@ -33,6 +46,12 @@ export function readScroll(): number {
   while (beat < last - 1 && scrollY >= arrivals[beat + 1]!) beat++
   const from = arrivals[beat]!
   const to = arrivals[beat + 1]!
-  const within = to > from ? (scrollY - from) / (to - from) : scrollY >= to ? 1 : 0
-  return (beat + Math.min(1, Math.max(0, within))) / last
+  let within = to > from ? (scrollY - from) / (to - from) : scrollY >= to ? 1 : 0
+  within = Math.min(1, Math.max(0, within))
+  if (dwells[beat + 1])
+    within =
+      within < DWELL.scroll
+        ? (within / DWELL.scroll) * DWELL.story
+        : DWELL.story + ((within - DWELL.scroll) / (1 - DWELL.scroll)) * (1 - DWELL.story)
+  return (beat + within) / last
 }

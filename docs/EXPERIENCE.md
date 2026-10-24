@@ -12,7 +12,7 @@ A city at night, drawn as a laser scan: points, a few lines, and surfaces only w
 
 As in the sketch, kept over a layout true to the map, because the experience matters more than accuracy ([DECISIONS D40](DECISIONS.md)). It is `src/experience/city/layouts.ts`, drawn on the workbench.
 
-- **The water.** The Singapore River runs into Marina Bay. The river is how the visitor arrives: the dust pours down into it.
+- **The water.** The Singapore River runs into Marina Bay. The river is how the visitor arrives: the haze comes down onto it as rain ([DECISIONS D44](DECISIONS.md)).
 - **The landmarks, round the water and in front,** so the city reads as Singapore from the first view: Marina Bay Sands across the bay, the ArtScience Museum in front of it, the Supertrees behind it, the Flyer and the Esplanade on the north shore, the Merlion at the river mouth. Drawn in code and kept recognisable, not traced.
 - **The CBD,** towers on the river's south bank.
 - **The heartland,** HDB slabs and point blocks all round, kept plain. This is where the windows are. Its one landmark is Pinnacle@Duxton, towers joined by sky bridges, drawn with care like the landmarks round the bay.
@@ -45,7 +45,16 @@ The beats keep the ids of the Machine's parts. No visitor sees them.
 
 ### The words over the city
 
-A city is busier than one object was, and it would win against the text. Proposed ([DECISIONS D38](DECISIONS.md)) and shown in the sketch: during each job's beat the city dims except its subject, and a short tag is pinned to the subject, like the labels in a scanning tool, with the years, the company and one line. The beat's full text sits at the left edge on a dark band, so it is read before the city is. All of it is real text in the page (rule 3); the tag is the canvas repeating it.
+Every claim is pinned to its proof in the city, like a surveyor's notes on a scan ([DECISIONS D45](DECISIONS.md)). Picked by Rahul from three systems on 2026-10-24.
+
+- **The beat's text** sits at the left edge on a dark band, at the bottom of a tall window: the job's number and its field in the accent, the headline large, leading with the work, the company, role and years as small print, then every [claim](CONTENT.md#claims) as its own numbered line, the strongest first. It is the whole job, readable with no scene, and the Index says the same.
+- **The pins.** Each claim with something in the city to point at has a numbered pin there, with a few of its words: the requests on the streets, the scanned roof, BLK 2024, the train for CI/CD, the Lens's tower. During a job's beat the city dims except its subject, as D38 proposed.
+- **Held, not scrolled** ([D46](DECISIONS.md)). While the scene runs, the text is held still on the window rather than rolling up it like film credits. On the way to the next beat it fades early, the city moves alone, and as the beat arrives the headline comes in, then the claims one after another, each line with its pin. The scroll slows a little for that stretch: a job's section is 1.3 windows tall, the extra spent on its claims arriving.
+- **Pointing**, never needed: pointing at a claim's line or its pin opens the pin's full sentence and dims the rest; a tap on touch. The open tag grows away from its pin from a corner that stays put, so it never moves out from under the pointer, and it is kept inside the window. The database's line draws its five systems onto five HDB blocks.
+- **Whole** puts one tag a job at its subject, and its list links to each job.
+- **On a small screen** the pins stay numbered points over the city and the list is read under it.
+
+All of it is real text in the page (rule 3); the pins repeat it and are hidden from assistive technology.
 
 ### Easter eggs
 
@@ -61,8 +70,8 @@ The page is one long scroll. The canvas is fixed behind it and the city responds
 
 | # | Beat | What the visitor sees | What they learn |
 | --- | --- | --- | --- |
-| 0 | **Found** | Black. Small type in the middle of the window, a size up from the other statements: `YOU'VE FOUND RAHUL.` Faint dust in the dark. Moving the pointer lights the dust near it. | Something is here. Nothing is explained. |
-| 1 | **Signal** | First scroll. The opening line crumbles into bright grains ([DECISIONS D37](DECISIONS.md)), and the dust pours down as a river and lands flat as a map: the bay, the river, the roads, every footprint. | The dust was a place all along. |
+| 0 | **Found** | Black. Small type in the middle of the window, a size up from the other statements: `YOU'VE FOUND RAHUL.` A faint haze of light in the dark round it. Moving the pointer lights the haze near it. | Something is here. Nothing is explained. |
+| 1 | **Signal** | First scroll. The opening line crumbles into bright grains that fall into the haze ([DECISIONS D37](DECISIONS.md)). Then the haze comes down as rain onto the river and the bay, flashing as it hits the water, and spreads from the water across the land as a map: the bay, the river, the roads, every footprint ([D44](DECISIONS.md)). | The haze was a place all along. |
 | 2 | **Core** | The city rises out of the map, building by building, and the camera glides down to the CBD. Requests run along the river and the streets as light. The first tag: the work, with the years and the company in small print. | Things in the city light up, and each one is a kind of work. |
 | 3 | **Scanner** | A roof stands as raw points. The visitor sweeps across it and surface appears where they sweep. | Rahul built this kind of software. They have been looking at a scan the whole time. |
 | 4 | **Rings** | Windows light up across the HDB blocks. | Scale and orchestration: 10,000+ users. |
@@ -127,7 +136,7 @@ A plain text version of everything: name, one line, the four eras with roles and
 
 **Touch and small screens.** Same story, same beats. The beat's subject sits in the upper part of the screen with text below. There is no pointer torch; the Scanner sweep becomes a drag. Fewer points (see tiers in [PERFORMANCE](PERFORMANCE.md)).
 
-**Reduced motion.** No pouring and no lighting up in sequence. The city is shown whole and lit, the camera cuts between beats instead of travelling, nothing moves on its own, and the content scrolls normally.
+**Reduced motion.** No crumbling, no rain and no lighting up in sequence. The city is shown whole and lit, the camera cuts between beats instead of travelling, nothing moves on its own, and the content scrolls normally.
 
 **No WebGL, or it fails.** The content layer is already a complete page. A static image of the lit city stands in for the canvas.
 
@@ -140,8 +149,8 @@ Direction only. Exact tokens are chosen during the build.
 - **Background:** near-black, not pure black, so the dust has something to sit in.
 - **Points, cold:** cold off-white, low brightness.
 - **Accent, lit:** one warm colour. Working choice is a solar amber, which fits "powering on" and the Etavolt solar work. One accent only.
-- **Type:** two families. A tight grotesque for statements, set small and in capitals. A monospace for instrument readouts: years, numbers, the tags in the city.
-- **Text placement:** at the edges, on a dark band, never over the beat's subject. The exceptions are the opening line, which stands in the middle because there is nothing yet ([DECISIONS D37](DECISIONS.md)), and the tags pinned in the city.
+- **Type:** two families. A tight grotesque for statements, set small and in capitals, and for a job's headline, set large in sentence case ([DECISIONS D45](DECISIONS.md)). A monospace for instrument readouts: years, numbers, labels.
+- **Text placement:** at the edges, on a dark band, never over the beat's subject, and held still while the scene runs ([D46](DECISIONS.md)). The exceptions are the opening line, which stands in the middle because there is nothing yet ([DECISIONS D37](DECISIONS.md)), and the pins in the city.
 - **Words:** few. See the voice rules in [CONTENT](CONTENT.md).
 
 ## Fixed versus open
@@ -149,7 +158,7 @@ Direction only. Exact tokens are chosen during the build.
 **Fixed.** Change only with a new entry in [DECISIONS](DECISIONS.md).
 
 - One world: a laser-scanned city at night round Marina Bay, with its landmarks in front.
-- The way in: the opening line crumbles into the dust, and the dust pours down as a river into the city.
+- The way in: the opening line crumbles into the haze, and the haze rains down onto the river and the bay and spreads from the water as the map (D44).
 - The four jobs as things happening in the city, in the order of the career.
 - Drawn primarily as points.
 - The eight beats and their order.
@@ -161,11 +170,11 @@ Direction only. Exact tokens are chosen during the build.
 
 - The city's layout and the detail of each landmark.
 - How the map is drawn, and how fast the city rises from it.
-- How the words sit over the city: the spotlight, tags and dark band are proposed, not picked.
+- The timing of a beat's words: how early they go and how fast the claims follow each other ([DECISIONS D46](DECISIONS.md)). How the words sit over the city is picked ([D45](DECISIONS.md)).
 - Which easter eggs beyond the seven picked, and how each is found.
 - How the scanned surface is drawn. It reads as rebuilt from a scan, points closing into faces, and is better than Rahul's old mesh, which he does not want copied (2026-10-20). The mesh image is a reference for the Science Centre's shape only.
 - What the visitor can do at the Whole beat.
 - How many points each tier draws. A city fills the window on every beat, so these start again from measurement.
 - The accent colour and the typefaces.
-- All copy. Drafts are in [CONTENT](CONTENT.md); the Whole beat's `FIVE YEARS. ONE MACHINE.` no longer fits.
+- All copy. Drafts are in [CONTENT](CONTENT.md), rewritten on 2026-10-24 to lead with the work ([DECISIONS D45](DECISIONS.md)).
 - How long each beat is in scroll distance.

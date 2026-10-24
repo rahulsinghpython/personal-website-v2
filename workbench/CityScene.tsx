@@ -12,7 +12,14 @@ import { applyCamera } from '../src/experience/camera/camera'
 import { buildCity, disposeCity, GROUPS, type Piece } from '../src/experience/city/city'
 import type { Layout } from '../src/experience/city/layouts'
 import { cityLift, cityPointsMaterial, sampleCity } from '../src/experience/city/points'
-import { cityFlow, cityStory, MOVES_FROM, RISE_SPAN, seekCity } from '../src/experience/city/story'
+import {
+  cityFlow,
+  cityStory,
+  mapShown,
+  MOVES_FROM,
+  RISE_SPAN,
+  seekCity,
+} from '../src/experience/city/story'
 import { TIERS } from '../src/state/tiers'
 import { pose } from './camera'
 import { SHOWN, useCity } from './city'
@@ -57,12 +64,6 @@ function riseShader(rise: { value: number }) {
 const RISE = { value: 1 }
 const onBeforeCompile = riseShader(RISE)
 
-/** 1 at `beat`, fading to nothing `width` beats either side. As the sketch drew the map. */
-const near = (beat: number, at: number, width: number) => {
-  const t = Math.min(1, Math.abs(beat - at) / width)
-  return 1 - t * t * (3 - 2 * t)
-}
-
 /**
  * The layout greybox (Phase 3b): the tile of map, the water, and every building as a grey solid
  * risen from its footprint, for judging the layout and the camera. With `draw` at points it is the
@@ -86,7 +87,7 @@ export function CityScene({ layout, look }: { layout: Layout; look?: string }) {
   const rise = beat === null ? risen : cityStory.rise
   const land = beat === null ? 1 : cityStory.land
   // In the story the map shows while the city is flat, and goes as it rises.
-  const lines = beat === null ? (map ? 1 : 0) : near(beat, 1.5, 0.32)
+  const lines = beat === null ? (map ? 1 : 0) : mapShown(beat)
   useEffect(() => {
     RISE.value = rise
     invalidate()
@@ -105,7 +106,7 @@ export function CityScene({ layout, look }: { layout: Layout; look?: string }) {
             <lineBasicMaterial color={MAP_POINTS} transparent opacity={lines} />
           </lineSegments>
         )}
-        <CityPoints layout={layout} look={look} rise={rise} land={land} />
+        <CityPoints layout={layout} look={look} rise={rise} />
       </>
     )
 
@@ -156,11 +157,14 @@ export function CityScene({ layout, look }: { layout: Layout; look?: string }) {
   )
 }
 
-/** Sets the story's moment on the points: risen, landed, and what is lit. Null is at rest. */
-function lightCity(material: ShaderMaterial, rise: number, land: number, beat: number | null) {
+/**
+ * Sets the story's moment on the points: risen, rained down, and what is lit. Null is at rest.
+ * As points, the city does not fade in: it is the haze until it rains down (D44).
+ */
+function lightCity(material: ShaderMaterial, rise: number, beat: number | null) {
   const uniforms = material.uniforms
   uniforms.uRise!.value = rise
-  uniforms.uLand!.value = land
+  uniforms.uPour!.value = beat === null ? 1 : cityStory.pour
   if (beat !== null) seekCity(beat)
   uniforms.uLit!.value = beat === null ? GROUPS.map(() => 0) : [...cityStory.lit]
   uniforms.uGain!.value = beat === null ? GROUPS.map(() => 1) : [...cityStory.gain]
@@ -181,12 +185,10 @@ function CityPoints({
   layout,
   look: lookId,
   rise,
-  land,
 }: {
   layout: Layout
   look?: string
   rise: number
-  land: number
 }) {
   const values = useCity((state) => state.params[layout.id]!)
   const look = useCity((state) => state.looks[lookId ?? state.look]!)
@@ -227,9 +229,9 @@ function CityPoints({
   useEffect(() => () => material.dispose(), [material])
 
   useEffect(() => {
-    lightCity(material, rise, land, beat)
+    lightCity(material, rise, beat)
     invalidate()
-  }, [material, rise, land, beat, invalidate])
+  }, [material, rise, beat, invalidate])
 
   // Near and far are measured from what the camera looks at: the story's subject, or the orbit's
   // target.

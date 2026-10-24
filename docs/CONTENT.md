@@ -120,22 +120,68 @@ Cleared means allowed, not required: which of these go in a project panel is cho
 
 What the site says now, in `src/content/beats.ts`. Not final: copy is settled in Phase 5. Rahul's steer on 2026-10-05: the wording is free, be creative with it. The facts underneath are not free. Rewrite within the voice rules, using only what this doc confirms.
 
-Each era beat has a readout line built from the era's data (years, company, full role), then the statement below, then that era's project and work lines.
+Each job beat leads with the work ([DECISIONS D45](DECISIONS.md)): a readout with the job's number and its field, the statement as the headline, set large in sentence case, a readout of company, role and years as small print, then the job's [claims](#claims), numbered. The other beats' statements are set small in capitals.
 
 | Beat | Readout | Statement |
 | --- | --- | --- |
 | Found | | `YOU'VE FOUND RAHUL.` |
 | Signal | | `SOMETHING WAS BUILT HERE.` |
-| Core | `2021 — 2023 / S2T / DATA ENGINEER, JR. TEAM LEAD` | `IT STARTED WITH PIPES. 10,000 REQUESTS A SECOND.` |
-| Scanner | `2023 — 2024 / ETAVOLT / SOFTWARE ENGINEER` | `I WROTE SOFTWARE THAT TURNS LASER SCANS INTO 3D MODELS. YOU'VE BEEN LOOKING AT ONE.` |
-| Rings | `2024 — NOW / UNIAD / LEAD SOFTWARE ENGINEER` | `10,000 PEOPLE. ONE SCHEDULE THAT HOLDS.` |
-| Lens | `2024 — NOW / COGNIZANT / SOFTWARE ENGINEER` | `LANGUAGE MODELS FOR SINGAPORE'S GOVERNMENT. DATA IN, DECISIONS OUT.` |
-| Whole | | `FIVE YEARS. ONE MACHINE.` |
+| Core | `JOB 1 OF 4 / DATA ENGINEERING`, then `S2T / DATA ENGINEER, JR. TEAM LEAD / 2021 — 2023` | APIs that hold 10,000 requests a second. |
+| Scanner | `JOB 2 OF 4 / LIDAR TO 3D`, then `ETAVOLT / SOFTWARE ENGINEER / 2023 — 2024` | Software that turns laser scans into 3D models. You've been looking at one. |
+| Rings | `JOB 3 OF 4 / PLATFORMS AT SCALE`, then `UNIAD / LEAD SOFTWARE ENGINEER / 2024 — NOW` | One platform. 10,000+ users across Asia. |
+| Lens | `JOB 4 OF 4 / APPLIED AI`, then `COGNIZANT / SOFTWARE ENGINEER / 2024 — NOW` | Language models for Singapore's government. Data in, decisions out. |
+| Whole | `THE WHOLE CAREER` | Four jobs. Five years. One city. |
 | Contact | | `YOU FOUND ME. SAY SOMETHING.` |
 
 **Added back on 2026-10-07, with the scene:** the Scanner statement's second sentence, `YOU'VE BEEN LOOKING AT ONE.` It is the third reveal in [EXPERIENCE](EXPERIENCE.md#the-reveal-budget). It is only true while the visitor is looking at a point cloud. The Index does not carry the statements, but the story page still shows the line when the scene cannot start (no JavaScript, no WebGL). Revisit it with the no-WebGL fallback in Phase 5.
 
-**Leans on the Machine:** `FIVE YEARS. ONE MACHINE.` was written for the Machine, which the city replaced on 2026-10-19 ([DECISIONS D38](DECISIONS.md)). It has to be rewritten before the city ships; `src/content/beats.ts` still carries it.
+**Rewritten for the city on 2026-10-24:** Whole's `FIVE YEARS. ONE MACHINE.`, written for the Machine, is now `Four jobs. Five years. One city.` ([DECISIONS D45](DECISIONS.md)).
+
+## Claims
+
+Each job's work, as the page says it and the Index lists it, in `src/content/eras.ts`: one line a claim, the strongest first. Each has a few words for its tag in the city and the place it is pinned to ([DECISIONS D45](DECISIONS.md)); a claim with nothing in the city to point at has no pin. The facts are the Career section's, and the projects' summaries are carried here, so the story page does not repeat them.
+
+**S2T, Core**
+
+| # | Claim | Tag | Pinned to |
+| --- | --- | --- | --- |
+| 1 | In-house APIs in Flask and FastAPI, handling over 10,000 requests a second. | 10,000 requests a second | the streets of the CBD, where the requests run |
+| 2 | Designed and built a microservices architecture in Python, Docker and Kubernetes. | Microservices, designed and built | a CBD tower |
+| 3 | Migrated legacy C++ to Python. | Legacy C++, moved to Python | another CBD tower |
+| 4 | Serverless, storage and databases on Azure and AWS. | Serverless on Azure and AWS | the top of the tallest CBD tower but the Lens's |
+| 5 | Led the API development team. Presented the software on international business trips. | Led the API team. Took it abroad | none yet: the plane from Changi, when it is built |
+
+**Etavolt, Scanner**
+
+| # | Claim | Tag | Pinned to |
+| --- | --- | --- | --- |
+| 1 | Shipped two development cycles of software that builds 3D meshes from point clouds and LiDAR, in React, Three.js and Python. | Laser scans in, 3D meshes out | the Science Centre's drum |
+| 2 | Made for solar: roofs reconstructed in 3D, analysed, and solar panels placed on them. | Roofs rebuilt, panels placed | its flat roof |
+| 3 | One of the meshes was the Science Centre. | One was the Science Centre | its hall |
+| 4 | Led full-stack development of a customer acquisition platform. | Led the full stack | a block nearby |
+| 5 | Presented the technology to clients, investors and stakeholders. | Pitched to investors | none |
+
+**Uniad, Rings**
+
+| # | Claim | Tag | Pinned to |
+| --- | --- | --- | --- |
+| 1 | Maintains a secure platform for over 10,000 users across Asia. | 10,000+ users across Asia | BLK 2024 |
+| 2 | Designed the relational database behind finance, user management, lesson bookings, calendar and access control. | One database, five systems | over the blocks round BLK 2024; opened, it names five of them Finance, Users, Bookings, Calendar and Access |
+| 3 | Built an enterprise product for tuition centres. | Built for tuition centres | a block in front |
+| 4 | Set up CI/CD for deployment and testing. | CI/CD for deploys and tests | the viaduct, where the train runs |
+| 5 | Supported by SMU Institute of Innovation & Entrepreneurship, NTU Innovation Lab and NUS Enterprise. | Backed by SMU, NTU and NUS | none |
+
+**Cognizant, Lens**
+
+| # | Claim | Tag | Pinned to |
+| --- | --- | --- | --- |
+| 1 | Built and deployed AI products for GovTech and Singapore's Ministry of Digital Development and Information (MDDI). | AI for GovTech and MDDI | the top of the Lens's tower |
+| 2 | Worked with data scientists on products that use LLMs for analytics, insight and decision support. | LLMs for decision support | the Lens's tower |
+| 3 | Drag-and-drop interfaces with dynamic charting. | Drag, drop, chart | a CBD tower |
+| 4 | Rolled out across Whole-of-Government infrastructure, meeting its security and regulatory requirements. | Across Whole-of-Government | another CBD tower |
+| 5 | Full-stack in React, TypeScript and Django. | React, TypeScript, Django | none |
+
+Each job is named by its field, first on the page and in the Index: Data engineering, LiDAR to 3D, Platforms at scale, Applied AI.
 
 ## Confirmed with Rahul
 

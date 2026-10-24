@@ -18,14 +18,14 @@ export const beats: readonly BeatId[] = [
   'contact',
 ]
 
-/** One line per beat, in story order. */
+/** One line per beat, in story order. A job's line is its headline, and leads with the work. */
 export const statements: Record<BeatId, string> = {
   found: `You've found ${site.firstName}.`,
   signal: 'Something was built here.',
-  core: 'It started with pipes. 10,000 requests a second.',
-  scanner: "I wrote software that turns laser scans into 3D models. You've been looking at one.",
-  rings: '10,000 people. One schedule that holds.',
+  core: 'APIs that hold 10,000 requests a second.',
+  scanner: "Software that turns laser scans into 3D models. You've been looking at one.",
+  rings: 'One platform. 10,000+ users across Asia.',
   lens: "Language models for Singapore's government. Data in, decisions out.",
-  whole: 'Five years. One machine.',
+  whole: 'Four jobs. Five years. One city.',
   contact: 'You found me. Say something.',
 }
