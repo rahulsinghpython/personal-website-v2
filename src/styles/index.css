@@ -181,6 +181,32 @@ body {
   }
 }
 
+/* Each beat a place the scroll comes to rest (D47): where its section ends at the bottom of the
+   window, which is where its words are whole (src/state/progress.ts). The browser does the
+   snapping, so the scroll stays the page's own. A mark at the foot of the section, not the
+   section, is what snaps: the browser lets a scroll rest anywhere in a box taller than the
+   window, and a job's section is, to slow the scroll (D46). Only a text too tall to hold is
+   read by scrolling freely through it. Only while the scene runs. */
+.snap {
+  scroll-snap-type: y mandatory;
+}
+.snap [data-beat] {
+  position: relative;
+}
+.snap [data-beat]::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  content: '';
+  pointer-events: none;
+  scroll-snap-align: end;
+}
+.snap [data-beat]:has(> .loose) {
+  scroll-snap-align: end;
+}
+
 /* The pins (D45). Made by the scene, which Tailwind is not told about, so plain CSS. A pin is a
    point with no size at its place in the city, moved there on every frame; what it holds hangs
    off it. Its tag is held by the corner nearest the pin, so opening it grows it away from the

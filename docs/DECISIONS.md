@@ -315,7 +315,7 @@ What a chat built on 2026-10-07 so that there was something to scroll, written d
 
 **The beads drift only once the Rings are awake,** at up to 0.06 radians a second, neighbouring rings in opposite directions. The rate is capped at 30 frames a second. This sets the cap that D26 left to Phase 3. Nothing is drawn at rest before the Rings beat.
 
-**The scene catches up with the scroll position** by closing about two thirds of the gap every 0.22 seconds, and stops drawing when the gap can no longer be seen.
+**The scene catches up with the scroll position** by closing about two thirds of the gap every 0.22 seconds (0.4 since D47), and stops drawing when the gap can no longer be seen.
 
 **The awake colour is a placeholder amber,** `#ffa726`, and an awake point is a quarter brighter than a dormant one. Round 5 picks the accent.
 
@@ -619,3 +619,21 @@ The words also wait for the camera and for the city: before this the Core's pins
 **Checked in the automated Chrome** at 1600 by 900 and 504 by 667: no beat's text too tall to hold; every pin's tag inside the window and under the pointer, as in D45. Not yet scrolled by Rahul.
 
 **Open:** the timing, by Rahul scrolling it: how early the words go, how long the city moves alone, how fast the lines follow each other (`cue.ts`), and how much slower the claims' stretch is (`progress.ts`).
+
+### D47. The scroll comes to rest on a beat — Proposed, 2026-10-25
+
+Rahul, scrolling the home page: a scroll can stop between beats, "quite useless", and he "started reading at the wrong time of the scroll". Both have one cause. Between beats the camera is mid-move and one beat's words have gone before the next's come in. And a beat's words were whole at one scroll position only, its arrival: the lines finished coming in just as it arrived, and began to fade just past it (`src/experience/cue.ts`, D46). Reading while scrolling meant reading words still arriving, and a small overshoot faded them out.
+
+**What changes.** While the scene runs, the page snaps: `scroll-snap-type: y mandatory`, with a point at the foot of each beat's section, which is where its words are whole (`src/styles/index.css`). The browser does it, so it costs no script. Dragging on a phone or a trackpad still scrubs the story under the finger; letting go glides on to the nearest beat. A mouse wheel moves a beat a notch. A 1-pixel mark at the foot of the section is what snaps, not the section, because the browser lets a scroll rest anywhere in a box taller than the window, and a job's section is (D46). A text too tall to hold (`loose`) is still read by scrolling freely through it. `?snap=0` in the address turns it off, to compare.
+
+The words also stay whole for the first 12 per cent of the way past their beat before they fade, so a scroll that rests a little beyond a beat still reads. The pins keep the same time.
+
+**Against interaction rule 3.** The page finishes a move the visitor started and never starts one, so the visitor still causes every change (interaction rule 1). EXPERIENCE's rule 3 says so now.
+
+**What it costs.** With a mouse wheel, the slower stretch where the claims light up (D46) passes in one notch: the claims still arrive one after another, over the scene's easing, not over the scroll. On touch it stays. The Index and the page without the scene scroll as before.
+
+**Slower to follow.** Rahul, scrolling it: snapping is better, but slow it down a bit. The browser sets the snap's own speed and CSS cannot change it, so the scene follows the scroll more slowly instead: `CHASE` in `src/experience/Experience.tsx` from 0.22 to 0.4 seconds (D31's figure). A beat's move is 95 per cent done in about 1.2 seconds instead of 0.66, still inside the 1.5 seconds of D26, and the canvas stops drawing about a second after that. Dragging feels a little looser under the finger.
+
+**Checked in the automated Chrome** at 1440 by 900: a scroll left at 30, 70 or 90 per cent of the way between any two beats came to rest on one of them, the job beats included. `?snap=0` leaves it where it was left. Not yet scrolled by Rahul.
+
+**Open:** whether mandatory snap feels right on Rahul's phone and laptop, or the softer `proximity`; how long the words stay past their beat.

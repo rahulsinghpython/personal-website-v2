@@ -41,9 +41,13 @@ function show(item: Shown, opacity: number, drift: number) {
   }
 }
 
-/** Holds the beats' text in place. `place` sets what shows at `beat`; call it on every frame. */
-export function holdText() {
+/**
+ * Holds the beats' text in place. `place` sets what shows at `beat`; call it on every frame. With
+ * `snap`, a scroll that stops comes to rest on a beat, where its words are whole (D47).
+ */
+export function holdText(snap: boolean) {
   const root = document.documentElement
+  root.classList.toggle('snap', snap)
   const held: Held[] = []
   for (const section of document.querySelectorAll<HTMLElement>('[data-beat]')) {
     const index = beats.indexOf(section.dataset.beat as (typeof beats)[number])
@@ -99,7 +103,7 @@ export function holdText() {
       resized.disconnect()
       removeEventListener('resize', fit)
       document.removeEventListener('focusin', focused)
-      root.classList.remove('held')
+      root.classList.remove('held', 'snap')
       for (const { panel, lines } of held) {
         panel.element.classList.remove('loose')
         for (const item of [panel, ...lines]) {

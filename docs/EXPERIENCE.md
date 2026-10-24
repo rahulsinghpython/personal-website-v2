@@ -101,7 +101,7 @@ These are the rules that make principle 3 in [VISION](VISION.md) real.
 
 1. **The visitor causes the change.** The story advances only on input: scroll, pointer move, click or tap, and drag. Nothing lights, assembles or moves the camera on its own.
 2. **Small ambient motion is allowed; decoration is not.** After input stops, the big motion eases to rest within about 1.5 seconds. What may keep moving is small, slow, and part of the city's meaning: the traffic, the river, the train ([DECISIONS D26](DECISIONS.md), [D38](DECISIONS.md)). It pauses when the tab is hidden, the canvas is off screen or the system asks for reduced motion, and it is off on the low tier. No idle camera drift, no breathing, no floating particles.
-3. **Scroll is never hijacked.** The page scrolls natively. The scene eases toward the scroll position, which gives smoothness without taking control from the visitor.
+3. **Scroll is never hijacked.** The page scrolls natively. The scene eases toward the scroll position, which gives smoothness without taking control from the visitor. When the visitor stops scrolling, the browser's own scroll snap finishes the move on the nearest beat, where its words are whole. It never starts a move ([DECISIONS D47](DECISIONS.md)).
 4. **Scrolling back undoes it.** The story is a pure function of progress. Scroll up and the city goes dark and back into dust exactly as it came.
 5. **Every interaction means something.** If an interaction does not teach the visitor about a job, cut it. Easter eggs are the exception: they say something about the place, and they are small.
 6. **Never required.** Every interaction is a bonus. A visitor who only scrolls still gets the full story.

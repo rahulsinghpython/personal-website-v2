@@ -26,8 +26,12 @@ import { defaultValues } from './params'
 // import three.js, and the page reaches this file through one dynamic import
 // (src/sections/Scene.tsx).
 
-/** Seconds for the scene to close about two thirds of the gap to the scroll position. */
-const CHASE = 0.22
+/**
+ * Seconds for the scene to close about two thirds of the gap to the scroll position. Slower since
+ * the scroll snaps (D47): a snap moves the scroll a whole beat at once, and this is the pace the
+ * city takes it at.
+ */
+const CHASE = 0.4
 /** A gap this small cannot be seen, so the scene is taken to have arrived and stops drawing. */
 const ARRIVED = 0.0004
 /** Frames a second while only the traffic, the river and the train are moving (D26). */
@@ -124,7 +128,7 @@ function crumbleLine(
   material.uniforms.uAspect!.value = width / height
 }
 
-/** `?words=0` in the address leaves the opening line alone (D37). */
+/** `?words=0` in the address leaves the opening line alone (D37); `?snap=0`, the scroll (D47). */
 const wanted = (key: string) => new URLSearchParams(location.search).get(key) !== '0'
 
 function City({
@@ -194,10 +198,11 @@ function City({
   }, [pinLayer, invalidate])
 
   // The beats' text held still on the window and swapped as the story moves, in time with the
-  // pins (D46). Only while the scene runs: without it the text scrolls with the page.
+  // pins (D46). Only while the scene runs: without it the text scrolls with the page. `?snap=0`
+  // lets the scroll stop between beats (D47).
   const heldText = useRef<HeldText | null>(null)
   useEffect(() => {
-    const text = holdText()
+    const text = holdText(wanted('snap'))
     heldText.current = text
     invalidate()
     return () => {
