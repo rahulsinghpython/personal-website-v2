@@ -153,7 +153,7 @@ In `src/content/exhibit.ts`. It states nothing about Rahul beyond what the story
 
 ### The résumé
 
-In `src/content/resume.ts`. The PDF itself is `public/resume.pdf`, Rahul's own file: what it says is his, not this doc's. Until he replaces it, it is a placeholder with his name, title and contact links and the word `PLACEHOLDER`.
+In `src/content/resume.ts`. The PDF itself is `public/resume.pdf`, Rahul's own file: what it says is his, not this doc's.
 
 | Part | Copy |
 | --- | --- |

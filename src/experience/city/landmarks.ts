@@ -1,4 +1,5 @@
 import {
+  BufferAttribute,
   BufferGeometry,
   CatmullRomCurve3,
   ExtrudeGeometry,
@@ -338,6 +339,67 @@ function science(): BufferGeometry[] {
   const block = box(0.13, 0.15, 0.22).rotateY(0.35).translate(0.02, 0.075, -0.22)
   const flat = box(0.3, 0.07, 0.36).translate(0.48, 0.035, 0)
   return [hall, drumTower, collar, block, flat]
+}
+
+/**
+ * The solar panels the Scanner places once the Science Centre's roofs are rebuilt: rows up the
+ * front slope of the hall's pitched roof, and a grid over the flat hall. Each panel is a quad, a
+ * little off its roof, with a `uv` from corner to corner so its frame can be drawn. In the same
+ * place and units as `science()`.
+ */
+export function sciencePanels(): BufferGeometry {
+  const positions: number[] = []
+  const uvs: number[] = []
+  const lift = 0.004
+  const quad = (corner: Vector3, u: Vector3, v: Vector3, normal: Vector3) => {
+    const a = corner.clone().addScaledVector(normal, lift)
+    const b = a.clone().add(u)
+    const c = a.clone().add(u).add(v)
+    const d = a.clone().add(v)
+    for (const [p, uv] of [
+      [a, [0, 0]],
+      [b, [1, 0]],
+      [c, [1, 1]],
+      [a, [0, 0]],
+      [c, [1, 1]],
+      [d, [0, 1]],
+    ] as const) {
+      positions.push(p.x, p.y, p.z)
+      uvs.push(...uv)
+    }
+  }
+  // The hall's front slope runs from its eave (z 0.2, height 0.06) up to the ridge (z 0, 0.16).
+  const eave = new Vector3(0, 0.06, 0.2)
+  const upSlope = new Vector3(0, 0.1, -0.2).normalize()
+  const slopeNormal = new Vector3(0, 0.2, 0.1).normalize()
+  const across = new Vector3(1, 0, 0)
+  for (let row = 0; row < 4; row++)
+    for (let column = 0; column < 12; column++) {
+      const corner = eave
+        .clone()
+        .addScaledVector(upSlope, 0.02 + row * 0.048)
+        .add(new Vector3(-0.218 + column * 0.0366, 0, 0))
+      quad(
+        corner,
+        across.clone().multiplyScalar(0.033),
+        upSlope.clone().multiplyScalar(0.044),
+        slopeNormal,
+      )
+    }
+  // The flat hall's roof: x 0.33 to 0.63, z -0.18 to 0.18, at 0.07.
+  const up = new Vector3(0, 1, 0)
+  for (let row = 0; row < 8; row++)
+    for (let column = 0; column < 7; column++)
+      quad(
+        new Vector3(0.35 + column * 0.0376, 0.07, 0.16 - row * 0.0405),
+        new Vector3(0.034, 0, 0),
+        new Vector3(0, 0, -0.036),
+        up,
+      )
+  const panels = new BufferGeometry()
+  panels.setAttribute('position', new BufferAttribute(new Float32Array(positions), 3))
+  panels.setAttribute('uv', new BufferAttribute(new Float32Array(uvs), 2))
+  return panels
 }
 
 export const LANDMARKS: Record<LandmarkId, () => BufferGeometry[]> = {

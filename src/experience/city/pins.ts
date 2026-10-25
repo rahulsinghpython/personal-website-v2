@@ -135,6 +135,9 @@ type Placed = {
 /** How close to the window's edge a tag may come, in CSS pixels. */
 const MARGIN = 8
 
+/** Milliseconds the pointer rests on a pin in the city before it opens. */
+const RESTING = 220
+
 const measure = (tag: HTMLElement) => ({
   left: tag.offsetLeft,
   top: tag.offsetTop,
@@ -295,9 +298,18 @@ export function mountPins(layer: HTMLElement, layout: Layout, values: CityValues
 
   // Pointing. A mouse over a claim's line or its pin opens it; a tap opens it, and a second tap,
   // or one elsewhere, closes it. Closing waits a moment, so crossing from a pin to its line or
-  // tag does not snap it shut.
+  // tag does not snap it shut. A pin in the city opens only once the pointer is still on it, so a
+  // hand sweeping the Scanner's beam across the building (./scan.ts) opens none of the pins and
+  // tags it passes over.
   let open: string | null = null
   let closing = 0
+  let opening = 0
+  let waiting: string | null = null
+  const wait = (id: string | null) => {
+    clearTimeout(opening)
+    waiting = id
+    if (id) opening = window.setTimeout(() => show(id), RESTING)
+  }
   const show = (id: string | null) => {
     if (id === open) return
     const was = open
@@ -328,8 +340,14 @@ export function mountPins(layer: HTMLElement, layout: Layout, values: CityValues
     if (event.pointerType !== 'mouse') return
     const id = claimAt(event.target)
     clearTimeout(closing)
-    if (id) show(id)
-    else if (open) closing = window.setTimeout(() => show(null), 180)
+    const inCity = event.target instanceof Node && layer.contains(event.target)
+    wait(id && inCity && id !== open ? id : null)
+    if (id && !inCity) show(id)
+    else if (!id && open) closing = window.setTimeout(() => show(null), 180)
+  }
+  // Still moving: the wait starts again.
+  const moving = (event: PointerEvent) => {
+    if (waiting && event.pointerType === 'mouse') wait(waiting)
   }
   const tap = (event: MouseEvent) => {
     const id = claimAt(event.target)
@@ -339,14 +357,17 @@ export function mountPins(layer: HTMLElement, layout: Layout, values: CityValues
     show(id === open ? null : id)
   }
   document.addEventListener('pointerover', over, { passive: true })
+  document.addEventListener('pointermove', moving, { passive: true })
   document.addEventListener('click', tap)
 
   return {
     place,
     dispose() {
       clearTimeout(closing)
+      clearTimeout(opening)
       show(null)
       document.removeEventListener('pointerover', over)
+      document.removeEventListener('pointermove', moving)
       document.removeEventListener('click', tap)
       layer.replaceChildren()
     },

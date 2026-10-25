@@ -668,7 +668,7 @@ Rahul asked for a résumé page, "maybe with a mini renderer", then, while three
 
 **An exception to the rules, on purpose.** Rahul, 2026-10-25: the résumé is an exception, as making it fit the rules "would defeat the purpose of the website". A résumé is a document a recruiter downloads, forwards and prints as it is; the site is the experience. So the résumé page stands outside the city (rule 1, one world), its facts are in a PDF rather than in the page's own text (rule 3, HTML first), and they are Rahul's own, outside CONTENT (rule 6, never invent facts): the PDF carries his phone number, which the site states nowhere else. CLAUDE.md and VISION say so. The page around the PDF still follows the rules: its own few words are in CONTENT, it is readable without scripts, and it keeps the budgets.
 
-**The PDF.** `public/resume.pdf`, copied into the build as it is. For now it is a one-page placeholder written by hand (no library): Rahul's name, title, contact links and the word `PLACEHOLDER`. Rahul replaces it with his own, keeping the name. Its facts are his, outside CONTENT; the page around it states only what CONTENT does.
+**The PDF.** `public/resume.pdf`, copied into the build as it is. It was first a one-page placeholder written by hand (no library); Rahul's own two-page résumé replaced it the same day, under the same name. Its facts are his, outside CONTENT; the page around it states only what CONTENT does.
 
 **Passed over, for now:** a résumé built from the content modules, which would overlap the Index.
 
@@ -676,7 +676,7 @@ Rahul asked for a résumé page, "maybe with a mini renderer", then, while three
 
 **Checked in the automated Chrome** at 1440 by 900 and at 390 by 844 with touch: the placeholder drawn as a sheet, its text in the text layer, no console warnings, no sideways scroll. Not yet tried by Rahul.
 
-**Open:** the real PDF; whether the Index and the résumé should become one page.
+**Open:** whether the Index and the résumé should become one page.
 
 ### D50. The Machine's code is deleted — Accepted, 2026-10-25
 
@@ -695,3 +695,43 @@ The city replaced the Machine on the home page on 2026-10-24 (D44), and the Mach
 **Cost:** none to the site. The page stopped loading the Machine on 2026-10-24, so every budget is unchanged: the scene chunk is 263.4 kB and the critical path of `/` 83.5 kB. The repository loses about 1,600 lines of code.
 
 **Checked:** typecheck, lint and the build pass; the workbench opens on the city and draws the story at beat 4 as points with no new console messages.
+
+### D51. The Scanner sweep: points grow into tiles, the mesh's lines over them — Accepted, 2026-10-25
+
+Phase 4's first interaction, from EXPERIENCE: at the Scanner beat the visitor sweeps across the Science Centre and surface appears where they sweep. Phase 3b closed the same day on Rahul's word ("I think all that is fine, I want to go to the next segment"), and this is the next segment.
+
+**How it was reached.** Built on the home page itself, not the workbench, so the options were judged with the beat's words and pins over them. Three looks for the rebuilt surface were recorded sweeping, on a private page (`Scanner Sweep Round`): A, a mesh, the triangles a reconstruction makes closing in one by one; B, tiles, each point growing into a facet of the wall; C, the model, clean faces and edges. Rahul: "maybe a combination of a and b?" That can be mixed two ways, so both were recorded: D, tiles that the mesh then closes over as they fade; E, the tiles staying as the surface with the mesh's lines over them. Rahul picked E. The four passed over were never committed.
+
+**What it is** (`src/experience/city/scan.ts`).
+
+- **The beam.** A blade of light standing over the building, where a mouse points or, on touch, where a finger drags sideways across it; dragging up or down still scrolls the page. It comes up when the pointer reaches the building and goes out when it leaves or the finger lifts.
+- **The surface.** Where the beam has passed, the Science Centre's points dim and grow into small square tiles of its walls and roofs, each in its own time, patchy as a real scan is. Over them, the mesh rebuilt from the building's shape comes in triangle by triangle as lines, a hair under the tiles so it shows between them. Each piece flashes as it arrives. A slice closes in 0.8 seconds.
+- **The panels.** Once a roof is rebuilt, its solar panels go on, row by row: on the front slope of the hall and over the flat hall. That is the job's second claim, "roofs reconstructed in 3D, analysed, and solar panels placed on them", done in front of the visitor.
+- **Leaving the beat** puts the building back to points, so it can be swept again, and scrolling back undoes it (interaction rule 4).
+
+**Against the interaction rules.** The visitor causes every change, and nothing moves once their hand stops but the surface finishing its 0.8 seconds. A visitor who never sweeps still has the whole story from the words: the headline says "You've been looking at one" (rule 6). With reduced motion the sweep works the same, since it moves only with the visitor's hand.
+
+**The pins.** The pins stand on the building, so a sweep crossed them and opened their tags one after another. A pin in the city now opens only when the pointer is still on it for 220 ms; a claim's line in the text still opens at once (`src/experience/city/pins.ts`, D45).
+
+**Cost:** 4.6 kB in the scene chunk, to 268.0 kB; nothing on the critical path. Four draw calls at the Scanner beat only: 3,200 tiles, 40,236 line segments, 104 panels and the beam. Built once when the scene attaches, in 31 ms on the development machine. On every tier.
+
+**Checked in the automated Chrome** at 1440 by 900 with a mouse and at 390 by 844 with touch: the sweep rebuilds what it passes and only that, the beam goes out when the finger lifts, and on the low tier, where nothing else moves, no draw calls at rest before a sweep or after it settles. A sweep across both pins on the building opened neither; resting on one opened it. Not yet swept by Rahul on a device.
+
+**Open:** how fast a slice closes; the panels' look. How a visitor who only scrolls learns to sweep was answered in D52.
+
+### D52. The Scanner beam waits at the building, and shows itself once — Accepted, 2026-10-26
+
+D51 left open how a visitor who only scrolls learns the building can be swept. Three ways were put to Rahul: leave it hidden, a line of text, or the beam left standing at the building. Rahul asked for the sweep to start on its own after a short delay. A sweep that rebuilt the building by itself would break D26 (ambient motion never assembles a part), so two versions were offered: a short teaser that starts the surface and lets it fall back, inside the rule, or the full sweep with the rule changed. Rahul: "Yes lets try 1", the teaser, and after it was built, "go a bit further in the teaser".
+
+**What it is** (`src/experience/city/scan.ts`).
+
+- **The beam waits.** At the Scanner beat the beam stands dim (0.3 of its full light) at the building's west edge, and after a sweep it stays dim where the visitor left it. It is still, so it costs no frames. On every tier and with reduced motion.
+- **The teaser.** Once per visit, 1.2 seconds after the camera has come to rest at the beat, the beam comes up, slides two-fifths of the way across the building in 1.6 seconds, and the strip it passes starts to close: tiles and some of the mesh's lines, to 0.45 of rebuilt, short of the 0.86 at which a roof's panels go on. It then slides back to the edge in 1.1 seconds, dimming, while the strip falls back to points. About 4.2 seconds in all.
+- **The visitor's hand ends it.** A pointer or finger on the building before or during the teaser cancels it for the rest of the visit, and the sweep is theirs as before.
+- **Not on the low tier, and not with reduced motion**, which keep only the waiting beam: the teaser is motion of its own, under D26's limits.
+
+**Against the rules.** The teaser builds nothing that stays: the building is points again when it ends, so the rebuilding is still the visitor's (D26, interaction rule 2). It plays once, and only when the visitor has stopped at the beat.
+
+**Cost:** 0.3 kB in the scene chunk, to 268.3 kB. About 1.2 seconds of waiting and 3 seconds of teaser drawn once per visit on the high and mid tiers; nothing on the low tier.
+
+**Checked in the automated Chrome** at 1440 by 900: the teaser plays once the camera settles, reaches two-fifths across with no panels, and leaves the building as points with the beam dim at its edge; on `?tier=low` it does not play; a mouse sweeping the building before it starts cancels it. Not yet seen by Rahul on a device.

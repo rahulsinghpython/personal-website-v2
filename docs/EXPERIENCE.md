@@ -50,7 +50,7 @@ Every claim is pinned to its proof in the city, like a surveyor's notes on a sca
 - **The beat's text** sits at the left edge on a dark band, at the bottom of a tall window: the job's number and its field in the accent, the headline large, leading with the work, the company, role and years as small print, then every [claim](CONTENT.md#claims) as its own numbered line, the strongest first. It is the whole job, readable with no scene, and the Index says the same.
 - **The pins.** Each claim with something in the city to point at has a numbered pin there, with a few of its words: the requests on the streets, the scanned roof, BLK 2024, the train for CI/CD, the Lens's tower. During a job's beat the city dims except its subject, as D38 proposed.
 - **Held, not scrolled** ([D46](DECISIONS.md)). While the scene runs, the text is held still on the window rather than rolling up it like film credits. On the way to the next beat it fades early, the city moves alone, and as the beat arrives the headline comes in, then the claims one after another, each line with its pin. The scroll slows a little for that stretch: a job's section is 1.3 windows tall, the extra spent on its claims arriving.
-- **Pointing**, never needed: pointing at a claim's line or its pin opens the pin's full sentence and dims the rest; a tap on touch. The open tag grows away from its pin from a corner that stays put, so it never moves out from under the pointer, and it is kept inside the window. The database's line draws its five systems onto five HDB blocks.
+- **Pointing**, never needed: pointing at a claim's line or its pin opens the pin's full sentence and dims the rest; a tap on touch. A pin in the city opens once the pointer is still on it, so sweeping the Scanner's beam over the building opens none ([D51](DECISIONS.md)). The open tag grows away from its pin from a corner that stays put, so it never moves out from under the pointer, and it is kept inside the window. The database's line draws its five systems onto five HDB blocks.
 - **Whole** puts one tag a job at its subject, and its list links to each job.
 - **On a small screen** the pins stay numbered points over the city and the list is read under it.
 
@@ -73,7 +73,7 @@ The page is one long scroll. The canvas is fixed behind it and the city responds
 | 0 | **Found** | Black. Small type in the middle of the window, a size up from the other statements: `YOU'VE FOUND RAHUL.` A faint haze of light in the dark round it. Moving the pointer lights the haze near it. At the foot of the window, `SCROLL TO LOOK CLOSER` (`SWIPE UP` on touch), and an amber chevron under it bouncing downward; it fades on the first scroll and is a link to the next beat ([D48](DECISIONS.md)). | Something is here. Nothing is explained. |
 | 1 | **Signal** | First scroll. The opening line crumbles into bright grains that fall into the haze ([DECISIONS D37](DECISIONS.md)). Then the haze comes down as rain onto the river and the bay, flashing as it hits the water, and spreads from the water across the land as a map: the bay, the river, the roads, every footprint ([D44](DECISIONS.md)). | The haze was a place all along. |
 | 2 | **Core** | The city rises out of the map, building by building, and the camera glides down to the CBD. Requests run along the river and the streets as light. The first tag: the work, with the years and the company in small print. | Things in the city light up, and each one is a kind of work. |
-| 3 | **Scanner** | A roof stands as raw points. The visitor sweeps across it and surface appears where they sweep. | Rahul built this kind of software. They have been looking at a scan the whole time. |
+| 3 | **Scanner** | A roof stands as raw points. The visitor sweeps a beam across it, and behind the beam the points grow into tiles of surface, the mesh rebuilt from them closes in over the tiles, and the roofs get their solar panels ([D51](DECISIONS.md)). The beam waits dim at the building's edge; once per visit, a moment after the visitor stops here, it slides partway in and back, the strip it passes starting to close and falling back to points, to show what it does ([D52](DECISIONS.md)). | Rahul built this kind of software. They have been looking at a scan the whole time. |
 | 4 | **Rings** | Windows light up across the HDB blocks. | Scale and orchestration: 10,000+ users. |
 | 5 | **Lens** | A tower in the CBD lights up and answers. | LLM products for Singapore's government. |
 | 6 | **Whole** | The camera rises over the bay. Everything Rahul's work touched is lit. | Five years, one city. |
@@ -113,7 +113,7 @@ Only the first release's are in scope now; see [ROADMAP](ROADMAP.md).
 | Where | Input | Result | Release |
 | --- | --- | --- | --- |
 | Found | Pointer move | Dust near the pointer brightens, like a torch, and more of it shows. Built ([DECISIONS D36](DECISIONS.md)) | First |
-| Scanner | Pointer sweep, or drag on touch | Points on the roof under the beam become surface | First |
+| Scanner | Pointer sweep, or a sideways drag on touch | Points on the building under the beam become surface and the roofs get their panels. Built ([DECISIONS D51](DECISIONS.md)); the waiting beam and its one teaser, [D52](DECISIONS.md) | First |
 | Anywhere | Hover, click or tap | An easter egg, where there is one | First, which ones open |
 | Whole | Drag | Look round the bay, within limits. Open: the old interaction was turning the Machine | First |
 | Whole | Click a subject | The camera glides to it; its detail opens | First |
@@ -176,6 +176,7 @@ Direction only. Exact tokens are chosen during the build.
 - The eight beats and their order.
 - A calm camera.
 - The interaction rules.
+- How the scanned surface is drawn: each point grows into a tile of the wall, with the rebuilt mesh's lines over the tiles ([D51](DECISIONS.md)).
 - The Index exists and shares the content data.
 
 **Open.** Settle by prototyping, then write the answer back here.
@@ -184,7 +185,6 @@ Direction only. Exact tokens are chosen during the build.
 - How the map is drawn, and how fast the city rises from it.
 - The timing of a beat's words: how early they go and how fast the claims follow each other ([DECISIONS D46](DECISIONS.md)). How the words sit over the city is picked ([D45](DECISIONS.md)).
 - Which easter eggs beyond the seven picked, and how each is found.
-- How the scanned surface is drawn. It reads as rebuilt from a scan, points closing into faces, and is better than Rahul's old mesh, which he does not want copied (2026-10-20). The mesh image is a reference for the Science Centre's shape only.
 - What the visitor can do at the Whole beat.
 - How many points each tier draws. A city fills the window on every beat, so these start again from measurement.
 - The accent colour and the typefaces.

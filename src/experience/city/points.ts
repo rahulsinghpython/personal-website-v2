@@ -30,6 +30,7 @@ import { rng, type Vec2 } from './plan'
 import type { Ink } from '../ink'
 import { CRUMBLE } from '../ink'
 import { POUR_SPAN, RISE_SPAN } from './story'
+import { SCAN_GLSL, scanUniforms } from './scan'
 
 // The city as points (docs/EXPERIENCE.md, "The city"): a city at night is its lights. Points are
 // placed where they mean something, on windows, edges and roofs, and the rest is left dark. One
@@ -764,6 +765,9 @@ export function cityPointsMaterial(layout: Layout, grains = false) {
       uWindowGain: { value: 2.4 },
       uColour: { value: new Color('#e8e5df') },
       uAccent: { value: new Color('#ffa726') },
+      // The Scanner sweep (./scan.ts): the Science Centre's points give way to the surface rebuilt
+      // from them, and flash as the beam crosses them. The page shares these with the scan.
+      ...scanUniforms(),
     },
     vertexShader: /* glsl */ `
       uniform float uSize;
@@ -805,6 +809,7 @@ export function cityPointsMaterial(layout: Layout, grains = false) {
       #endif
       varying float vBrightness;
       varying float vWarm;
+      ${SCAN_GLSL}
 
       // The point s along the line of count points from first in uLines, and its heading there.
       vec2 along(int first, int count, float s, out vec2 heading) {
@@ -884,6 +889,9 @@ export function cityPointsMaterial(layout: Layout, grains = false) {
         float torch = uTorch.z * away * smoothstep(uTorchReach.x, 0.0, length(fromTorch));
         brightness *= 1.0 + uTorchReach.y * torch;
         gl_PointSize = clamp(size, 1.0, uMaxSize);
+        if (group == ${GROUPS.indexOf('science')}) {
+          brightness *= mix(1.0, 0.3, scanned(at.x)) * (1.0 + 3.0 * underBeam(at.x, 0.02));
+        }
 
         #ifdef GRAINS
           // A grain stands on its letter until the line crumbles as far as it, then falls into

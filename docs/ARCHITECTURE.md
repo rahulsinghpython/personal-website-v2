@@ -108,6 +108,8 @@ The canvas does not run a continuous loop. A frame is drawn only when something 
 
 **The whole city is one draw call**, and the opening line's grains one more. The map's lines are one more, drawn only around Signal.
 
+**The Scanner sweep** ([D51](DECISIONS.md)) is the one place surface is drawn, as the city's rule says: where the scan has rebuilt something. `city/scan.ts` builds, once, the Science Centre's tiles (one instanced draw), a mesh remeshed from its shape and drawn as lines, its solar panels and the beam: four draw calls, at the Scanner beat only. What has been swept is 32 numbers across the building, from raw points to rebuilt, held in uniforms the tiles, the lines, the panels and the city's own points all read, so the Science Centre's points give way where the surface comes in. The beam is aimed by casting the pointer's ray through the story's camera; the frame loop asks for frames only while the sweep is still closing. The teaser ([D52](DECISIONS.md)) drives the same beam and holds its own 32 numbers, which fall back to zero; the shaders read the greater of the two, so it never leaves anything rebuilt.
+
 **No lights, no shadows, no environment map, no textures.** Points are unlit and coloured in the shader, cold or lit in the accent. Glow is faked with additive blending and soft point sprites, not a bloom pass. A point's size is in the city's own units, not in pixels, so the city is the same picture on a phone and on a monitor.
 
 **The exhibit** (`/exhibit`, [D48](DECISIONS.md)) draws the same cloud with the same code, held at Whole, with three.js's `OrbitControls` for a camera the visitor moves.
@@ -135,6 +137,7 @@ src/
       story.ts     the city's story as a function of the beat: the camera, the rain, the rise, what is lit
       draw.ts      what the home page and the exhibit share: the layout, the look, the story into a material
       pins.ts      each claim pinned to its proof in the city (D45)
+      scan.ts      the Scanner sweep: the beam, the surface rebuilt where it has passed, the panels (D51)
     camera/        camera.ts: how a pose is applied and the picture framed
     ink.ts         where the letters of the opening line are on the page, and the mask that rubs it out (D37)
     cue.ts         when a beat's words and pins come and go (D46)

@@ -1,5 +1,6 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { Raycaster, Vector2 } from 'three'
 import type { PerspectiveCamera, Points, ShaderMaterial, Vector3, Vector4 } from 'three'
 import { beats } from '../content/beats'
 import { measure, progress, readScroll } from '../state/progress'
@@ -16,6 +17,7 @@ import {
 } from './city/points'
 import { cityFlow, cityStory, MOVES_FROM, seekCity, seekCityStill, mapShown } from './city/story'
 import { mountPins, type Pins } from './city/pins'
+import { buildScan, scanShown } from './city/scan'
 import { holdText, type HeldText } from './hold'
 import { rubOut, sampleInk, type Ink } from './ink'
 
@@ -159,6 +161,17 @@ function City({
   useEffect(() => () => grains?.dispose(), [grains])
   useEffect(() => () => grainMaterial.dispose(), [grainMaterial])
 
+  // The Scanner sweep: the rebuilt surface, its panels and the beam, sharing the sweep with the
+  // city's points so the raw points give way where the surface comes in.
+  const scan = useMemo(() => {
+    const built = buildScan(layout, values)
+    Object.assign(material.uniforms, built.uniforms)
+    return built
+  }, [material])
+  useEffect(() => () => scan.dispose(), [scan])
+  const raycaster = useMemo(() => new Raycaster(), [])
+  const ndc = useMemo(() => new Vector2(), [])
+
   // Each claim pinned to its proof in the city (D45), placed on every frame drawn below.
   const pins = useRef<Pins | null>(null)
   useEffect(() => {
@@ -231,6 +244,43 @@ function City({
     }
   }, [tier, invalidate])
 
+  // What aims the Scanner's beam: a mouse over the page, or a finger on it. A finger drags it
+  // across the building; the page still scrolls under a finger that moves up or down.
+  const aim = useRef({ x: 0, y: 0, on: false })
+  useEffect(() => {
+    const atScanner = () => scanShown(progress.eased * LAST) > 0
+    const point = (x: number, y: number) => {
+      aim.current = { x, y, on: true }
+      if (atScanner()) invalidate()
+    }
+    const off = () => {
+      aim.current.on = false
+      if (atScanner()) invalidate()
+    }
+    const move = (event: PointerEvent) => {
+      if (event.pointerType === 'mouse') point(event.clientX, event.clientY)
+    }
+    const touch = (event: TouchEvent) => {
+      const finger = event.touches[0]
+      if (finger) point(finger.clientX, finger.clientY)
+    }
+    const root = document.documentElement
+    addEventListener('pointermove', move, { passive: true })
+    root.addEventListener('pointerleave', off)
+    addEventListener('touchstart', touch, { passive: true })
+    addEventListener('touchmove', touch, { passive: true })
+    addEventListener('touchend', off, { passive: true })
+    addEventListener('touchcancel', off, { passive: true })
+    return () => {
+      removeEventListener('pointermove', move)
+      root.removeEventListener('pointerleave', off)
+      removeEventListener('touchstart', touch)
+      removeEventListener('touchmove', touch)
+      removeEventListener('touchend', off)
+      removeEventListener('touchcancel', off)
+    }
+  }, [invalidate])
+
   // The traffic, the river and the train move on their own only on a device with frames to
   // spare, only if motion is welcome, and only once the city has risen (D43). Their clock only
   // adds up while it runs, so pausing never makes them jump.
@@ -275,7 +325,18 @@ function City({
 
     const held = lightTorch(material, torch.current, size.width, size.height, dt)
 
-    if (!arrived || !held) invalidate()
+    // The sweep, drawn only near the Scanner beat, and rebuilt again from points each time it
+    // is reached.
+    const shown = scanShown(beat)
+    let beam: number | null = null
+    if (aim.current.on && shown > 0) {
+      ndc.set((aim.current.x / size.width) * 2 - 1, 1 - (aim.current.y / size.height) * 2)
+      raycaster.setFromCamera(ndc, camera)
+      beam = scan.aim(raycaster)
+    }
+    const scanning = scan.step(dt, beam, shown, { settled: arrived, motion: ambient })
+
+    if (!arrived || !held || scanning) invalidate()
     else if (moving && !document.hidden && !waiting.current) {
       waiting.current = true
       setTimeout(tick, 1000 / AMBIENT_FPS)
@@ -296,6 +357,7 @@ function City({
           uniforms-uHeight-value={bufferHeight}
         />
       </points>
+      <primitive object={scan.object} />
       {grains && (
         <points ref={grainPoints} geometry={grains} frustumCulled={false}>
           <primitive
