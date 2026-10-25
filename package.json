@@ -9,6 +9,7 @@
   },
   "scripts": {
     "dev": "vite",
+    "dev:host": "vite --host",
     "build": "vite build && node scripts/check-size.mjs",
     "size": "node scripts/check-size.mjs",
     "preview": "vite preview",
