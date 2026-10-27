@@ -131,16 +131,18 @@ function artscience(): BufferGeometry[] {
  * A grove of six: tall trunks opening, near the top, into wide shallow canopies. The skyway runs
  * between the two tallest.
  */
+/** Where each Supertree stands in the grove and how tall it is. The light show reads them too. */
+export const SUPERTREES: readonly (readonly [x: number, z: number, height: number])[] = [
+  [-0.24, 0.11, 0.62],
+  [0.03, 0.31, 0.78],
+  [-0.39, -0.19, 0.5],
+  [0.23, -0.09, 0.7],
+  [-0.07, -0.39, 0.66],
+  [0.46, 0.21, 0.48],
+]
+
 function supertrees(): BufferGeometry[] {
-  const trees: [x: number, z: number, height: number][] = [
-    [-0.24, 0.11, 0.62],
-    [0.03, 0.31, 0.78],
-    [-0.39, -0.19, 0.5],
-    [0.23, -0.09, 0.7],
-    [-0.07, -0.39, 0.66],
-    [0.46, 0.21, 0.48],
-  ]
-  const pieces = trees.map(([x, z, height]) =>
+  const pieces = SUPERTREES.map(([x, z, height]) =>
     lathe(
       [
         [0.045, 0],
@@ -226,6 +228,14 @@ function esplanade(): BufferGeometry[] {
  * the arc of water from the mouth into the bay, which is what reads from afar. An upright column
  * with a round head read as phallic, twice (docs/DECISIONS.md, D41); this outline has neither.
  */
+/**
+ * The Merlion's water, from its mouth (t = 0) to the bay (t = 1), before the Merlion is scaled
+ * and turned: how high it is, `up[0] + up[1] t + up[2] t²`, and how far forward. The spout in
+ * ./eggs.ts runs along the same arc.
+ */
+export const JET = { up: [0.195, 0.05, -0.24], forward: [0.115, 0.42] } as const
+const jetUp = (t: number) => JET.up[0] + JET.up[1] * t + JET.up[2] * t * t
+
 function merlion(): BufferGeometry[] {
   // [forward, up], drawn round from the back of the base.
   const side: [number, number][] = [
@@ -282,7 +292,7 @@ function merlion(): BufferGeometry[] {
   const jet = new CatmullRomCurve3(
     Array.from({ length: 9 }, (_, k) => {
       const t = k / 8
-      return new Vector3(0, 0.195 + 0.05 * t - 0.24 * t * t, 0.115 + 0.42 * t)
+      return new Vector3(0, jetUp(t), JET.forward[0] + JET.forward[1] * t)
     }),
   )
   const water = new TubeGeometry(jet, 32, 0.006, 6)

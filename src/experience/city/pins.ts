@@ -3,6 +3,7 @@ import { beats } from '../../content/beats'
 import { claimId, eras, type PinId } from '../../content/eras'
 import { cue } from '../cue'
 import { planCity, VIADUCT, type Block } from './city'
+import { planePinAt } from './plane'
 import type { CityValues, Layout } from './layouts'
 import type { Vec2 } from './plan'
 
@@ -39,6 +40,7 @@ const SIDES: Record<PinId, Side> = {
   tower: 'ne',
   charts: 'nw',
   rollout: 'se',
+  plane: 'sw',
 }
 
 /** The pin that stands for a whole job at the Whole beat. */
@@ -109,6 +111,8 @@ export function pinPlaces(layout: Layout, values: CityValues) {
     tower: [plan.lens.x, plan.lens.h * 0.55, plan.lens.z],
     charts: top(nearest(plan.cbd, [-2.0, -0.6])),
     rollout: top(nearest(plan.cbd, [-1.1, -0.6])),
+    // Where the plane is at the Core beat. It moves on; `follow` below keeps the pin on it.
+    plane: planePinAt(beats.indexOf('core'), new Vector3()).toArray(),
   }
   return { at, spread }
 }
@@ -128,6 +132,8 @@ type Placed = {
    * comes out, opens, closes or the window changes size, so most frames read no layout.
    */
   tag?: HTMLElement
+  /** For a pin on something that moves, where that thing is at a beat. */
+  follow?: (beat: number, out: Vector3) => void
   box?: { left: number; top: number; width: number; height: number } | null
   shift?: string
 }
@@ -220,6 +226,7 @@ export function mountPins(layer: HTMLElement, layout: Layout, values: CityValues
       add(pin, at[claim.pin], shown)
       const hub = placed.at(-1)!
       hub.tag = tag
+      if (claim.pin === 'plane') hub.follow = planePinAt
 
       // Words drawn onto the blocks round the pin when it opens, each tied to it by a line.
       claim.spread?.forEach((word, k) => {
@@ -264,6 +271,7 @@ export function mountPins(layer: HTMLElement, layout: Layout, values: CityValues
     for (const item of placed) {
       let opacity = item.shown(beat, still)
       if (opacity > 0.001) {
+        item.follow?.(beat, item.at)
         point.copy(item.at).project(camera)
         const x = Math.round(((point.x + 1) / 2) * width * 2) / 2
         const y = Math.round(((1 - point.y) / 2) * height * 2) / 2

@@ -48,7 +48,7 @@ The beats keep the ids of the Machine's parts. No visitor sees them.
 Every claim is pinned to its proof in the city, like a surveyor's notes on a scan ([DECISIONS D45](DECISIONS.md)). Picked by Rahul from three systems on 2026-10-24.
 
 - **The beat's text** sits at the left edge on a dark band, at the bottom of a tall window: the job's number and its field in the accent, the headline large, leading with the work, the company, role and years as small print, then every [claim](CONTENT.md#claims) as its own numbered line, the strongest first. It is the whole job, readable with no scene, and the Index says the same.
-- **The pins.** Each claim with something in the city to point at has a numbered pin there, with a few of its words: the requests on the streets, the scanned roof, BLK 2024, the train for CI/CD, the Lens's tower. During a job's beat the city dims except its subject, as D38 proposed.
+- **The pins.** Each claim with something in the city to point at has a numbered pin there, with a few of its words: the requests on the streets, the scanned roof, BLK 2024, the train for CI/CD, the Lens's tower, and the plane leaving Changi, which crosses the sky at Core and takes its pin with it ([DECISIONS D54](DECISIONS.md)). During a job's beat the city dims except its subject, as D38 proposed.
 - **Held, not scrolled** ([D46](DECISIONS.md)). While the scene runs, the text is held still on the window rather than rolling up it like film credits. On the way to the next beat it fades early, the city moves alone, and as the beat arrives the headline comes in, then the claims one after another, each line with its pin. The scroll slows a little for that stretch: a job's section is 1.3 windows tall, the extra spent on its claims arriving.
 - **Pointing**, never needed: pointing at a claim's line or its pin opens the pin's full sentence and dims the rest; a tap on touch. A pin in the city opens once the pointer is still on it, so sweeping the Scanner's beam over the building opens none ([D51](DECISIONS.md)). The open tag grows away from its pin from a corner that stays put, so it never moves out from under the pointer, and it is kept inside the window. The database's line draws its five systems onto five HDB blocks.
 - **Whole** puts one tag a job at its subject, and its list links to each job.
@@ -61,7 +61,8 @@ All of it is real text in the page (rule 3); the pins repeat it and are hidden f
 Small things a visitor finds. Rahul wants them. Each is found, never forced; none advances the story; none states a fact that is not in [CONTENT](CONTENT.md).
 
 - In the sketch, liked: the Merlion spouting; a train on its viaduct; a block numbered `BLK 2024`, the year Rahul joined Uniad.
-- Picked by Rahul in the references round (2026-10-20): otters, a family crossing a path or surfacing in the river; a cat on a void deck that looks up when the pointer passes; the Supertrees playing a few seconds of their light show when clicked; a plane leaving Changi at the Core beat, for the international business trips.
+- Picked by Rahul in the references round (2026-10-20): otters, a family crossing a path or surfacing in the river; a cat on a void deck that looks up when the pointer passes; the Supertrees playing a few seconds of their light show when found; a plane leaving Changi at the Core beat, for the international business trips.
+- How they are found: the mouse coming onto one plays it, and on touch a tap, on the home page and on the exhibit ([DECISIONS D55](DECISIONS.md)). Built 2026-10-26, the three from the sketch ([DECISIONS D53](DECISIONS.md)): the Merlion spouts into the bay; the train, out of sight, pulls in to where the visitor pointed, or blinks as its doors close if it is there; BLK 2024 carries its number on its end wall, and found, a band of light runs up it. Built 2026-10-28, the four picked after ([D54](DECISIONS.md)): otters surface where the river is found and swim a little way downstream; the cat at the foot of BLK 2024 looks up as the pointer passes; the Supertrees play a few seconds of their light show; and the plane leaving Changi crosses the sky at Core, the pin for the trips abroad.
 - Still open: other block numbers that are Rahul's years, and anything else found while building.
 
 ## The beats
@@ -114,7 +115,7 @@ Only the first release's are in scope now; see [ROADMAP](ROADMAP.md).
 | --- | --- | --- | --- |
 | Found | Pointer move | Dust near the pointer brightens, like a torch, and more of it shows. Built ([DECISIONS D36](DECISIONS.md)) | First |
 | Scanner | Pointer sweep, or a sideways drag on touch | Points on the building under the beam become surface and the roofs get their panels. Built ([DECISIONS D51](DECISIONS.md)); the waiting beam and its one teaser, [D52](DECISIONS.md) | First |
-| Anywhere | Hover, click or tap | An easter egg, where there is one | First, which ones open |
+| Anywhere | Hover, or a tap on touch | An easter egg, where there is one. All seven built ([DECISIONS D53](DECISIONS.md), [D54](DECISIONS.md)), played on hover ([D55](DECISIONS.md)) | First, which ones open |
 | Whole | Drag | Look round the bay, within limits. Open: the old interaction was turning the Machine | First |
 | Whole | Click a subject | The camera glides to it; its detail opens | First |
 | Core, Rings, Lens | Scroll or drag | Each job does a little more of its work | Later |
@@ -184,7 +185,7 @@ Direction only. Exact tokens are chosen during the build.
 - The city's layout and the detail of each landmark.
 - How the map is drawn, and how fast the city rises from it.
 - The timing of a beat's words: how early they go and how fast the claims follow each other ([DECISIONS D46](DECISIONS.md)). How the words sit over the city is picked ([D45](DECISIONS.md)).
-- Which easter eggs beyond the seven picked, and how each is found.
+- Which easter eggs beyond the seven picked.
 - What the visitor can do at the Whole beat.
 - How many points each tier draws. A city fills the window on every beat, so these start again from measurement.
 - The accent colour and the typefaces.

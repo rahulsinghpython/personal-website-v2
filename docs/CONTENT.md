@@ -19,7 +19,7 @@ The only source of facts about Rahul for this site. When code needs a fact, it c
 
 ## Career
 
-Four eras, in the order the story tells them. Each is one job beat in the city; see [EXPERIENCE](EXPERIENCE.md#where-each-job-is). Roles and dates are confirmed. Uniad and Cognizant are both current and run at the same time.
+Four eras, in the order the story tells them. Each is one job beat in the city; see [EXPERIENCE](EXPERIENCE.md#where-each-job-is). Roles and dates are confirmed. Cognizant is current. Uniad ended in Dec 2024, the month Cognizant began (Rahul, 2026-10-28).
 
 ### 1. S2T (Software & Simulation Technologies) → Core
 
@@ -52,9 +52,9 @@ This era is the conceptual centre of the site. The city is drawn as a laser scan
 ### 3. Uniad → Rings
 
 - **Role:** Lead Software Engineer
-- **Dates:** Aug 2024 to present
+- **Dates:** Aug 2024 to Dec 2024
 - **Work:**
-  - Maintains a secure platform for 10,000+ users across Asia.
+  - Maintained a secure platform for 10,000+ users across Asia.
   - Built an enterprise product for tuition centres.
   - Set up CI/CD for deployment and testing.
   - Designed the relational database for finance, user management, lesson bookings, calendar and access control.
@@ -175,7 +175,7 @@ Each job's work, as the page says it and the Index lists it, in `src/content/era
 | 2 | Designed and built a microservices architecture in Python, Docker and Kubernetes. | Microservices, designed and built | a CBD tower |
 | 3 | Migrated legacy C++ to Python. | Legacy C++, moved to Python | another CBD tower |
 | 4 | Serverless, storage and databases on Azure and AWS. | Serverless on Azure and AWS | the top of the tallest CBD tower but the Lens's |
-| 5 | Led the API development team. Presented the software on international business trips. | Led the API team. Took it abroad | none yet: the plane from Changi, when it is built |
+| 5 | Led the API development team. Presented the software on international business trips. | Led the API team. Took it abroad | the plane leaving Changi, which crosses the sky at this beat |
 
 **Etavolt, Scanner**
 
@@ -191,7 +191,7 @@ Each job's work, as the page says it and the Index lists it, in `src/content/era
 
 | # | Claim | Tag | Pinned to |
 | --- | --- | --- | --- |
-| 1 | Maintains a secure platform for over 10,000 users across Asia. | 10,000+ users across Asia | BLK 2024 |
+| 1 | Maintained a secure platform for over 10,000 users across Asia. | 10,000+ users across Asia | BLK 2024 |
 | 2 | Designed the relational database behind finance, user management, lesson bookings, calendar and access control. | One database, five systems | over the blocks round BLK 2024; opened, it names five of them Finance, Users, Bookings, Calendar and Access |
 | 3 | Built an enterprise product for tuition centres. | Built for tuition centres | a block in front |
 | 4 | Set up CI/CD for deployment and testing. | CI/CD for deploys and tests | the viaduct, where the train runs |

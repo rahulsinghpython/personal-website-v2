@@ -27,6 +27,7 @@ export type PinId =
   | 'tower'
   | 'charts'
   | 'rollout'
+  | 'plane'
 
 /** One line of a job's work, the strongest first. */
 export type Claim = {
@@ -98,6 +99,7 @@ export const eras: readonly Era[] = [
         text: 'Led the API development team. Presented the software on international business trips.',
         tag: 'Led the API team. Took it abroad',
         kind: 'Leadership',
+        pin: 'plane',
       },
     ],
   },
@@ -148,10 +150,10 @@ export const eras: readonly Era[] = [
     company: 'Uniad',
     role: 'Lead Software Engineer',
     start: { year: 2024, month: 8 },
-    end: null,
+    end: { year: 2024, month: 12 },
     claims: [
       {
-        text: 'Maintains a secure platform for over 10,000 users across Asia.',
+        text: 'Maintained a secure platform for over 10,000 users across Asia.',
         tag: '10,000+ users across Asia',
         kind: 'Scale',
         pin: 'blk',

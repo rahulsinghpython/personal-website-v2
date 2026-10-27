@@ -7,6 +7,7 @@ import { measure, progress, readScroll } from '../state/progress'
 import { guessTier, tierBudget, type Tier } from '../state/tiers'
 import { applyCamera } from './camera/camera'
 import { cityMap } from './city/city'
+import { buildEggs, watchEggs } from './city/eggs'
 import { applyCity, layout, look, values, VOID } from './city/draw'
 import {
   CITY_GRAINS,
@@ -169,6 +170,10 @@ function City({
     return built
   }, [material])
   useEffect(() => () => scan.dispose(), [scan])
+  // The easter eggs: the Merlion's spout and BLK 2024's number, drawn over the city, and the
+  // train and the band up BLK 2024, which are the city's own points.
+  const eggs = useMemo(() => buildEggs(layout, values, material), [material])
+  useEffect(() => () => eggs.dispose(), [eggs])
   const raycaster = useMemo(() => new Raycaster(), [])
   const ndc = useMemo(() => new Vector2(), [])
 
@@ -281,6 +286,13 @@ function City({
     }
   }, [invalidate])
 
+  // Finding an egg (./city/eggs.ts), once the city has risen.
+  const get = useThree((state) => state.get)
+  useEffect(
+    () => watchEggs(eggs, get, () => cityStory.rise > 0.95 && cityStory.pour >= 1, invalidate),
+    [eggs, get, invalidate],
+  )
+
   // The traffic, the river and the train move on their own only on a device with frames to
   // spare, only if motion is welcome, and only once the city has risen (D43). Their clock only
   // adds up while it runs, so pausing never makes them jump.
@@ -336,7 +348,16 @@ function City({
     }
     const scanning = scan.step(dt, beam, shown, { settled: arrived, motion: ambient })
 
-    if (!arrived || !held || scanning) invalidate()
+    const egging = eggs.step(dt, {
+      height: size.height * dpr,
+      beat,
+      rise: cityStory.rise,
+      train: flow[2],
+      clock: clock.current,
+      still,
+    })
+
+    if (!arrived || !held || scanning || egging) invalidate()
     else if (moving && !document.hidden && !waiting.current) {
       waiting.current = true
       setTimeout(tick, 1000 / AMBIENT_FPS)
@@ -358,6 +379,7 @@ function City({
         />
       </points>
       <primitive object={scan.object} />
+      <primitive object={eggs.object} />
       {grains && (
         <points ref={grainPoints} geometry={grains} frustumCulled={false}>
           <primitive

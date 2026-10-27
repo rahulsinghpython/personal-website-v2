@@ -735,3 +735,52 @@ D51 left open how a visitor who only scrolls learns the building can be swept. T
 **Cost:** 0.3 kB in the scene chunk, to 268.3 kB. About 1.2 seconds of waiting and 3 seconds of teaser drawn once per visit on the high and mid tiers; nothing on the low tier.
 
 **Checked in the automated Chrome** at 1440 by 900: the teaser plays once the camera settles, reaches two-fifths across with no panels, and leaves the building as points with the beam dim at its edge; on `?tier=low` it does not play; a mouse sweeping the building before it starts cancels it. Not yet seen by Rahul on a device.
+
+### D53. The three easter eggs from the sketch: the Merlion spouts, the train comes, BLK 2024 lights up — Proposed, 2026-10-26
+
+Phase 4's easter eggs, starting with the three Rahul liked in the sketch (D38): the Merlion spouting, a train on its viaduct and a block numbered BLK 2024, the year he joined Uniad. The city already had all three standing still: the Merlion's water as a fixed arc, the train running on its own (D43), and BLK 2024 as the block the Rings beat lights. So the egg in each is what happens when the visitor finds it. Rahul said to start ("lets goooo"); one version of each was built, for him to steer.
+
+**How they are found** (`src/experience/city/eggs.ts`, `watchEggs`). A mouse over one shows the hand; a click or a tap plays it. Nothing on the page says they are there (EXPERIENCE: found, never forced). Never on the page's own words, links or pins, which keep their clicks; on the home page only once the city has risen; on the exhibit, also there, never at the end of a drag that turned the city. Pointing reads the camera as the last frame left it, so it draws nothing.
+
+- **The Merlion spouts.** For about four seconds, water runs from its mouth along the arc into the bay, spraying wider as it falls, and rings spread on the water where it lands. It dies away droplet by droplet. Tapped again while it runs, it runs on.
+- **The train comes.** Pointing anywhere along the viaduct: if the train is out of sight, it appears a little up the line and pulls in to where the visitor pointed, fast at first and slowing, a little brighter, then runs on at its pace. If it is already in sight, its lights blink twice, as the doors close.
+- **BLK 2024 lights up.** The block carries its number, `BLK 2024`, painted near the top of the end wall the Rings beat faces, as HDB blocks do: white points, there whenever the block stands, found by looking. Tapped, a band of light runs up the block floor by floor in a second and a half, and the number flashes warm.
+
+**Against the rules.** Each plays because the visitor asked and stops on its own; none moves the camera or the story (rule 2). The number states a fact in CONTENT, the year Uniad began. Nothing an egg does is needed: a visitor who finds none has the whole story. With reduced motion each plays without its motion: the spout stands lit without flowing, the train is placed where pointed without the run in, and the band glows in place halfway up the block instead of running up it.
+
+**Built on the city's own points.** The train and the band are the city's points, moved and lit through two uniforms (`uTrain`, `uBlk`). The spout and the number are one more draw call: 260 droplets, 150 splash points and about 1,100 points of number. Lit windows were already as bright as they go, so the band turns them white and a little larger rather than brighter.
+
+**Cost:** 3.5 kB in the scene chunk, to 271.8 kB; nothing on the critical path. One draw call more, on every beat once the city stands. Frames only while one plays, on every tier: what the visitor causes, like the Scanner sweep.
+
+**Checked in the automated Chrome** at 1440 by 900: the hand shows over each; the spout, the band and the number seen at the Core and Rings beats and on the exhibit; the train called from out of sight came in from 0.9 units up the line to where it was pointed in under a second, and blinked when it was already there. A tap on a pin opened the pin, not the egg under it. Not yet seen by Rahul.
+
+**Open:** whether each reads and pleases, by Rahul's eye on a device. At the Rings beat the Merlion is behind the words' veil, so its spout is faint there; it is clear at Core, Whole and on the exhibit. The small `BLK` over the number does not read at story distance; `2024` does. Then the other four Rahul picked: the otters, the cat on the void deck, the Supertrees' light show and the plane from Changi.
+
+### D54. The other four: otters, the cat, the Supertrees' light show and the plane leaving Changi — Proposed, 2026-10-28
+
+The four easter eggs Rahul picked in the references round (2026-10-20, EXPERIENCE) after the three from the sketch (D53). Rahul: "ok continue". One version of each, for him to steer, built in the same module and the same draw call as D53's (`src/experience/city/eggs.ts`), and found the same way.
+
+- **The otters.** Tapping the river brings a family of five to the surface where it was tapped, two grown and three young, in a line. They swim a little way downstream, weaving, each with a V of ripples spreading behind it, and dive after about five seconds. White on the lit river at Core.
+- **The cat on the void deck.** It sits on the ground at the foot of BLK 2024, under the number, as cats sit on HDB void decks: a small white shape with its ears up, there whenever the block stands. It needs no tap. When the pointer passes over it, it looks up, its head lifting a little and its eyes catching the light in the accent, and it holds the look while the pointer stays. On touch, a tap does it.
+- **The Supertrees' light show.** Tapping the grove plays a few seconds of a show: waves of light run up the trunks and ring out round the canopies, each tree a beat behind the last, dark between them, then the grove is as it was. White, as the city is: the real show's colours are left for Rahul to ask for (see Open).
+- **The plane leaving Changi.** No egg but the Core beat's last pin. CONTENT always meant the line "Led the API development team. Presented the software on international business trips" to point at a plane from Changi; it had no pin until now. A small plane, lit in the accent as the beat's subject, crosses the sky above Marina Bay Sands at the Core beat, westward from Changi and climbing, with a faint contrail and a strobe flashing on each wingtip and the tail. It flies with the scroll alone (rule 2), so at rest on the beat it is always where its pin is; the pin stands on the contrail just behind it, since its ring is as big as the plane. Only its lights keep the city's own clock, as the traffic does (D43). Seen from Core it is close to side on, so it reads as a dash with a fin.
+
+**Against the rules.** As D53: each plays because the visitor asked, stops on its own, moves no camera and no story, and needs to be found by no one. The plane moves only with the scroll. With reduced motion the otters stand still where they surfaced, the show stands lit without its waves, and the cat looks up without moving.
+
+**Built on the city's own points:** the show is the Supertrees' points, lit through `uShow` and `uTrees`; the trees' places are read from the landmark (`SUPERTREES` in `src/experience/city/landmarks.ts`). The plane's path is `src/experience/city/plane.ts`, which the pins read as well (`follow`), so the pin keeps to the plane between beats.
+
+**Cost:** 3.1 kB in the scene chunk, to 274.9 kB; nothing on the critical path. No draw call more: the eggs' one draw call grows to about 2,100 points.
+
+**Checked in the automated Chrome** at 1440 by 900: the plane and its pin at Core, the pin no longer hiding it; the otters and their wakes in the river at Core; the light show and the cat at Rings. Not yet seen by Rahul, and none of it moving on a device.
+
+**Open:** at story distance the cat is about twelve pixels tall and its look up is mostly its eyes; whether it should be larger, or sit nearer the camera. The light show in colour, as the real one is, would bring colours the site has never used. The plane might bank toward the camera to show its wings. The grove's box, for pointing, also covers part of Marina Bay Sands behind it at Core.
+
+### D55. The easter eggs play on hover, and the cat and the otters are drawn bigger — Accepted, 2026-10-28
+
+Rahul, on seeing D53 and D54: "Can we make all of these on hover instead of tapping and also I cant see the cat at all or the otters".
+
+- **Hover, not click.** A mouse plays an egg as it comes onto it. The Merlion, the cat and the Supertrees keep playing while the mouse stays on them; BLK 2024's band, the train and the otters play once on arriving and again only after the mouse has left and come back. There is no hand cursor, since there is nothing to click. Touch has no hover, so a tap still plays one. Still never on the page's words or pins and never during a drag, and it is still the visitor's own movement that plays each (rule 2): nothing plays as the city scrolls under a still pointer. The reach round a line, the train's and the river's, grows from 18 to 24 pixels.
+- **The cat**, about 8 pixels tall at the Rings beat, read as nothing. It is now 0.12 high, not 0.05, about 40 pixels at Rings: a sitting cat seen from in front, narrow at the shoulders and wide where it sits, with pointed ears and its tail curled up beside it, and gaps in its face where the eyes are, so they show on their own when they catch the light.
+- **The otters**, the whole family a speck of about 20 pixels at Core, are each now 0.05 long, about three times what they were, further apart and quicker, with longer wakes and more points each. Far bigger than otters are, as the city favours what reads over what is true to scale.
+
+**Cost:** the eggs' one draw call grows to about 2,300 points; no other change.

@@ -24,7 +24,7 @@ import {
   type Block,
   type Group,
 } from './city'
-import type { LandmarkId } from './landmarks'
+import { SUPERTREES, type LandmarkId } from './landmarks'
 import type { CityValues, Layout } from './layouts'
 import { rng, type Vec2 } from './plan'
 import type { Ink } from '../ink'
@@ -106,7 +106,7 @@ const CAR = { points: 4, gap: 0.011, trail: 0.55 }
  * The train: how many points at most, how long each of its three cars is and the gap between
  * them, and how much longer its loop is than the track, which is how long it is out of sight.
  */
-const TRAIN = { points: 900, car: 0.13, gap: 0.015, wait: 1.6 }
+export const TRAIN = { points: 900, car: 0.13, gap: 0.015, wait: 1.6 }
 
 /** The river's packets: how many streams across it, points to a packet, their spacing and fade. */
 const PACKET = { streams: 5, points: 5, gap: 0.009, trail: 0.7 }
@@ -669,7 +669,7 @@ function nearestOn(line: Vec2[], [x, z]: Vec2): Vec2 {
   return best
 }
 
-const lineLength = (line: Vec2[]) =>
+export const lineLength = (line: Vec2[]) =>
   line.slice(1).reduce((sum, [x, z], i) => sum + Math.hypot(x - line[i]![0], z - line[i]![1]), 0)
 
 const mix = (a: Vec2, b: Vec2, t: number): Vec2 => [
@@ -768,6 +768,14 @@ export function cityPointsMaterial(layout: Layout, grains = false) {
       // The Scanner sweep (./scan.ts): the Science Centre's points give way to the surface rebuilt
       // from them, and flash as the beam crosses them. The page shares these with the scan.
       ...scanUniforms(),
+      // The easter eggs (./eggs.ts): how much further the train has gone than the flow says, and
+      // how bright it is; how far up BLK 2024 its band of light is, how bright, and its height.
+      uTrain: { value: new Vector2(0, 1) },
+      uBlk: { value: new Vector3(0, 0, 1) },
+      // The Supertrees' light show: how strongly it plays and its clock in seconds, and each tree
+      // as where it stands and how tall it is.
+      uShow: { value: new Vector2() },
+      uTrees: { value: Array.from({ length: SUPERTREES.length }, () => new Vector3(0, 0, 1)) },
     },
     vertexShader: /* glsl */ `
       uniform float uSize;
@@ -781,6 +789,10 @@ export function cityPointsMaterial(layout: Layout, grains = false) {
       uniform float uGain[${GROUPS.length}];
       uniform float uWindows;
       uniform float uWindowGain;
+      uniform vec2 uTrain;
+      uniform vec3 uBlk;
+      uniform vec2 uShow;
+      uniform vec3 uTrees[${SUPERTREES.length}];
       attribute float aGroup;
       attribute float aBright;
       attribute float aRise;
@@ -834,7 +846,7 @@ export function cityPointsMaterial(layout: Layout, grains = false) {
         int kind = int(aMove.x + 0.5);
         float shown = 1.0;
         if (kind > 0) {
-          float travelled = kind == 1 ? uFlow.x : kind == 2 ? uFlow.y : uFlow.z;
+          float travelled = kind == 1 ? uFlow.x : kind == 2 ? uFlow.y : uFlow.z + uTrain.x;
           float s = mod(aMove.y + aMove.w * travelled, aMove.z);
           float line = kind == 1 ? aMove.z : aPath.y;
           float t = s / line;
@@ -891,6 +903,37 @@ export function cityPointsMaterial(layout: Layout, grains = false) {
         gl_PointSize = clamp(size, 1.0, uMaxSize);
         if (group == ${GROUPS.indexOf('science')}) {
           brightness *= mix(1.0, 0.3, scanned(at.x)) * (1.0 + 3.0 * underBeam(at.x, 0.02));
+        }
+        if (group == ${GROUPS.indexOf('train')}) brightness *= uTrain.y;
+        // The Supertrees' light show: waves of light run up the trunks and ring out round the
+        // canopies, each tree a beat behind the last, the rest dark between them.
+        if (group == ${GROUPS.indexOf('landmarks')} && uShow.x > 0.0) {
+          float nearest = 1.0;
+          int tree = -1;
+          for (int k = 0; k < ${SUPERTREES.length}; k++) {
+            float r = length(position.xz - uTrees[k].xy);
+            if (r < nearest) {
+              nearest = r;
+              tree = k;
+            }
+          }
+          if (nearest < 0.22) {
+            float up = position.y / uTrees[tree].z;
+            float k = float(tree);
+            float wave = up > 0.86
+              ? 0.5 + 0.5 * sin(uShow.y * 6.0 - nearest * 40.0 + k * 1.3)
+              : 0.5 + 0.5 * sin(uShow.y * 5.0 - up * 10.0 - k * 0.9);
+            brightness *= mix(1.0, 0.05 + 4.5 * wave * wave * wave * wave, uShow.x);
+          }
+        }
+        // BLK 2024's band of light: its lit windows are already as bright as they go, so where the
+        // band passes they turn white and swell.
+        if (group == ${GROUPS.indexOf('rings')} && uBlk.y > 0.0) {
+          float band = (position.y / uBlk.z - uBlk.x) / 0.09;
+          float on = uBlk.y * exp(-band * band);
+          brightness *= 1.0 + on;
+          vWarm *= 1.0 - min(1.0, 0.45 * on);
+          gl_PointSize = clamp(gl_PointSize * (1.0 + 0.35 * on), 1.0, uMaxSize * 1.5);
         }
 
         #ifdef GRAINS

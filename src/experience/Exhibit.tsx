@@ -6,6 +6,7 @@ import { beats } from '../content/beats'
 import { guessTier, tierBudget, type Tier } from '../state/tiers'
 import { applyCamera, frame, type Lens } from './camera/camera'
 import { applyCity, layout, look, values, VOID } from './city/draw'
+import { buildEggs, watchEggs } from './city/eggs'
 import { mountPins, type Pins } from './city/pins'
 import { cityLift, cityPointsMaterial, sampleCity } from './city/points'
 import { cityFlow, CITY_POSES, seekCity } from './city/story'
@@ -14,7 +15,8 @@ import { cityFlow, CITY_POSES, seekCity } from './city/story'
 // it at Whole, for the visitor to look round. The second lazy entry, beside ./Experience.tsx; it
 // draws the same city with the same code, and only the camera is new. Nothing here moves by
 // itself but the traffic, the river and the train (D26, D43): the camera moves when the visitor
-// drags, and comes to rest a moment after they stop.
+// drags, and comes to rest a moment after they stop. The easter eggs are here too, for the finding
+// (D53).
 
 const WHOLE = beats.indexOf('whole')
 /** Centred: there is no band of text at the side to keep clear of. */
@@ -114,6 +116,12 @@ function City({
     }
   }, [pinLayer, invalidate])
 
+  // The easter eggs, as on the home page; a drag that turns the city plays none.
+  const eggs = useMemo(() => buildEggs(layout, values, material), [material])
+  useEffect(() => () => eggs.dispose(), [eggs])
+  const get = useThree((state) => state.get)
+  useEffect(() => watchEggs(eggs, get, () => true, invalidate), [eggs, get, invalidate])
+
   // The traffic, the river and the train, as on the home page (D43), and on the same terms.
   const ambient = tier !== 'low' && !still
   const clock = useRef(0)
@@ -135,10 +143,20 @@ function City({
     const gliding = controls.update(dt)
     frame(camera, size.width, size.height, LENS)
     if (ambient) clock.current += dt
-    applyCity(material, cityFlow(WHOLE, clock.current), camera.position.distanceTo(controls.target))
+    const flow = cityFlow(WHOLE, clock.current)
+    applyCity(material, flow, camera.position.distanceTo(controls.target))
     pins.current?.place(camera, size.width, size.height, WHOLE, true)
 
-    if (gliding) invalidate()
+    const egging = eggs.step(dt, {
+      height: size.height * dpr,
+      beat: WHOLE,
+      rise: 1,
+      train: flow[2],
+      clock: clock.current,
+      still,
+    })
+
+    if (gliding || egging) invalidate()
     else if (ambient && !document.hidden && !waiting.current) {
       waiting.current = true
       setTimeout(tick, 1000 / AMBIENT_FPS)
@@ -146,15 +164,18 @@ function City({
   })
 
   return (
-    <points geometry={geometry} frustumCulled={false}>
-      <primitive
-        object={material}
-        attach="material"
-        uniforms-uSize-value={look.size * scale}
-        uniforms-uBrightness-value={look.brightness * scale}
-        uniforms-uHeight-value={size.height * dpr}
-      />
-    </points>
+    <>
+      <points geometry={geometry} frustumCulled={false}>
+        <primitive
+          object={material}
+          attach="material"
+          uniforms-uSize-value={look.size * scale}
+          uniforms-uBrightness-value={look.brightness * scale}
+          uniforms-uHeight-value={size.height * dpr}
+        />
+      </points>
+      <primitive object={eggs.object} />
+    </>
   )
 }
 
