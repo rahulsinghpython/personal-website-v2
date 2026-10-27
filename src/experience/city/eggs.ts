@@ -453,7 +453,7 @@ export function watchEggs(
   const onPage = (target: EventTarget | null) =>
     target instanceof Element &&
     !!target.closest(
-      'a, button, input, select, textarea, label, summary, p, li, h1, h2, h3, [data-claim]',
+      'a, button, input, select, textarea, label, summary, p, li, h1, h2, h3, [data-claim], [popover]',
     )
   const find = (event: MouseEvent) => {
     if (!ready() || onPage(event.target)) return null

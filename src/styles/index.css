@@ -142,6 +142,51 @@ body {
     background: transparent;
   }
 
+  /* A job's line at Whole, which opens its panel (D56): the whole line is the button. */
+  .job-open {
+    @apply block text-left transition-colors hover:text-lit focus-visible:text-lit;
+  }
+
+  /* A job's panel at Whole (D56): at the left of a wide window, where the text band is, and up from
+     the bottom of a tall one, so the camera's view of the job's subject stays clear. It scrolls on
+     its own, and a scroll inside it never moves the page under it. */
+  .work {
+    @apply fixed inset-auto m-0 overflow-y-auto overscroll-contain border-cold/15 bg-void px-6 py-8 text-cold sm:px-10 sm:py-10;
+    scrollbar-color: rgb(229 229 229 / 0.2) transparent;
+    scrollbar-width: thin;
+  }
+  /* The panel stands in for Whole's own words while it is open. */
+  body:has(.work:popover-open) #whole > [data-panel] {
+    visibility: hidden;
+  }
+  @media (orientation: landscape) {
+    .work {
+      @apply top-0 bottom-0 left-0 h-auto max-h-none w-[min(32rem,100vw)] border-r;
+    }
+  }
+  @media (orientation: portrait) {
+    .work {
+      @apply right-0 bottom-0 left-0 max-h-[55svh] w-auto max-w-none border-t;
+    }
+  }
+  .work::backdrop {
+    background: transparent;
+  }
+  .work img,
+  .work video {
+    @apply block h-auto w-full border border-cold/10 bg-cold/5;
+  }
+  .work-pictures {
+    @apply grid grid-cols-2 gap-x-3 gap-y-5;
+  }
+  /* The first picture across the panel, the rest two to a row. */
+  .work-pictures > :first-child {
+    @apply col-span-2;
+  }
+  .work-action {
+    @apply block border border-cold/20 px-4 py-3 text-center font-mono text-xs tracking-[0.08em] text-cold uppercase transition-colors hover:border-lit hover:text-lit focus-visible:border-lit focus-visible:text-lit;
+  }
+
   /* The exhibit's words, at the foot of the window on a dark band like a job's (D45), so they read
      over the city behind them. */
   .caption {

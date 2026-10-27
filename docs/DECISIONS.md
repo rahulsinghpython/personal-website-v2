@@ -784,3 +784,22 @@ Rahul, on seeing D53 and D54: "Can we make all of these on hover instead of tapp
 - **The otters**, the whole family a speck of about 20 pixels at Core, are each now 0.05 long, about three times what they were, further apart and quicker, with longer wakes and more points each. Far bigger than otters are, as the city favours what reads over what is true to scale.
 
 **Cost:** the eggs' one draw call grows to about 2,300 points; no other change.
+
+### D56. The Whole beat: choosing a job opens its panel and glides the camera to its subject — Proposed, 2026-10-28
+
+Rahul, asked on 2026-10-28 what a click at Whole should do, whether Whole should be dragged, and which of the cleared pictures go in: the camera glides in and a panel opens; no drag, a link to the exhibit instead; and every set offered, Etavolt's screens and its LiDAR video, Uniad's screens and S2T's road-show photos.
+
+- **Choosing a job.** By its line in Whole's list (now buttons, where they were links back up to the job), its tag in the city, or a click within about 64 pixels of its subject: the streets for Core, the Science Centre for the Scanner, BLK 2024 and the block beside it for the Rings, the Lens's tower. A mouse over a subject shows the hand.
+- **The panel** is a native popover, as Contact is (D48), so it opens and closes with scripts off, on Escape and on a click elsewhere, and its words are in the page's HTML. At the left of a wide window, where the text band is, from top to bottom; up from the bottom of a tall one, over a little more than half of it. It says the job's number and field, the project's name where there was one, the company, role and years, what it did, and then what can be shown: the film and the pictures, the first across the panel and the rest two to a row, each opening full size in a tab of its own. Cognizant's says its claims again and that none of it can be shown. It ends with "Read the job", back up to the job's beat, and Close. While it is open Whole's own words are hidden behind it.
+- **The camera** glides in 1.3 seconds from wherever it is to the pose of the job's own beat, so the subject is seen as the job's beat saw it and the panel covers what the job's text covered; the other jobs' tags fade as it goes. Closing glides it back to Whole, and choosing another job glides it on from where it is. The city's lighting stays Whole's. A scroll of more than 0.3 of a beat away from Whole closes the panel, so the story moves on with the camera. With reduced motion the camera cuts.
+- **No drag at Whole.** Looking round the city is the exhibit's (D48), linked under the list as "Look round the city"; on a phone a drag at Whole would fight the page's scroll.
+
+**Against the rules.** Every move is the visitor's: a click opens, a click, a key or a scroll closes (rule 2). The panels are real HTML, reachable by keyboard from the list, and the pictures have their alt text (rule 3). The projects live at their subject, in the city, not in a grid of their own (rule 1). Their facts are CONTENT's, in a new section, "The Whole beat's panels" (rule 6).
+
+**Media.** The pictures are the old site's, resized to WebP, at most 1280 pixels across, 8 to 139 kB each, in `public/work/`, loaded only when their panel opens. The LiDAR film is the old site's file, 4.1 MB (3.6 MB as the size check counts it), loaded only when it is played; its sound track is silent, so it plays muted and has no captions. There was no tool here to make it smaller. Its poster is a frame from halfway through. Each picture has a budget of 150 kB and the film of 4 MB, checked by `scripts/check-size.mjs`.
+
+**Cost:** 0.9 kB in the scene chunk, to 276.0 kB. The panels' words are in the home page's HTML, so its critical path grows 3.4 kB, to 86.9 of 100 kB.
+
+**Checked in the automated Chrome** at 1442 by 901 and at 504 by 846 (as narrow as that window goes): each panel opening from its line, BLK 2024's from a click on the block, the camera at each subject, Escape and a scroll closing it. Not seen by Rahul, and not on a touch device.
+
+**Open:** the film at 4 MB could be made smaller with a video tool; whether the city should also dim except the chosen subject, as a job's beat does; whether a job's numbered pins should come back with its panel.

@@ -38,6 +38,8 @@ These are targets set before any code exists. Measure a baseline at the end of t
 | The résumé PDF, gzipped | ≤ 500 KB. Loaded only on `/resume` ([DECISIONS D49](DECISIONS.md)) |
 | Font files | ≤ 2 families, subset, WOFF2 |
 | Image textures in the scene | 0 |
+| A picture in a job's panel at Whole | ≤ 150 KB each, loaded only when its panel opens ([DECISIONS D56](DECISIONS.md)) |
+| The film in Etavolt's panel | ≤ 4 MB, loaded only when it is played ([D56](DECISIONS.md)) |
 
 ### Runtime
 

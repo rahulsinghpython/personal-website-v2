@@ -104,7 +104,18 @@ Screenshots and a LiDAR mesh video are in the old repo under `src/assets/carouse
 | Uniad | 8 images | Dashboard and overview, students, calendar synced across users, invoicing, PDF generation, onboarding, sign-up. |
 | Cognizant | 3 images | Team and event photos only. **Nothing of this work may be shown.** Rahul, on 2026-10-08: it comes under the secrets act. It is described in text only, within what is cleared to be named ([Confirmed with Rahul](#confirmed-with-rahul), row 4). Do not make or look for screenshots of it. |
 
-Cleared means allowed, not required: which of these go in a project panel is chosen when the panels are built. They are copied in and resized then, under the budgets in [PERFORMANCE](PERFORMANCE.md); one photo is 9.6 MB as it stands. Nothing else from the old site is ported.
+Cleared means allowed, not required: which of these go in a project panel is chosen when the panels are built. Chosen on 2026-10-28, see [The Whole beat's panels](#the-whole-beats-panels). They are copied in and resized then, under the budgets in [PERFORMANCE](PERFORMANCE.md); one photo is 9.6 MB as it stands. Nothing else from the old site is ported.
+
+### The Whole beat's panels
+
+What opens when a job is chosen at Whole ([DECISIONS D56](DECISIONS.md)), in `src/content/panels.ts`. Rahul picked every set offered on 2026-10-28. The pictures are resized copies in `public/work/`; their captions say only what CONTENT already says, and the alt text describes what is in each picture.
+
+| Job | Name | What it did | Shown |
+| --- | --- | --- | --- |
+| S2T | the field, Data engineering | Led the API development team, and presented the software on international business trips. | Two road-show photos and the Singapore team. |
+| Etavolt | LiDAR point-cloud-to-mesh software | The project's summary above: meshes from point clouds and LiDAR, for solar, two cycles shipped, the Science Centre. | The mesh-from-LiDAR film; roofs reconstructed in 3D, the Science Centre mesh, solar roof analysis, panels placed on a complex roof, optimising where the panels go. |
+| Uniad | Tuition centre management platform | An enterprise product for tuition centres: students, lesson bookings on a calendar synced across users, invoicing and PDF generation, over one relational database. | Dashboard, calendar synced across users, students, invoicing, PDF generation. Onboarding and sign-up are left out. |
+| Cognizant | the field, Applied AI | AI products for government, built with data scientists and rolled out across it; then its claims. | Nothing: "Government work: none of it can be shown." Nor the team photos. |
 
 ## Voice
 

@@ -19,6 +19,7 @@ import {
 import { cityFlow, cityStory, MOVES_FROM, seekCity, seekCityStill, mapShown } from './city/story'
 import { mountPins, type Pins } from './city/pins'
 import { buildScan, scanShown } from './city/scan'
+import { watchWhole, type Whole } from './city/whole'
 import { holdText, type HeldText } from './hold'
 import { rubOut, sampleInk, type Ink } from './ink'
 
@@ -293,6 +294,17 @@ function City({
     [eggs, get, invalidate],
   )
 
+  // The Whole beat: choosing a job opens its panel and glides the camera to its subject (D56).
+  const whole = useRef<Whole | null>(null)
+  useEffect(() => {
+    const watched = watchWhole(layout, values, get, () => progress.eased * LAST, invalidate)
+    whole.current = watched
+    return () => {
+      whole.current = null
+      watched.dispose()
+    }
+  }, [get, invalidate])
+
   // The traffic, the river and the train move on their own only on a device with frames to
   // spare, only if motion is welcome, and only once the city has risen (D43). Their clock only
   // adds up while it runs, so pausing never makes them jump.
@@ -320,6 +332,7 @@ function City({
     applyCity(material, flow)
     applyCity(grainMaterial, flow)
     crumbleLine(grainPoints.current, grainMaterial, ink, size.width, size.height)
+    const gliding = whole.current?.step(dt, cityStory.camera, still) ?? false
     applyCamera(
       camera as PerspectiveCamera,
       cityStory.camera,
@@ -327,7 +340,14 @@ function City({
       size.height,
       cityStory.lens,
     )
-    pins.current?.place(camera as PerspectiveCamera, size.width, size.height, beat, still)
+    pins.current?.place(
+      camera as PerspectiveCamera,
+      size.width,
+      size.height,
+      beat,
+      still,
+      whole.current?.focus,
+    )
     heldText.current?.place(beat, still)
     if (mapLines.current) {
       const shown = still ? 0 : mapShown(beat)
@@ -357,7 +377,7 @@ function City({
       still,
     })
 
-    if (!arrived || !held || scanning || egging) invalidate()
+    if (!arrived || !held || scanning || egging || gliding) invalidate()
     else if (moving && !document.hidden && !waiting.current) {
       waiting.current = true
       setTimeout(tick, 1000 / AMBIENT_FPS)

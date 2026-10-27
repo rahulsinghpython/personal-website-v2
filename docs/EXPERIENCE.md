@@ -51,7 +51,7 @@ Every claim is pinned to its proof in the city, like a surveyor's notes on a sca
 - **The pins.** Each claim with something in the city to point at has a numbered pin there, with a few of its words: the requests on the streets, the scanned roof, BLK 2024, the train for CI/CD, the Lens's tower, and the plane leaving Changi, which crosses the sky at Core and takes its pin with it ([DECISIONS D54](DECISIONS.md)). During a job's beat the city dims except its subject, as D38 proposed.
 - **Held, not scrolled** ([D46](DECISIONS.md)). While the scene runs, the text is held still on the window rather than rolling up it like film credits. On the way to the next beat it fades early, the city moves alone, and as the beat arrives the headline comes in, then the claims one after another, each line with its pin. The scroll slows a little for that stretch: a job's section is 1.3 windows tall, the extra spent on its claims arriving.
 - **Pointing**, never needed: pointing at a claim's line or its pin opens the pin's full sentence and dims the rest; a tap on touch. A pin in the city opens once the pointer is still on it, so sweeping the Scanner's beam over the building opens none ([D51](DECISIONS.md)). The open tag grows away from its pin from a corner that stays put, so it never moves out from under the pointer, and it is kept inside the window. The database's line draws its five systems onto five HDB blocks.
-- **Whole** puts one tag a job at its subject, and its list links to each job.
+- **Whole** puts one tag a job at its subject, and its list opens each job's panel ([DECISIONS D56](DECISIONS.md)).
 - **On a small screen** the pins stay numbered points over the city and the list is read under it.
 
 All of it is real text in the page (rule 3); the pins repeat it and are hidden from assistive technology.
@@ -116,13 +116,13 @@ Only the first release's are in scope now; see [ROADMAP](ROADMAP.md).
 | Found | Pointer move | Dust near the pointer brightens, like a torch, and more of it shows. Built ([DECISIONS D36](DECISIONS.md)) | First |
 | Scanner | Pointer sweep, or a sideways drag on touch | Points on the building under the beam become surface and the roofs get their panels. Built ([DECISIONS D51](DECISIONS.md)); the waiting beam and its one teaser, [D52](DECISIONS.md) | First |
 | Anywhere | Hover, or a tap on touch | An easter egg, where there is one. All seven built ([DECISIONS D53](DECISIONS.md), [D54](DECISIONS.md)), played on hover ([D55](DECISIONS.md)) | First, which ones open |
-| Whole | Drag | Look round the bay, within limits. Open: the old interaction was turning the Machine | First |
-| Whole | Click a subject | The camera glides to it; its detail opens | First |
+| Whole | Click a subject, its tag or its line | The camera glides to it; its panel opens. Built ([DECISIONS D56](DECISIONS.md)) | First |
+| Whole | Drag | None: looking round the city is the exhibit's, linked from Whole ([D56](DECISIONS.md)) | — |
 | Core, Rings, Lens | Scroll or drag | Each job does a little more of its work | Later |
 
 ### Projects
 
-Projects live **inside** the city, at their subject, never as a separate grid. Clicking a subject in the Whole beat opens it: the camera glides in and an HTML panel gives the project's name, what it did and a link. Which projects exist is in [CONTENT](CONTENT.md).
+Projects live **inside** the city, at their subject, never as a separate grid. Choosing a job in the Whole beat, by its subject, its tag or its line in the list, opens its panel: the camera glides in 1.3 seconds to where the job's own beat looked at its subject from, the other jobs' tags fade, and an HTML panel, where the text band is, gives the project's name, what it did, the pictures and film that can be shown, and a link back to the job. Closing it, or scrolling away from Whole, glides the camera back. A native popover, so it works with scripts off ([DECISIONS D56](DECISIONS.md)). What each panel says is in [CONTENT](CONTENT.md#the-whole-beats-panels).
 
 ## The Index
 
@@ -186,7 +186,6 @@ Direction only. Exact tokens are chosen during the build.
 - How the map is drawn, and how fast the city rises from it.
 - The timing of a beat's words: how early they go and how fast the claims follow each other ([DECISIONS D46](DECISIONS.md)). How the words sit over the city is picked ([D45](DECISIONS.md)).
 - Which easter eggs beyond the seven picked.
-- What the visitor can do at the Whole beat.
 - How many points each tier draws. A city fills the window on every beat, so these start again from measurement.
 - The accent colour and the typefaces.
 - All copy. Drafts are in [CONTENT](CONTENT.md), rewritten on 2026-10-24 to lead with the work ([DECISIONS D45](DECISIONS.md)).

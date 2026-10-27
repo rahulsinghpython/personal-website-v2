@@ -1,11 +1,13 @@
 import { cues, statements } from '../content/beats'
 import { yearRange } from '../content/dates'
 import { eras } from '../content/eras'
+import { panelId } from '../content/panels'
 import { opens, site } from '../content/site'
 import { EXHIBIT_PATH, INDEX_PATH, RESUME_PATH } from '../routes'
 import { Beat } from './Beat'
 import { EraBeat } from './EraBeat'
 import { Header } from './Header'
+import { JobPanels } from './JobPanels'
 import { Scene } from './Scene'
 
 const LINKS = [
@@ -63,21 +65,27 @@ export function Story() {
           <h2 id="whole-title" className="headline mt-3">
             {statements.whole}
           </h2>
-          {/* The DOM equivalent of clicking a job's subject in the city. Each job's tag in the
-              city has the same name, so pointing at either lights both (D45). */}
-          <nav aria-label="Jobs" className="mt-6">
-            <ol className="claims">
-              {eras.map((era, index) => (
-                <li key={era.id} data-claim={`job-${era.part}`}>
-                  <span className="readout">{String(index + 1).padStart(2, '0')}</span>
-                  <a href={`#${era.part}`} className="block">
-                    {era.field}
-                    <span className="readout block">{`${era.company} / ${yearRange(era)}`}</span>
-                  </a>
-                </li>
-              ))}
-            </ol>
-          </nav>
+          {/* The same as clicking a job's subject in the city: each opens the job's panel
+              (D56). Each job's tag in the city has the same name, so pointing at either lights
+              both (D45). */}
+          <ol className="claims mt-6" aria-label="Jobs">
+            {eras.map((era, index) => (
+              <li key={era.id} data-claim={`job-${era.part}`}>
+                <span className="readout">{String(index + 1).padStart(2, '0')}</span>
+                <button type="button" popoverTarget={panelId(era.part)} className="job-open">
+                  {era.field}
+                  <span className="readout block">{`${era.company} / ${yearRange(era)}`}</span>
+                </button>
+              </li>
+            ))}
+          </ol>
+          {/* Turning the city is the exhibit's, where a drag fights no scroll (D56). */}
+          <a
+            href={EXHIBIT_PATH}
+            className="readout mt-6 inline-block py-1 text-cold hover:text-lit"
+          >
+            Look round the city
+          </a>
         </Beat>
 
         {/* Banded like a job: the links are what the story ends on, and the city is lit behind them. */}
@@ -98,6 +106,7 @@ export function Story() {
           <p className="readout mt-8">{`${site.name} / ${site.title} / ${site.location}`}</p>
         </Beat>
       </main>
+      <JobPanels />
     </>
   )
 }

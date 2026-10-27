@@ -11,7 +11,15 @@ const DIST = 'dist'
 const MANIFEST = '.vite/manifest.json'
 
 // Mirrors the Loading table in docs/PERFORMANCE.md. Change both together, with a DECISIONS entry.
-const BUDGET_KB = { critical: 100, scene: 400, whole: 1000, resume: 500, viewer: 600 }
+const BUDGET_KB = {
+  critical: 100,
+  scene: 400,
+  whole: 1000,
+  resume: 500,
+  viewer: 600,
+  picture: 150,
+  film: 4000,
+}
 
 // The site's pages (src/routes.ts). Any other HTML in the build, the workbench say, is a failure.
 const PAGES = ['index.html', 'plain/index.html', 'exhibit/index.html', 'resume/index.html']
@@ -25,6 +33,10 @@ const VIEWER_SRC = 'src/resume/'
 // The résumé PDF (D49), copied from public/ and replaced by hand. Loaded only on /resume, and on
 // a phone only when asked for, so it has a budget of its own.
 const RESUME = 'resume.pdf'
+
+// The pictures and the film in the jobs' panels at Whole (D56), copied from public/work/. Each is
+// loaded only when its panel opens, the film only when it is played, so each has a budget of its own.
+const WORK = 'work/'
 
 // Emitted by the build but requested by no page (see "How it is prerendered" in ARCHITECTURE.md).
 // Any other file that no budget covers fails the check, so nothing ships unmeasured.
@@ -135,10 +147,21 @@ budget('Resume viewer', viewer, BUDGET_KB.viewer)
 if (allFiles.includes(RESUME)) budget('Resume PDF', new Set([RESUME]), BUDGET_KB.resume)
 else failures.push(`No ${RESUME} in ${DIST}. The résumé page links to it.`)
 
+const work = allFiles.filter((file) => file.startsWith(WORK))
+for (const file of work) {
+  const film = file.endsWith('.mp4')
+  budget(
+    film ? 'Panel film' : `Panel picture ${file.slice(WORK.length)}`,
+    new Set([file]),
+    film ? BUDGET_KB.film : BUDGET_KB.picture,
+  )
+}
+
 // Everything else in dist has to be accounted for.
 const counted = new Set([
   MANIFEST,
   RESUME,
+  ...work,
   ...viewer,
   ...scene,
   ...[...criticalByPage.values()].flatMap((f) => [...f]),

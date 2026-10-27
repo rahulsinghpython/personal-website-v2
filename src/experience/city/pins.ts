@@ -1,6 +1,6 @@
 import { Vector3, type PerspectiveCamera } from 'three'
 import { beats } from '../../content/beats'
-import { claimId, eras, type PinId } from '../../content/eras'
+import { claimId, eras, type PartId, type PinId } from '../../content/eras'
 import { cue } from '../cue'
 import { planCity, VIADUCT, type Block } from './city'
 import { planePinAt } from './plane'
@@ -44,7 +44,7 @@ const SIDES: Record<PinId, Side> = {
 }
 
 /** The pin that stands for a whole job at the Whole beat. */
-const JOB_PINS: Record<(typeof eras)[number]['part'], PinId> = {
+const JOB_PINS: Record<PartId, PinId> = {
   core: 'streets',
   scanner: 'mesh',
   rings: 'blk',
@@ -134,6 +134,8 @@ type Placed = {
   tag?: HTMLElement
   /** For a pin on something that moves, where that thing is at a beat. */
   follow?: (beat: number, out: Vector3) => void
+  /** For a job's tag at Whole, its job: the other jobs' tags go while one job is chosen. */
+  job?: PartId
   box?: { left: number; top: number; width: number; height: number } | null
   shift?: string
 }
@@ -248,6 +250,7 @@ export function mountPins(layer: HTMLElement, layout: Layout, values: CityValues
     job.append(element('span', 'pin-dot'), element('span', 'pin-name', era.field))
     // Each with its job's line on the page, as a claim's pin is.
     add(job, at[JOB_PINS[era.part]], (beat, still) => cue(beat, whole, e, eras.length, still))
+    placed.at(-1)!.job = era.part
   })
 
   const point = new Vector3()
@@ -255,13 +258,17 @@ export function mountPins(layer: HTMLElement, layout: Layout, values: CityValues
   let windowWidth = innerWidth
   let windowHeight = innerHeight
 
-  /** Moves every pin to where `camera` sees it, at `beat`, from 0 (Found) to the last beat. */
+  /**
+   * Moves every pin to where `camera` sees it, at `beat`, from 0 (Found) to the last beat. `focus`
+   * is the job chosen at Whole, if one is, and how far the camera has gone to it (./whole.ts).
+   */
   function place(
     camera: PerspectiveCamera,
     width: number,
     height: number,
     beat: number,
     still: boolean,
+    focus?: { part: PartId | null; away: number },
   ) {
     camera.updateMatrixWorld()
     // A new window size can reflow the tags: each is measured again when next it is out.
@@ -270,6 +277,7 @@ export function mountPins(layer: HTMLElement, layout: Layout, values: CityValues
     windowHeight = height
     for (const item of placed) {
       let opacity = item.shown(beat, still)
+      if (item.job && focus && item.job !== focus.part) opacity *= 1 - focus.away
       if (opacity > 0.001) {
         item.follow?.(beat, item.at)
         point.copy(item.at).project(camera)

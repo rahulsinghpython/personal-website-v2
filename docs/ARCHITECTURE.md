@@ -114,6 +114,8 @@ The canvas does not run a continuous loop. A frame is drawn only when something 
 
 **No lights, no shadows, no environment map, no textures.** Points are unlit and coloured in the shader, cold or lit in the accent. Glow is faked with additive blending and soft point sprites, not a bloom pass. A point's size is in the city's own units, not in pixels, so the city is the same picture on a phone and on a monitor.
 
+**The Whole beat's panels** ([D56](DECISIONS.md)) are native popovers in the page, `src/sections/JobPanels.tsx`, opened by the buttons in Whole's list with no script. `city/whole.ts` listens for them opening and closing, and for a click on a job's subject or tag, which it finds as the eggs are found; while one is open it moves the camera the story set towards the job's beat pose, before the camera is applied, and tells the pins how far it has gone so the other jobs' tags fade. A scroll away from Whole closes the panel. The pictures and the film are in `public/work/`, outside the bundle, with budgets of their own in the size check.
+
 **The exhibit** (`/exhibit`, [D48](DECISIONS.md)) draws the same cloud with the same code, held at Whole, with three.js's `OrbitControls` for a camera the visitor moves.
 
 ## Planned layout
@@ -123,7 +125,8 @@ src/
   content/         typed facts: site, eras, projects, beats (copy), and the exhibit's and résumé's
                    words. Mirrors docs/CONTENT.md.
   sections/        the pages. Story.tsx lays out all eight beats; the four era beats share EraBeat.tsx.
-                   Header.tsx is every page's header and Contact. Scene.tsx is where the story reaches
+                   Header.tsx is every page's header and Contact. JobPanels.tsx is the jobs' panels at
+                   Whole (D56). Scene.tsx is where the story reaches
                    the scene, Exhibit.tsx the exhibit, Resume.tsx the résumé, each by a dynamic import.
   index-view/      the Index (plain version), served at /plain
   resume/          PdfSheet.tsx: the résumé PDF drawn by PDF.js, the résumé page's lazy entry (D49)
@@ -142,6 +145,7 @@ src/
       scan.ts      the Scanner sweep: the beam, the surface rebuilt where it has passed, the panels (D51)
       eggs.ts      the easter eggs: what the pointer finds and what each plays (D53, D54)
       plane.ts     the plane leaving Changi, where it is at a beat, and its pin (D54)
+      whole.ts     the Whole beat: choosing a job, and the camera's glide to its subject (D56)
     camera/        camera.ts: how a pose is applied and the picture framed
     ink.ts         where the letters of the opening line are on the page, and the mask that rubs it out (D37)
     cue.ts         when a beat's words and pins come and go (D46)
